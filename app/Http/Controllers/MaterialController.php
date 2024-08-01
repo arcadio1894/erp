@@ -6,6 +6,7 @@ use App\Brand;
 use App\Category;
 use App\CategoryInvoice;
 use App\Exampler;
+use App\Genero;
 use App\Http\Requests\DeleteMaterialRequest;
 use App\Http\Requests\StoreMaterialRequest;
 use App\Http\Requests\UpdateMaterialRequest;
@@ -17,6 +18,8 @@ use App\Item;
 use APP\DetailEntry;
 use App\Subcategory;
 use App\Subtype;
+use App\Talla;
+use App\TipoVenta;
 use App\Typescrap;
 use App\UnitMeasure;
 use App\Warrant;
@@ -52,7 +55,10 @@ class MaterialController extends Controller
         $qualities = Quality::all();
         $typescraps = Typescrap::all();
         $unitMeasures = UnitMeasure::all();
-        return view('material.create', compact('categories', 'warrants', 'brands', 'qualities', 'typescraps', 'unitMeasures'));
+        $generos = Genero::all();
+        $tallas = Talla::all();
+        $tipoVentas = TipoVenta::all();
+        return view('material.create', compact('tipoVentas','tallas','generos', 'categories', 'warrants', 'brands', 'qualities', 'typescraps', 'unitMeasures'));
     }
 
     public function store(StoreMaterialRequest $request)
@@ -65,7 +71,6 @@ class MaterialController extends Controller
 
             $material = Material::create([
                 'description' => $request->get('description'),
-                'measure' => $request->get('measure'),
                 'unit_measure_id' => $request->get('unit_measure'),
                 'stock_max' => $request->get('stock_max'),
                 'stock_min' => $request->get('stock_min'),
@@ -74,14 +79,16 @@ class MaterialController extends Controller
                 'priority' => 'Aceptable',
                 'category_id' => $request->get('category'),
                 'subcategory_id' => $request->get('subcategory'),
-                'material_type_id' => $request->get('type'),
-                'subtype_id' => $request->get('subtype'),
                 'brand_id' => $request->get('brand'),
                 'exampler_id' => $request->get('exampler'),
-                'warrant_id' => $request->get('warrant'),
-                'quality_id' => $request->get('quality'),
                 'typescrap_id' => $request->get('typescrap'),
-                'enable_status' => true
+                'enable_status' => true,
+                'codigo' => $request->get('codigo'),
+                'genero_id' => $request->get('genero'),
+                'talla_id' => $request->get('talla'),
+                'tipo_venta_id' => $request->get('tipo_venta'),
+                'perecible' => $request->get('perecible'),
+                'full_name' => $request->get('name'),
             ]);
 
             $length = 5;
@@ -105,30 +112,15 @@ class MaterialController extends Controller
                 $material->save();
             }
 
-            // TODO: Insertamos las especificaciones
-
-            $specifications = $request->get('specifications');
-            $contents = $request->get('contents');
-            if ( $request->has('specifications') )
-            {
-                for ( $i=0; $i< sizeof($specifications); $i++ )
-                {
-                    Specification::create([
-                        'name' => $specifications[$i],
-                        'content' => $contents[$i],
-                        'material_id' => $material->id
-                    ]);
-                }
-            }
-            $mat = $material;
+            //$mat = $material;
             DB::commit();
         } catch ( \Throwable $e ) {
             DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 422);
         }
 
-        $mat->full_name = $material->full_description;
-        $mat->save();
+        /*$mat->full_name = $material->full_description;
+        $mat->save();*/
 
         return response()->json(['message' => 'Material guardado con éxito.'], 200);
 
@@ -150,7 +142,10 @@ class MaterialController extends Controller
         $qualities = Quality::all();
         $typescraps = Typescrap::all();
         $unitMeasures = UnitMeasure::all();
-        return view('material.edit', compact('unitMeasures','typescraps','qualities','warrants','specifications', 'brands', 'categories', 'materialTypes', 'material'));
+        $generos = Genero::all();
+        $tallas = Talla::all();
+        $tipoVentas = TipoVenta::all();
+        return view('material.edit', compact('generos','tallas','tipoVentas','unitMeasures','typescraps','qualities','warrants','specifications', 'brands', 'categories', 'materialTypes', 'material'));
 
     }
 
@@ -164,23 +159,23 @@ class MaterialController extends Controller
 
             $material = Material::find($request->get('material_id'));
 
+            $material->full_name = $request->get('name');
             $material->description = $request->get('description');
-            $material->measure = $request->get('measure');
             $material->unit_measure_id = $request->get('unit_measure');
             $material->stock_max = $request->get('stock_max');
             $material->stock_min = $request->get('stock_min');
             $material->unit_price = $request->get('unit_price');
             $material->stock_current = $request->get('stock_current');
-            $material->priority = $request->get('priority');
             $material->category_id = $request->get('category');
             $material->subcategory_id = $request->get('subcategory');
-            $material->material_type_id = $request->get('type');
-            $material->subtype_id = $request->get('subtype');
             $material->brand_id = $request->get('brand');
             $material->exampler_id = $request->get('exampler');
-            $material->warrant_id = $request->get('warrant');
-            $material->quality_id = $request->get('quality');
             $material->typescrap_id = $request->get('typescrap');
+            $material->genero_id = $request->get('genero');
+            $material->talla_id = $request->get('talla');
+            $material->tipo_venta_id = $request->get('tipo_venta');
+            $material->perecible = $request->get('perecible');
+            $material->codigo = $request->get('codigo');
             $material->save();
 
             // TODO: Tratamiento de un archivo de forma tradicional
@@ -196,25 +191,6 @@ class MaterialController extends Controller
                 $request->file('image')->move($path, $filename);
                 $material->image = $filename;
                 $material->save();
-            }
-
-            // TODO: Insertamos las especificaciones
-            $specifications = $request->get('specifications');
-            $contents = $request->get('contents');
-            if ( $request->has('specifications') )
-            {
-                Specification::where('material_id', $material->id)->delete();
-
-                for ( $i=0; $i< sizeof($specifications); $i++ )
-                {
-                    Specification::create([
-                        'name' => $specifications[$i],
-                        'content' => $contents[$i],
-                        'material_id' => $material->id
-                    ]);
-                }
-            } else {
-                Specification::where('material_id', $material->id)->delete();
             }
 
             if ($material->wasChanged('typescrap_id') )
@@ -248,9 +224,6 @@ class MaterialController extends Controller
             return response()->json(['message' => $e->getMessage()], 422);
         }
 
-        $material = Material::find($request->get('material_id'));
-        $material->full_name = $material->full_description;
-        $material->save();
         return response()->json(['message' => 'Cambios guardados con éxito.'], 200);
 
     }
@@ -645,7 +618,19 @@ class MaterialController extends Controller
         $array = [];
         foreach ( $materials as $material )
         {
-            array_push($array, ['id'=> $material->id, 'material' => $material->full_description, 'unit' => $material->unitMeasure->name, 'code' => $material->code, 'price'=>$material->unit_price, 'typescrap'=>$material->typescrap_id, 'full_typescrap'=>$material->typeScrap, 'stock_current'=>$material->stock_current, 'category'=>$material->category_id]);
+            array_push($array, [
+                'id'=> $material->id,
+                'material' => $material->full_name,
+                'unit' => $material->unitMeasure->name,
+                'code' => $material->code,
+                'price'=>$material->unit_price,
+                'typescrap'=>$material->typescrap_id,
+                'full_typescrap'=>$material->typeScrap,
+                'stock_current'=>$material->stock_current,
+                'category'=>$material->category_id,
+                'enable_status'=>$material->enable_status,
+                'tipo_venta_id'=>$material->tipo_venta_id
+            ]);
         }
 
         //dd($materials);

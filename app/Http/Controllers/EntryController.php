@@ -330,6 +330,7 @@ class EntryController extends Controller
                     'material_id' => $id_material,
                     'ordered_quantity' => $count,
                     'entered_quantity' => $count,
+                    'date_vence' => ($request->get('date_vence') == "" || $request->get('date_vence') == null) ? null: Carbon::createFromFormat('d/m/Y', $request->get('date_vence'))
                 ]);
 
                 // TODO: Revisamos si hay un material en seguimiento y creamos
@@ -1304,6 +1305,8 @@ class EntryController extends Controller
                     'material_id' => $id_material,
                     'ordered_quantity' => $count,
                     'entered_quantity' => $count,
+                    'date_vence' => ($request->get('date_vence') == "" || $request->get('date_vence') == null) ? null: Carbon::createFromFormat('d/m/Y', $request->get('date_vence'))
+
                 ]);
                 //dd($id_material .' '. $count);
                 $total_detail = 0;

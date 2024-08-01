@@ -16,32 +16,28 @@ class StoreMaterialRequest extends FormRequest
     {
         return [
             'description' => 'required|string',
-            'measure' => 'nullable|string|max:255',
-            'unit_measure' => 'required|exists:unit_measures,id',
+            'unit_measure' => 'nullable|exists:unit_measures,id',
             'typescrap' => 'nullable|exists:typescraps,id',
             'stock_max' => 'nullable|numeric|min:0',
             'stock_min' => 'nullable|numeric|min:0',
             'unit_price' => 'nullable|numeric|between:0,99999.99',
             'image' => 'image',
-            'type' => 'nullable|exists:material_types,id',
-            'subtype' => 'nullable|exists:subtypes,id',
             'category' => 'required|exists:categories,id',
             'subcategory' => 'nullable|exists:subcategories,id',
             'brand' => 'nullable|exists:brands,id',
             'exampler' => 'nullable|exists:examplers,id',
-            'warrant' => 'nullable|exists:warrants,id',
-            'quality' => 'nullable|exists:qualities,id',
+            'name' => 'required|string'
         ];
     }
 
     public function messages()
     {
         return [
+            'name.required' => 'El :attribute es obligatorio.',
+            'name.string' => 'El :attribute debe contener caracteres válidos',
+
             'description.required' => 'El :attribute es obligatorio.',
             'description.string' => 'El :attribute debe contener caracteres válidos',
-
-            'measure.string' => 'El :attribute debe contener caracteres válidos.',
-            'measure.max' => 'El :attribute es demasiado largo.',
 
             'unit_measure.required' => 'El :attribute es obligatorio.',
             'unit_measure.exists' => 'El :attribute no existe en la base de datos.',
@@ -61,12 +57,6 @@ class StoreMaterialRequest extends FormRequest
 
             'image.image' => 'La :attribute debe ser un formato de imagen correcto',
 
-            'type.exists' => 'El :attribute no existe en la base de datos.',
-            'type.required' => 'El :attribute es obligatorio.',
-
-            'subtype.exists' => 'El :attribute no existe en la base de datos.',
-            'subtype.required' => 'El :attribute es obligatorio.',
-
             'category.exists' => 'El :attribute no existe en la base de datos.',
             'category.required' => 'La :attribute es obligatoria.',
 
@@ -79,17 +69,13 @@ class StoreMaterialRequest extends FormRequest
             'exampler.exists' => 'El :attribute no existe en la base de datos.',
             'exampler.required' => 'La :attribute es obligatoria.',
 
-            'warrant.exists' => 'El :attribute no existe en la base de datos.',
-            'warrant.required' => 'La :attribute es obligatoria.',
-
-            'quality.exists' => 'El :attribute no existe en la base de datos.',
-            'quality.required' => 'La :attribute es obligatoria.',
         ];
     }
 
     public function attributes()
     {
         return [
+            'name' => 'Nombre Completo',
             'description' => 'descripción',
             'measure' => 'medida',
             'unit_measure' => 'unidad de medida',

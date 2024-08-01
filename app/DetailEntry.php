@@ -17,8 +17,11 @@ class DetailEntry extends Model
         'unit_price',
         'material_name',
         'material_unit',
-        'total_detail'
+        'total_detail',
+        'date_vence'
     ];
+
+    protected $dates = ['date_vence'];
 
     public function getMaterialDescriptionAttribute()
     {

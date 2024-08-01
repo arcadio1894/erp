@@ -32,10 +32,6 @@ $(document).ready(function () {
         $('#quality').trigger('change');
         var category =  $selectCategory.val();
         $.get( "/dashboard/get/subcategories/"+category, function( data ) {
-            $selectSubCategory.append($("<option>", {
-                value: '',
-                text: 'Ninguna'
-            }));
             for ( var i=0; i<data.length; i++ )
             {
                 $selectSubCategory.append($("<option>", {
@@ -51,10 +47,6 @@ $(document).ready(function () {
         $selectExampler.empty();
         var brand =  $selectBrand.val();
         $.get( "/dashboard/get/exampler/"+brand, function( data ) {
-            $selectExampler.append($("<option>", {
-                value: '',
-                text: 'Ninguna'
-            }));
             for ( var i=0; i<data.length; i++ )
             {
                 $selectExampler.append($("<option>", {
@@ -66,7 +58,7 @@ $(document).ready(function () {
 
     });
 
-    $selectSubCategory.change(function () {
+    /*$selectSubCategory.change(function () {
         let subcategory = $selectSubCategory.select2('data');
         let option = $selectSubCategory.find(':selected');
 
@@ -101,7 +93,7 @@ $(document).ready(function () {
             $('#quality').trigger('change');
             $selectSubCategory.select2('close');
         }
-        /*switch(subcategory[0].text) {
+        /!*switch(subcategory[0].text) {
             case "INOX":
                 //alert('Metalico');
                 $selectType.empty();
@@ -135,7 +127,7 @@ $(document).ready(function () {
                 $selectSubCategory.trigger('change');
                 generateNameProduct();
                 break;
-        }*/
+        }*!/
     });
 
     $selectType.change(function () {
@@ -160,13 +152,15 @@ $(document).ready(function () {
         }
 
 
-    });
+    });*/
 
     $selectExampler.select2({
         placeholder: "Selecione un modelo",
     });
     
     $('#btn-generate').on('click', generateNameProduct);
+
+    $('#btn-generateCode').on('click', generateCodeProduct);
 
 });
 
@@ -178,6 +172,23 @@ var $selectBrand;
 var $selectExampler;
 var $selectType;
 var $selectSubtype;
+let $caracteres = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+let $longitud = 20;
+
+function generateCodeProduct() {
+    let codigo = rand_code($caracteres, $longitud);
+    $('#codigo').val(codigo);
+}
+
+function rand_code($caracteres, $longitud){
+    var code = "";
+    for (var x=0; x < $longitud; x++)
+    {
+        var rand = Math.floor(Math.random()*$caracteres.length);
+        code += $caracteres.substr(rand, 1);
+    }
+    return code;
+}
 
 function mayus(e) {
     e.value = e.value.toUpperCase();
@@ -207,24 +218,25 @@ function generateNameProduct() {
         return;
     }
 
-    $('#name').val('');
-    //alert($('#subcategory option:selected').text());
-    let category = ($('#category option:selected').text() === 'Ninguna' || $('#subcategory option:selected').text() === '') ? '': ' '+$('#category option:selected').text();
-    let subcategory = ($('#subcategory option:selected').text() === 'Ninguna' || $('#subcategory option:selected').text() === '') ? '': ' '+$('#subcategory option:selected').text()+' ';
-    //console.log($('#subcategory option:selected').text());
-    let type = ($('#type option:selected').text() === 'Ninguno' || $('#type option:selected').text()==='') ? '': $('#type option:selected').text()+' ';
-    //console.log($('#type option:selected').text());
-    let subtype = ($('#subtype option:selected').text() === 'Ninguno' || $('#subtype option:selected').text()==='') ? '': $('#subtype option:selected').text()+' ';
-    //console.log($('#subtype option:selected').text());
-    let warrant = ($('#warrant option:selected').text() === 'Ninguno' || $('#warrant option:selected').text()==='') ? '': $('#warrant option:selected').text()+' ';
-    //console.log($('#warrant option:selected').text());
-    let quality = ($('#quality option:selected').text() === 'Ninguno' || $('#quality option:selected').text()==='') ? '': $('#quality option:selected').text();
-    //console.log($('#quality option:selected').text());
-    let measure = $('#measure').val();
-    //console.log(measure);
-    //console.log(category);
-    //console.log(subcategory.trim());
+    // Obtener los valores de las opciones seleccionadas
+    let marca = $('#brand option:selected').text();
+    let modelo = $('#exampler option:selected').text();
+    let genero = $('#genero option:selected').text();
+    let talla = $('#talla option:selected').text();
 
+    // Inicializar un arreglo con la descripción
+    let partes = [$('#description').val().trim()];
+
+    // Agregar las partes no vacías al arreglo
+    if (marca !== 'Ninguno' && marca !== '') partes.push(marca);
+    if (modelo !== 'Ninguno' && modelo !== '') partes.push(modelo);
+    if (genero !== 'Ninguno' && genero !== '') partes.push(genero);
+    if (talla !== 'Ninguno' && talla !== '') partes.push(talla);
+
+    // Unir las partes con un espacio y asignarlo al campo de nombre
+    let name = partes.join(' ');
+    $('#name').val(name);
+    /*$('#name').val(name);
     if (category.trim() === 'CONSUMIBLES' && (subcategory.trim() === 'MIXTO' || subcategory.trim() === 'NORMAL'))
     {
         let name = $('#description').val() + type + subtype + warrant + quality + ' '+measure;
@@ -232,7 +244,7 @@ function generateNameProduct() {
     } else {
         let name2 = $('#description').val() + subcategory + type + subtype + warrant + quality + ' '+measure;
         $('#name').val(name2);
-    }
+    }*/
 }
 
 function showTemplateSpecification() {

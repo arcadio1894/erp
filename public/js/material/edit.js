@@ -4,9 +4,6 @@ $(document).ready(function () {
     //$formEdit.on('submit', updateMaterial);
     $('#btn-submit').on('click', updateMaterial);
 
-    getExampler();
-    getSubcategory();
-
     $('#btn-add').on('click', showTemplateSpecification);
 
     $(document).on('click', '[data-delete]', deleteSpecification);
@@ -36,10 +33,7 @@ $(document).ready(function () {
         $('#quality').trigger('change');
         var category =  $selectCategory.val();
         $.get( "/dashboard/get/subcategories/"+category, function( data ) {
-            $selectSubCategory.append($("<option>", {
-                value: '',
-                text: 'Ninguna'
-            }));
+
             for ( var i=0; i<data.length; i++ )
             {
                 $selectSubCategory.append($("<option>", {
@@ -57,10 +51,6 @@ $(document).ready(function () {
         if ( brand !== '' || brand !== null )
         {
             $.get( "/dashboard/get/exampler/"+brand, function( data ) {
-                $selectExample.append($("<option>", {
-                    value: '',
-                    text: 'Ninguna'
-                }));
                 for ( var i=0; i<data.length; i++ )
                 {
                     $selectExample.append($("<option>", {
@@ -70,11 +60,9 @@ $(document).ready(function () {
                 }
             });
         }
-
-
     });
 
-    $selectSubCategory.change(function () {
+    /*$selectSubCategory.change(function () {
         let subcategory = $selectSubCategory.select2('data');
         let option = $selectSubCategory.find(':selected');
 
@@ -90,10 +78,10 @@ $(document).ready(function () {
                 var type_id = $('#type_id').val();
                 for ( var i=0; i<data.length; i++ )
                 {
-                    /*$selectType.append($("<option>", {
+                    /!*$selectType.append($("<option>", {
                         value: data[i].id,
                         text: data[i].type
-                    }));*/
+                    }));*!/
                     if (data[i].id === parseInt(type_id)) {
                         var newOption = new Option(data[i].type, data[i].id, false, true);
                         // Append it to the select
@@ -121,7 +109,7 @@ $(document).ready(function () {
             $selectSubCategory.select2('close');
         }
         //alert(subcategory[0].text);
-        /*switch(subcategory[0].text) {
+        /!*switch(subcategory[0].text) {
             case "INOX":
                 //alert('Metalico');
                 $selectType.empty();
@@ -162,7 +150,7 @@ $(document).ready(function () {
                 $('#quality').trigger('change');
                 generateNameProduct();
                 break;
-        }*/
+        }*!/
     });
 
     $selectType.change(function () {
@@ -176,10 +164,10 @@ $(document).ready(function () {
                 }));
                 var subtype = $('#subtype_id').val();
                 for (var i = 0; i < data.length; i++) {
-                    /*$selectSubtype.append($("<option>", {
+                    /!*$selectSubtype.append($("<option>", {
                         value: data[i].id,
                         text: data[i].subtype
-                    }));*/
+                    }));*!/
 
                     if (data[i].id === parseInt(subtype)) {
                         var newOption = new Option(data[i].subtype, data[i].id, false, true);
@@ -194,15 +182,20 @@ $(document).ready(function () {
                 }
             });
         }
-    });
+    });*/
 
     //generateNameProduct();
 
     $selectExample.select2({
         placeholder: "Selecione un modelo",
     });
-    $('#btn-generate').on('click', generateNameProduct);
 
+    getExampler();
+
+    $('#btn-generate').on('click', generateNameProduct);
+    $('#btn-generateCode').on('click', generateCodeProduct);
+
+    getSubcategory();
 });
 
 var $formEdit;
@@ -212,6 +205,23 @@ var $selectBrand;
 var $selectExample;
 var $selectType;
 var $selectSubtype;
+let $caracteres = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+let $longitud = 20;
+
+function generateCodeProduct() {
+    let codigo = rand_code($caracteres, $longitud);
+    $('#codigo').val(codigo);
+}
+
+function rand_code($caracteres, $longitud){
+    var code = "";
+    for (var x=0; x < $longitud; x++)
+    {
+        var rand = Math.floor(Math.random()*$caracteres.length);
+        code += $caracteres.substr(rand, 1);
+    }
+    return code;
+}
 
 function mayus(e) {
     e.value = e.value.toUpperCase();
@@ -242,28 +252,24 @@ function generateNameProduct() {
     }
 
     $('#name').val('');
-    //alert($('#subcategory option:selected').text());
-    let category = ($('#category option:selected').text() === 'Ninguna' || $('#subcategory option:selected').text() === '') ? '': ' '+$('#category option:selected').text();
-    let subcategory = ($('#subcategory option:selected').text() === 'Ninguna' || $('#subcategory option:selected').text() === '') ? '': ' '+$('#subcategory option:selected').text()+' ';
-    //console.log($('#subcategory option:selected').text());
-    let type = ($('#type option:selected').text() === 'Ninguno' || $('#type option:selected').text()==='') ? '': $('#type option:selected').text()+' ';
-    //console.log($('#type option:selected').text());
-    let subtype = ($('#subtype option:selected').text() === 'Ninguno' || $('#subtype option:selected').text()==='') ? '': $('#subtype option:selected').text()+' ';
-    //console.log($('#subtype option:selected').text());
-    let warrant = ($('#warrant option:selected').text() === 'Ninguno' || $('#warrant option:selected').text()==='') ? '': $('#warrant option:selected').text()+' ';
-    //console.log($('#warrant option:selected').text());
-    let quality = ($('#quality option:selected').text() === 'Ninguno' || $('#quality option:selected').text()==='') ? '': $('#quality option:selected').text();
-    //console.log($('#quality option:selected').text());
-    let measure = $('#measure').val();
-    //console.log(measure);
-    if (category.trim() === 'CONSUMIBLES' && (subcategory.trim() === 'MIXTO' || subcategory.trim() === 'NORMAL'))
-    {
-        let name = $('#description').val() + type + subtype + warrant + quality + ' '+measure;
-        $('#name').val(name);
-    } else {
-        let name = $('#description').val() + subcategory + type + subtype + warrant + quality + ' '+measure;
-        $('#name').val(name);
-    }
+    // Obtener los valores de las opciones seleccionadas
+    let marca = $('#brand option:selected').text();
+    let modelo = $('#exampler option:selected').text();
+    let genero = $('#genero option:selected').text();
+    let talla = $('#talla option:selected').text();
+
+    // Inicializar un arreglo con la descripción
+    let partes = [$('#description').val().trim()];
+
+    // Agregar las partes no vacías al arreglo
+    if (marca !== 'Ninguno' && marca !== '') partes.push(marca);
+    if (modelo !== 'Ninguno' && modelo !== '') partes.push(modelo);
+    if (genero !== 'Ninguno' && genero !== '') partes.push(genero);
+    if (talla !== 'Ninguno' && talla !== '') partes.push(talla);
+
+    // Unir las partes con un espacio y asignarlo al campo de nombre
+    let name = partes.join(' ');
+    $('#name').val(name);
 
 }
 
@@ -309,12 +315,12 @@ function getSubcategory() {
 
 function getExampler() {
     //$select.empty();
-    var brand =  $('#brand_id').val();
-    //alert(brand);
+    var brand =  $('#brand').val();
+    console.log(brand);
     if ( typeof brand !== 'undefined' )
     {
         //alert(brand);
-        $.get( "/dashboard/get/examplers/"+brand, function( data ) {
+        $.get( "/dashboard/get/exampler/"+brand, function( data ) {
             $selectExample.append($("<option>", {
                 value: '',
                 text: ''

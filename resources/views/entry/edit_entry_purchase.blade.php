@@ -188,24 +188,41 @@
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <div class="form-group">
-                                <label for="quantity">Cantidad <span class="right badge badge-danger">(*)</span></label>
-                                <input type="text" id="quantity" class="form-control">
+                            <div class="form-group" id="sandbox-container2">
+                                <label for="quantity">F. Vence </label>
+                                <div class="input-daterange" id="datepicker2">
+                                    <input type="text" class="form-control date-range-filter" id="date_vence" name="date_vence">
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-1">
                             <div class="form-group">
-                                <label for="price">Precio Total C/IGV <span class="right badge badge-danger">(*)</span></label>
-                                <input type="text" id="price" class="form-control">
+                                <label for="quantity">Cantidad </label>
+                                <input type="number" id="quantity" class="form-control">
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <label for="btn-grouped"> Agrupado </label> <br>
-                            <input id="btn-grouped" type="checkbox" name="my-checkbox" data-bootstrap-switch data-off-color="danger" data-on-text="SI" data-off-text="NO" data-on-color="success">
+                        <div class="col-md-1">
+                            <div class="form-group">
+                                <label for="price">Precio IGV </label>
+                                <input type="number" id="price" class="form-control" placeholder="0.00" min="0" value="" step="0.01" pattern="^\d+(?:\.\d{1,2})?$" onblur="
+                                    this.style.borderColor=/^\d+(?:\.\d{1,2})?$/.test(this.value)?'':'red'
+                                    ">
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <label for="btn-grouped2"> Agrupado </label> <br>
+                            <input id="btn-grouped2" class="col-md-12" type="checkbox" name="my-checkbox" data-bootstrap-switch data-off-color="danger" data-on-text="SI" data-off-text="NO" data-on-color="success">
                         </div>
                         <div class="col-md-2">
+                            <div class="form-group">
+                                <label for="quantity">Almacen </label>
+                                <input type="text" id="almacen" name="almacen" data-locationGroup class="form-control locationGroup" />
+
+                            </div>
+                        </div>
+                        <div class="col-md-1">
                             <label for="btn-add"> &nbsp; </label>
-                            <button type="button" id="btn-add" class="btn btn-block btn-outline-primary">Agregar <i class="fas fa-arrow-circle-right"></i></button>
+                            <button type="button" id="btn-add" class="btn btn-block btn-outline-primary"> <i class="fas fa-arrow-circle-right"></i></button>
                         </div>
 
                     </div>
@@ -518,11 +535,22 @@
             defaultViewDate: moment().format('L')
         });
 
+        $('#sandbox-container2 .input-daterange').datepicker({
+            todayBtn: "linked",
+            clearBtn: true,
+            language: "es",
+            multidate: false,
+            autoclose: true,
+            todayHighlight: true,
+            defaultViewDate: moment().format('L')
+        });
+
         $("input[data-bootstrap-switch]").each(function(){
             $(this).bootstrapSwitch();
         });
         $('#supplier').select2({
             placeholder: "Seleccione un proveedor",
+            allowClear: true
         })
     </script>
     <script src="{{ asset('js/entry/edit_entry_purchase.js') }}"></script>

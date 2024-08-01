@@ -37,7 +37,12 @@ class Material extends Model
         'date_update_price',
         'state_update_price',
         'rotation',
-        'rotation_value'
+        'rotation_value',
+        'genero_id',
+        'talla_id',
+        'tipo_venta_id',
+        'perecible',
+        'codigo'
     ];
 
     public function setNameProductAttribute($value)
@@ -70,46 +75,9 @@ class Material extends Model
 
     public function getFullDescriptionAttribute()
     {
-        $description='';
-        $subcategory = ( is_null($this->subcategory) ) ? '': ' '.$this->subcategory->name;
-        $type = ( is_null($this->materialType) ) ? '': ' '.$this->materialType->name;
-        $subtype = ( is_null($this->subType) ) ? '': ' '.$this->subType->name;
-        $warrant = ( is_null($this->warrant) ) ? '': ' '.$this->warrant->name;
-        $quality = ( is_null($this->quality) ) ? '': ' '.$this->quality->name;
 
-        if($this->category_id == 2)
-        {
-            /*$pos = strripos($this->description, "(*) ");
-            if ( $pos !== false ) {
-                $description = $description . substr($this->description, 4);
-            } else {
-                $description = $description.$this->description;
-            }*/
-            if (preg_match('/\(\*\) |\(e\)/', $this->description, $matches, PREG_OFFSET_CAPTURE)) {
-                $pos = $matches[0][1];
-                // Si se encontró una coincidencia, eliminamos los primeros 4 caracteres
-                $description = $description . substr($this->description, 4);
-            } else {
-                // No se encontró ninguna de las cadenas
-                $description = $description . $this->description;
-            }
-        } else {
-            $description = $description.$this->description;
-        }
+        return $this->full_name;
 
-        if (isset( $this->subcategory ))
-        {
-            if( ($this->category_id == 2 && trim($this->subcategory->name) == 'MIXTO') || $this->category_id == 8 )
-            {
-                $subcategory = '';
-            }
-        }
-
-        $nombre_v1 = $description . $subcategory . $type . $subtype . $warrant . $quality . " {$this->measure}";
-
-        $nombre_correcto = preg_replace(array('/\s{2,}/', '/[\t\n]/'), ' ', $nombre_v1);
-
-        return $nombre_correcto;
     }
 
     public function unitMeasure()

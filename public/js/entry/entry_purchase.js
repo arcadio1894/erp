@@ -3,6 +3,8 @@ let $locations=[];
 let $materialsComplete=[];
 let $locationsComplete=[];
 let $items=[];
+let $material;
+
 $(document).ready(function () {
     $.ajax({
         url: "/dashboard/get/materials/entry",
@@ -68,6 +70,91 @@ $(document).ready(function () {
         }
     });
 
+    $('#almacen').typeahead('destroy');
+    $('#almacen').typeahead({
+            hint: true,
+            highlight: true, /* Enable substring highlighting */
+            minLength: 1 /* Specify minimum characters required for showing suggestions */
+        },
+        {
+            limit: 12,
+            source: substringMatcher($locations)
+        });
+    //var l = $locations[0];
+    $("#almacen").typeahead('val',$locations[0]).trigger('change');
+
+    $(document).on('typeahead:select', '#material_search', function(ev, suggestion) {
+        var select_material = $(this);
+        console.log($(this).val());
+        // TODO: Tomar el texto no el val()
+        var material_search = select_material.val();
+        console.log(material_search);
+        //$material = $materials.find( mat=>mat.full_name.trim().toLowerCase() === material_search.trim().toLowerCase() );
+
+        $material = $materialsComplete.find(mat =>
+            mat.material.trim().toLowerCase() === material_search.trim().toLowerCase() &&
+            mat.enable_status === 1
+        );
+        console.log($material);
+        if( $material === undefined )
+        {
+            toastr.error('Debe seleccionar un material', 'Error',
+                {
+                    "closeButton": true,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": true,
+                    "positionClass": "toast-top-right",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "2000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                });
+            return;
+        }
+        console.log($material.tipo_venta_id);
+        if ( $material.tipo_venta_id === null )
+        {
+
+        } else {
+            switch($material.tipo_venta_id) {
+                case 1:
+                    $('#date_vence').prop('readonly', false);
+                    $('#date_vence').prop('disabled', false);
+                    $('#almacen').prop('readonly', false);
+                    $('#almacen').prop('disabled', false);
+                    $('#btn-grouped2').bootstrapSwitch('state', false, true);
+                    $('#btn-grouped2').bootstrapSwitch('disabled', true);
+                    break;
+                case 2:
+                    $('#date_vence').prop('readonly', false);
+                    $('#date_vence').prop('disabled', false);
+                    $('#almacen').prop('readonly', false);
+                    $('#almacen').prop('disabled', false);
+                    $('#btn-grouped2').bootstrapSwitch('state', false, true);
+                    $('#btn-grouped2').bootstrapSwitch('disabled', true);
+                    break;
+                case 3:
+                    // ITEMEABLE
+                    $('#date_vence').prop('readonly', true);
+                    $('#date_vence').prop('disabled', true);
+                    $('#almacen').prop('readonly', true);
+                    $('#almacen').prop('disabled', true);
+                    $('#btn-grouped2').bootstrapSwitch('disabled', false);
+                    break;
+
+            }
+            //var idMaterial = $(this).select2('data').id;
+            //$renderMaterial = $(this).parent().parent().parent().parent().next().next().next();
+            //$modalAddMaterial.modal('show');
+        }
+    });
 
 });
 
@@ -216,6 +303,7 @@ function saveTableItems() {
         $('#locationGroup').typeahead('destroy');
 
         updateSummaryInvoice();
+
         $modalAddItems.modal('hide');
     }
 
@@ -292,69 +380,114 @@ function addItems() {
         return;
     }
 
-    let material_name = $('#material_search').val();
-    let material_quantity = parseFloat($('#quantity').val()).toFixed(2);
-    // TODO: Este precio es el total ahora
-    let material_price = parseFloat($('#price').val()).toFixed(2);
-
-    $('#locationGroup').typeahead('destroy');
-
-    if($('[name="my-checkbox"]').is(':checked'))
+    if ( $material.tipo_venta_id != 3 )
     {
-        //alert('Es agrupado');
+        let quantity = $('#quantity').val();
+        let material_name = $('#material_search').val();
+        // TODO: Este precio es total
+        let material_price = parseFloat($('#price').val()).toFixed(2);
+        //let material_location = $('#locationGroup').val();
+        let material_location = $('#almacen').val();
+        let material_vence = $("#date_vence").val()
+        let location = $locationsComplete.find( location => location.location === material_location );
 
-        $modalAddGroupItems.find('[id=material_GroupSelected]').val(material_name);
-        $modalAddGroupItems.find('[id=material_GroupSelected]').prop('disabled', true);
-        $modalAddGroupItems.find('[id=quantity_GroupSelected]').val(material_quantity);
-        $modalAddGroupItems.find('[id=quantity_GroupSelected]').prop('disabled', true);
-        $modalAddGroupItems.find('[id=price_GroupSelected]').val(material_price);
-        $modalAddGroupItems.find('[id=price_GroupSelected]').prop('disabled', true);
-
-        $('#locationGroup').typeahead({
-                hint: true,
-                highlight: true, /* Enable substring highlighting */
-                minLength: 1 /* Specify minimum characters required for showing suggestions */
-            },
-            {
-                limit: 12,
-                source: substringMatcher($locations)
-            });
-        //var l = $locations[0];
-        $("#locationGroup").typeahead('val',$locations[0]).trigger('change');
-
-        $modalAddGroupItems.modal('show');
-
-    }else{
-        //alert('NO es agrupado');
-        $modalAddItems.find('[id=material_selected]').val(material_name);
-        $modalAddItems.find('[id=material_selected]').prop('disabled', true);
-        $modalAddItems.find('[id=quantity_selected]').val(material_quantity);
-        $modalAddItems.find('[id=quantity_selected]').prop('disabled', true);
-        $modalAddItems.find('[id=price_selected]').val(material_price);
-        $modalAddItems.find('[id=price_selected]').prop('disabled', true);
-
-        $('#body-items').html('');
-
-        for (var i = 0; i<material_quantity; i++)
+        for ( var j=0; j<quantity; j++ )
         {
-            renderTemplateItem();
+            const material = $materialsComplete.find( material => material.material === material_name );
+            const code = rand_code($caracteres, $longitud);
 
-        }
-        $('.select2').select2();
-        $('.locations').typeahead({
-                hint: true,
-                highlight: true, /* Enable substring highlighting */
-                minLength: 1 /* Specify minimum characters required for showing suggestions */
-            },
-            {
-                limit: 12,
-                source: substringMatcher($locations)
+            $items.push({
+                'id': $items.length+1,
+                'price': parseFloat(parseFloat(material_price)/parseFloat(quantity)).toFixed(4),
+                'quantity':1 ,
+                'material': material_name,
+                'id_material': material.id,
+                'item': code,
+                'id_location':location.id,
+                'date_vence': material_vence
             });
+            //renderTemplateMaterial($items.length, material_price, material_name, code,  location.location, state_description);
+        }
+        const material = $materialsComplete.find( material => material.material === material_name );
+        console.log(material);
+        var subtotal =parseFloat((material_price)/1.18).toFixed(2);
+        var taxes = parseFloat(subtotal*0.18).toFixed(2);
+        var total = parseFloat(material_price).toFixed(2);
 
-        $(".locations").typeahead('val',$locations[0]).trigger('change');
+        renderTemplateMaterial(material.id, material.code, material.material, quantity, material.unit, parseFloat(material_price/quantity).toFixed(2), subtotal, taxes, total);
 
-        $modalAddItems.modal('show');
+        $('#material_search').val('');
+        $('#quantity').val('');
+        $('#price').val('');
+        $('#almacen').val('');
+        $("#date_vence").val('');
+
+    } else {
+        let material_name = $('#material_search').val();
+        let material_quantity = parseFloat($('#quantity').val()).toFixed(2);
+        // TODO: Este precio es el total ahora
+        let material_price = parseFloat($('#price').val()).toFixed(2);
+
+        $('#locationGroup').typeahead('destroy');
+
+        if($('[name="my-checkbox"]').is(':checked'))
+        {
+            //alert('Es agrupado');
+            $modalAddGroupItems.find('[id=material_GroupSelected]').val(material_name);
+            $modalAddGroupItems.find('[id=material_GroupSelected]').prop('disabled', true);
+            $modalAddGroupItems.find('[id=quantity_GroupSelected]').val(material_quantity);
+            $modalAddGroupItems.find('[id=quantity_GroupSelected]').prop('disabled', true);
+            $modalAddGroupItems.find('[id=price_GroupSelected]').val(material_price);
+            $modalAddGroupItems.find('[id=price_GroupSelected]').prop('disabled', true);
+
+            $('#locationGroup').typeahead({
+                    hint: true,
+                    highlight: true, /* Enable substring highlighting */
+                    minLength: 1 /* Specify minimum characters required for showing suggestions */
+                },
+                {
+                    limit: 12,
+                    source: substringMatcher($locations)
+                });
+            //var l = $locations[0];
+            $("#locationGroup").typeahead('val',$locations[0]).trigger('change');
+
+            $modalAddGroupItems.modal('show');
+
+        }else{
+            //alert('NO es agrupado');
+            $modalAddItems.find('[id=material_selected]').val(material_name);
+            $modalAddItems.find('[id=material_selected]').prop('disabled', true);
+            $modalAddItems.find('[id=quantity_selected]').val(material_quantity);
+            $modalAddItems.find('[id=quantity_selected]').prop('disabled', true);
+            $modalAddItems.find('[id=price_selected]').val(material_price);
+            $modalAddItems.find('[id=price_selected]').prop('disabled', true);
+
+            $('#body-items').html('');
+
+            for (var i = 0; i<material_quantity; i++)
+            {
+                renderTemplateItem();
+
+            }
+            $('.select2').select2();
+            $('.locations').typeahead({
+                    hint: true,
+                    highlight: true, /* Enable substring highlighting */
+                    minLength: 1 /* Specify minimum characters required for showing suggestions */
+                },
+                {
+                    limit: 12,
+                    source: substringMatcher($locations)
+                });
+
+            $(".locations").typeahead('val',$locations[0]).trigger('change');
+
+            $modalAddItems.modal('show');
+        }
     }
+
+
 }
 
 function rand_code($caracteres, $longitud){

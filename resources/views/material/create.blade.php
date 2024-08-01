@@ -55,7 +55,7 @@
     <form id="formCreate" class="form-horizontal" data-url="{{ route('material.store') }}" enctype="multipart/form-data">
         @csrf
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <div class="card card-success">
                     <div class="card-header">
                         <h3 class="card-title">Datos generales</h3>
@@ -74,25 +74,64 @@
                         </div>
 
                         <div class="form-group row">
-                            <div class="col-md-6">
-                                <label for="measure">Medida </label>
-                                <input type="text" id="measure" {{--onkeyup="mayus(this);"--}} name="measure" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="unit_measure">Unidad de medida <span class="right badge badge-danger">(*)</span></label>
+                            <div class="col-md-4">
+                                <label for="unit_measure">Unidad de medida </label>
                                 <select id="unit_measure" name="unit_measure" class="form-control select2" style="width: 100%;">
                                     <option></option>
                                     @foreach( $unitMeasures as $unitMeasure )
-                                        <option value="{{ $unitMeasure->id }}">{{ $unitMeasure->name }}</option>
+                                        <option value="{{ $unitMeasure->id }}">{{ $unitMeasure->description }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="brand">Marca </label>
+                                <select id="brand" name="brand" class="form-control select2" style="width: 100%;">
+                                    <option></option>
+                                    @foreach( $brands as $brand )
+                                        <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="exampler">Modelo </label>
+                                <select id="exampler" name="exampler" class="form-control select2" style="width: 100%;">
 
+                                </select>
                             </div>
                         </div>
 
                         <div class="form-group row">
-                            <div class="col-md-6">
-                                <label for="category">Categorías <span class="right badge badge-danger">(*)</span></label>
+                            <div class="col-md-4">
+                                <label for="genero">Genero </label>
+                                <select id="genero" name="genero" class="form-control select2" style="width: 100%;">
+                                    <option></option>
+                                    @foreach( $generos as $genero )
+                                        <option value="{{ $genero->id }}">{{ $genero->description }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="talla">Talla </label>
+                                <select id="talla" name="talla" class="form-control select2" style="width: 100%;">
+                                    <option></option>
+                                    @foreach( $tallas as $talla )
+                                        <option value="{{ $talla->id }}">{{ $talla->description }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="perecible">Perecible </label>
+                                <select id="perecible" name="perecible" class="form-control select2" style="width: 100%;">
+                                    <option></option>
+                                    <option value="s">SI</option>
+                                    <option value="n">NO</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <label for="category">Categorías </label>
                                 <select id="category" name="category" class="form-control select2" style="width: 100%;">
                                     <option></option>
                                     @foreach( $categories as $category )
@@ -101,8 +140,8 @@
                                 </select>
 
                             </div>
-                            <div class="col-md-6">
-                                <label for="subcategory">Subcategorías <span class="right badge badge-danger">(*)</span></label>
+                            <div class="col-md-4">
+                                <label for="subcategory">Subcategorías </label>
                                 <select id="subcategory" name="subcategory" class="form-control select2" style="width: 100%;">
                                     <option></option>
 
@@ -110,7 +149,8 @@
 
                             </div>
                         </div>
-                        <div class="form-group row" id="feature-body" style="display: none">
+
+                        {{--<div class="form-group row" id="feature-body" style="display: none">
                             <div class="col-md-3">
                                 <label for="type">Tipo </label>
                                 <select id="type" name="type" class="form-control select2" style="width: 100%;">
@@ -147,7 +187,7 @@
                                 </select>
 
                             </div>
-                        </div>
+                        </div>--}}
 
                         <div class="form-group">
                             <label for="name">Nombre completo</label>
@@ -160,13 +200,35 @@
                         </div>
 
 
-                        <div class="form-group">
-                            <label for="unit_price">Precio Unitario </label>
-                            <input type="number" id="unit_price" name="unit_price" class="form-control" placeholder="0.00" min="0" value="0" step="0.01" pattern="^\d+(?:\.\d{1,2})?$" onblur="
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <label for="unit_price">Precio Unitario </label>
+                                <input type="number" id="unit_price" name="unit_price" class="form-control" placeholder="0.00" min="0" value="0" step="0.01" pattern="^\d+(?:\.\d{1,2})?$" onblur="
                                     this.style.borderColor=/^\d+(?:\.\d{1,2})?$/.test(this.value)?'':'red'
                                     ">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="codigo">Código del producto </label>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control rounded-0" id="codigo" name="codigo">
+                                    <span class="input-group-append">
+                                        <button type="button" class="btn btn-info btn-flat" id="btn-generateCode"> <i class="fas fa-random"></i></button>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="tipo_venta">Tipo de Venta </label>
+                                <select id="tipo_venta" name="tipo_venta" class="form-control select2" style="width: 100%;">
+                                    <option></option>
+                                    @foreach( $tipoVentas as $tipo )
+                                        <option value="{{$tipo->id}}">{{ $tipo->description }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                         </div>
                         <div class="form-group">
+
                             <label for="image">Imagen </label>
                             <input type="file" id="image" name="image" class="form-control">
                         </div>
@@ -179,7 +241,7 @@
                 </div>
                 <!-- /.card -->
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="card card-warning">
                     <div class="card-header">
                         <h3 class="card-title">Categoría y Stock</h3>
@@ -203,7 +265,7 @@
                                     ">
                         </div>
 
-                        <div class="form-group row">
+                        {{--<div class="form-group row">
                             <div class="col-md-12">
                                 <label for="btn-grouped"> Retacería </label> <br>
                             </div>
@@ -239,59 +301,14 @@
                             <select id="exampler" name="exampler" class="form-control select2" style="width: 100%;">
 
                             </select>
-                        </div>
+                        </div>--}}
 
                     </div>
                     <!-- /.card-body -->
                 </div>
                 <!-- /.card -->
             </div>
-            {{--<div class="col-md-12">
-                <div class="card card-success">
-                    <div class="card-header">
-                        <h3 class="card-title">Especificaciones (Opcional)</h3>
 
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
-                                <i class="fas fa-minus"></i></button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group row">
-                            <div class="col-md-5">
-                                <label for="specification">Especificación </label>
-                                <input type="text" id="specification" class="form-control">
-                            </div>
-                            <div class="col-md-5">
-                                <label for="content">Contenido </label>
-                                <input type="text" id="content" class="form-control">
-                            </div>
-                            <div class="col-md-2">
-                                <label for="btn-add"> &nbsp; </label>
-                                <button type="button" id="btn-add" class="btn btn-block btn-outline-primary">Agregar <i class="fas fa-arrow-circle-right"></i></button>
-                            </div>
-
-                        </div>
-                        <hr>
-                        <div id="body-specifications"></div>
-                        <template id="template-specification">
-                            <div class="form-group row">
-                                <div class="col-md-5">
-                                    <input type="text" data-name name="specifications[]" class="form-control">
-                                </div>
-                                <div class="col-md-5">
-                                    <input type="text" data-content name="contents[]" class="form-control">
-                                </div>
-                                <div class="col-md-2">
-                                    <button type="button" data-delete="btn-delete" class="btn btn-block btn-outline-danger">Quitar <i class="fas fa-trash"></i></button>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                    <!-- /.card-body -->
-                </div>
-                <!-- /.card -->
-            </div>--}}
         </div>
         <div class="row">
             <div class="col-12">
@@ -315,38 +332,65 @@
             //Initialize Select2 Elements
             $('#material_type').select2({
                 placeholder: "Selecione tipo de material",
+                allowClear: true,
             });
             $('#category').select2({
                 placeholder: "Selecione categoría",
+                allowClear: true,
             });
             $('#subcategory').select2({
                 placeholder: "Selecione subcategoría",
+                allowClear: true,
             });
             $('#brand').select2({
                 placeholder: "Selecione una marca",
+                allowClear: true,
             });
             $('#feature').select2({
                 placeholder: "Seleccione característica",
+                allowClear: true,
             });
             $('#type').select2({
                 placeholder: "Elija",
+                allowClear: true,
             });
             $('#subtype').select2({
                 placeholder: "Elija",
+                allowClear: true,
             });
             $('#warrant').select2({
                 placeholder: "Elija",
+                allowClear: true,
             });
             $('#quality').select2({
                 placeholder: "Elija",
+                allowClear: true,
             });
             $('#unit_measure').select2({
-                placeholder: "Elija",
+                placeholder: "Seleccione una unidad",
+                allowClear: true,
             });
+            $('#perecible').select2({
+                placeholder: "Seleccione ",
+                allowClear: true,
+            });
+            $('#genero').select2({
+                placeholder: "Seleccione género",
+                allowClear: true,
+            });
+            $('#talla').select2({
+                placeholder: "Seleccione talla",
+                allowClear: true,
+            });
+            $('#tipo_venta').select2({
+                placeholder: "Seleccione Tipo Venta",
+                allowClear: true,
+            });
+
             $("input[data-bootstrap-switch]").each(function(){
                 $(this).bootstrapSwitch();
             });
         })
     </script>
-    <script src="{{ asset('js/material/create.js') }}"></script>
+    <script src="{{ asset('js/material/create.js') }}?v={{ time() }}"></script>
 @endsection
