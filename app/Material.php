@@ -42,7 +42,8 @@ class Material extends Model
         'talla_id',
         'tipo_venta_id',
         'perecible',
-        'codigo'
+        'codigo',
+        'type_tax_id'
     ];
 
     public function setNameProductAttribute($value)
@@ -128,6 +129,11 @@ class Material extends Model
     public function typeScrap()
     {
         return $this->belongsTo('App\Typescrap', 'typescrap_id');
+    }
+
+    public function typeTax()
+    {
+        return $this->belongsTo('App\TypeTax');
     }
 
     public function defaultItems()

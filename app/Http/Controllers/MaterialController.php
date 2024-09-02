@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Brand;
 use App\Category;
 use App\CategoryInvoice;
+use App\DiscountQuantity;
 use App\Exampler;
 use App\Genero;
 use App\Http\Requests\DeleteMaterialRequest;
 use App\Http\Requests\StoreMaterialRequest;
 use App\Http\Requests\UpdateMaterialRequest;
 use App\Material;
+use App\MaterialDiscountQuantity;
 use App\MaterialType;
 use App\Quality;
 use App\Specification;
@@ -58,7 +60,8 @@ class MaterialController extends Controller
         $generos = Genero::all();
         $tallas = Talla::all();
         $tipoVentas = TipoVenta::all();
-        return view('material.create', compact('tipoVentas','tallas','generos', 'categories', 'warrants', 'brands', 'qualities', 'typescraps', 'unitMeasures'));
+        $discountQuantities = DiscountQuantity::all();
+        return view('material.create', compact('discountQuantities', 'tipoVentas','tallas','generos', 'categories', 'warrants', 'brands', 'qualities', 'typescraps', 'unitMeasures'));
     }
 
     public function store(StoreMaterialRequest $request)
@@ -113,6 +116,24 @@ class MaterialController extends Controller
             }
 
             //$mat = $material;
+            // TODO: Guardar las promociones
+            $discounts = $request->input('discount', []);
+            $percentages = $request->input('percentage', []);
+
+            foreach ($discounts as $discountId => $value) {
+                // Verificamos si el checkbox fue marcado
+                if (isset($value)) {
+                    // Obtenemos el porcentaje correspondiente
+                    $percentage = isset($percentages[$discountId]) ? $percentages[$discountId] : null;
+
+                    // Guardamos la información en la base de datos
+                    MaterialDiscountQuantity::create([
+                        'material_id' => $material->id,
+                        'discount_quantity_id' => $discountId,
+                        'percentage' => $percentage
+                    ]);
+                }
+            }
             DB::commit();
         } catch ( \Throwable $e ) {
             DB::rollBack();
@@ -145,7 +166,16 @@ class MaterialController extends Controller
         $generos = Genero::all();
         $tallas = Talla::all();
         $tipoVentas = TipoVenta::all();
-        return view('material.edit', compact('generos','tallas','tipoVentas','unitMeasures','typescraps','qualities','warrants','specifications', 'brands', 'categories', 'materialTypes', 'material'));
+        $discountQuantities = DiscountQuantity::all();
+        $materialsDiscounts = MaterialDiscountQuantity::where('material_id', $id)
+            ->get()
+            ->keyBy('discount_quantity_id')
+            ->map(function($item) {
+                return $item->percentage;
+            })
+            ->toArray();
+
+        return view('material.edit', compact('materialsDiscounts', 'discountQuantities', 'generos','tallas','tipoVentas','unitMeasures','typescraps','qualities','warrants','specifications', 'brands', 'categories', 'materialTypes', 'material'));
 
     }
 
@@ -216,6 +246,31 @@ class MaterialController extends Controller
                 $material->date_update_price = Carbon::now("America/Lima");
                 $material->state_update_price = 1;
                 $material->save();
+            }
+
+            // TODO: Guardar las promociones
+            $old_discounts = MaterialDiscountQuantity::where($material->id)->get();
+            foreach ( $old_discounts as $discount )
+            {
+                $discount->delete();
+            }
+
+            $discounts = $request->input('discount', []);
+            $percentages = $request->input('percentage', []);
+
+            foreach ($discounts as $discountId => $value) {
+                // Verificamos si el checkbox fue marcado
+                if (isset($value)) {
+                    // Obtenemos el porcentaje correspondiente
+                    $percentage = isset($percentages[$discountId]) ? $percentages[$discountId] : null;
+
+                    // Guardamos la información en la base de datos
+                    MaterialDiscountQuantity::create([
+                        'material_id' => $material->id,
+                        'discount_quantity_id' => $discountId,
+                        'percentage' => $percentage
+                    ]);
+                }
             }
 
             DB::commit();

@@ -2636,6 +2636,16 @@ Route::middleware('auth')->group(function (){
         Route::get('/exportar/guias/remision/v2/', 'ReferralGuideController@exportReferralGuides')
             ->middleware('permission:download_referralGuide');
 
+        // TODO: Rutas Punto de Venta
+        Route::get('/crear/venta/', 'PuntoVentaController@index')
+            ->name('puntoVenta.index');
+        Route::get('/get/data/products/{page}', 'PuntoVentaController@getDataProducts');
+        Route::get('/get/discount/product/{product_id}', 'PuntoVentaController@getDiscountProduct');
+        Route::post('/store/venta/', 'PuntoVentaController@store')
+            ->name('puntoVenta.store');
+        Route::get('imprimir/documento/venta/{id}', 'PuntoVentaController@printDocumentSale')
+            ->name('puntoVenta.print');
+        //get/data/products
     });
 });
 

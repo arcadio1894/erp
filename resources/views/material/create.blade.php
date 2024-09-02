@@ -307,6 +307,31 @@
                     <!-- /.card-body -->
                 </div>
                 <!-- /.card -->
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Promociones</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+                                <i class="fas fa-minus"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @foreach( $discountQuantities as $discountQuantity )
+                        <div class="form-group clearfix">
+                            <div class="icheck-primary d-inline">
+                                <input type="checkbox" name="discount[{{$discountQuantity->id}}]" id="checkboxPrimary{{$discountQuantity->id}}">
+                                <label for="checkboxPrimary{{$discountQuantity->id}}">
+                                    {{$discountQuantity->description}} - {{ $discountQuantity->percentage }}%
+                                </label>
+                                <input type="number" class="form-control form-control-sm d-inline ml-2" style="width: 70px;" id="percentageInput{{$discountQuantity->id}}" name="percentage[{{$discountQuantity->id}}]" value="{{ $discountQuantity->percentage }}" min="0" max="100"> %
+                            </div>
+                        </div>
+                        @endforeach
+
+                    </div>
+                    <!-- /.card-body -->
+                </div>
             </div>
 
         </div>
