@@ -451,7 +451,7 @@ Importe Total:
         //var total_exonerada=0;
         if ( $items[i].productTax == 0 )
         {
-            total_exonerada+=$items[i].productTotal;
+            total_exonerada = total_exonerada + parseFloat($items[i].productTotal);
         }
 
         //var total_gravada=0;
