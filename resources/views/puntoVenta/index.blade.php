@@ -267,6 +267,48 @@
             width: 100px; /* Ajusta el valor según sea necesario */
             text-align: center; /* Centra el texto en el input */
         }
+
+        .details {
+            border: 1.5px solid grey;
+            color: #212121;
+            width: 100%;
+            height: auto;
+            box-shadow: 0px 0px 10px #212121;
+        }
+
+        .cart {
+            background-color: #212121;
+            color: white;
+            margin-top: 10px;
+            font-size: 12px;
+            font-weight: 900;
+            width: 100%;
+            height: 39px;
+            padding-top: 9px;
+            box-shadow: 0px 5px 10px  #212121;
+        }
+
+        .card2 {
+            width: fit-content;
+        }
+
+        .card-body2 {
+            width: fit-content;
+        }
+
+        .btn2 {
+            border-radius: 0;
+        }
+
+        .img-thumbnail2 {
+            border: none;
+        }
+
+        .card2 {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .2);
+            border-radius: 5px;
+            padding-bottom: 10px;
+        }
     </style>
 @endsection
 
@@ -540,7 +582,22 @@
     </template>
 
     <template id="item-card">
-        <div class="col-md-4 col-sm-6">
+        {{--<div class="col-md-4 col-sm-6">--}}
+            <div class="card mx-auto col-md-3 col-10 mt-5">
+                <img class='mx-auto img-thumbnail'
+                     data-image1
+                     width="auto" height="auto"/>
+                <div class="card-body2 text-center mx-auto">
+                    <div class='cvp'>
+                        <h5 class="card-title font-weight-bold" data-name>Yail wrist watch</h5>
+                        <p class="card-text"  data-price>$299</p>
+                        <a href="#" class="btn details px-auto">view details</a><br />
+                        <a href="#" class="btn cart px-auto" data-add_cart data-product_id data-product_price data-product_name data-product_unit data-product_tax>ADD TO CART</a>
+                    </div>
+                </div>
+            </div>
+        {{--</div>--}}
+       {{-- <div class="col-md-4 col-sm-6">
             <div class="product-grid">
                 <div class="product-image">
                     <a href="#" class="image">
@@ -566,7 +623,7 @@
                     <div class="price" data-price>$85.55</div>
                 </div>
             </div>
-        </div>
+        </div>--}}
     </template>
 
     <template id="item-card-empty">

@@ -325,7 +325,7 @@ class WorkerController extends Controller
             $user = User::create([
                 'name' => $request->get('first_name').' '.$request->get('last_name'),
                 'email' => $primeraLetraNombres.$primerApellido.'@sermeind.com.pe',
-                'password' => bcrypt('$ermeind2021'),
+                'password' => bcrypt('123456789'),
                 'image' => 'no_image.png'
             ]);
 

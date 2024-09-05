@@ -439,10 +439,13 @@ Descuentos:
 Importe Total:
 - OP. Exonerada + OP. Inafecta + OP. Gravada + IGV
     * */
+    console.log($items);
     var total_exonerada = 0;
     var total_gravada = 0;
     var total_igv = 0;
     var total_descuentos = 0;
+    var total_importe = 0;
+    var total_igv_bruto=0;
     for ( let i = 0; i < $items.length; i++ )
     {
         //var total_exonerada=0;
@@ -454,10 +457,10 @@ Importe Total:
         //var total_gravada=0;
         if ( $items[i].productTax != 0 )
         {
-            total_gravada = total_gravada + (($items[i].productTotal-$items[i].productDiscount)/(1+$items[i].productTax));
+            total_gravada = total_gravada + (($items[i].productTotal-$items[i].productDiscount)/(1+($items[i].productTax/100)));
         }
         //var total_igv=0;
-        var total_igv_bruto=0;
+
         if ( $items[i].productTax != 0 )
         {
             total_igv_bruto = total_igv_bruto + ($items[i].productTotal-$items[i].productDiscount);
@@ -470,10 +473,17 @@ Importe Total:
         {
             total_descuentos = total_descuentos + $items[i].productDiscount;
         }
+
+        console.log("Total exonerada "+total_exonerada);
+        console.log("Total gravada "+total_gravada);
+        console.log("Total igv "+total_igv);
+        console.log("Total descuentos "+total_descuentos);
+
+
     }
 
-    var total_importe=total_exonerada+total_gravada+total_igv;
-
+    //console.log(total_importe);
+    total_importe=total_importe+total_exonerada+total_gravada+total_igv;
     // Actualizar los datos
 
     $fin_total_exonerada = total_exonerada;
@@ -482,12 +492,18 @@ Importe Total:
     $fin_total_descuentos = total_descuentos;
     $fin_total_importe = total_importe;
 
-    $("#op_exonerada").html("S/. "+parseFloat(total_exonerada).toFixed(2));
+    console.log("Total exonerada "+$fin_total_exonerada);
+    console.log("Total gravada "+$fin_total_gravada);
+    console.log("Total igv "+$fin_total_igv);
+    console.log("Total descuentos "+$fin_total_descuentos);
+    console.log("Total importe "+$fin_total_importe);
+
+    $("#op_exonerada").html("S/. "+parseFloat($fin_total_exonerada).toFixed(2));
     //$("#op_inafecta").html("S/. "+parseFloat(op_exonerada).toFixed(2));
-    $("#op_gravada").html("S/. "+parseFloat(total_igv).toFixed(2));
-    $("#total_igv").html("S/. "+parseFloat(total_gravada).toFixed(2));
-    $("#total_descuentos").html("S/. "+parseFloat(total_descuentos).toFixed(2));
-    $("#total_importe").html("S/. "+parseFloat(total_importe).toFixed(2));
+    $("#op_gravada").html("S/. "+parseFloat($fin_total_gravada).toFixed(2));
+    $("#total_igv").html("S/. "+parseFloat($fin_total_igv).toFixed(2));
+    $("#total_descuentos").html("S/. "+parseFloat($fin_total_descuentos).toFixed(2));
+    $("#total_importe").html("S/. "+parseFloat($fin_total_importe).toFixed(2));
 
 
 }
@@ -790,7 +806,7 @@ function renderDataCard(data) {
     var clone = activateTemplate('#item-card');
     let url_image = document.location.origin + '/images/material/' + data.image;
     clone.querySelector("[data-image1]").setAttribute("src", url_image);
-    clone.querySelector("[data-image2]").setAttribute("src", url_image);
+    /*clone.querySelector("[data-image2]").setAttribute("src", url_image);*/
     clone.querySelector("[data-name]").innerHTML = data.full_name;
     clone.querySelector("[data-price]").innerHTML = data.price;
 
