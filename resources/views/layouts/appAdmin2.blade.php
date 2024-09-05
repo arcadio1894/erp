@@ -2729,7 +2729,7 @@
                         <li class="nav-header">FINANZAS</li>
                     @endcanany
 
-                    @can('list_invoice')
+                    {{--@can('list_invoice')
                         <li class="nav-item has-treeview @yield('openMaterialsActivos')">
                             <a href="#" class="nav-link @yield('activeMaterialsActivos')">
                                 <i class="nav-icon fas fa-credit-card"></i>
@@ -2749,7 +2749,7 @@
                                 @endcan
                             </ul>
                         </li>
-                    @endcan
+                    @endcan--}}
 
                     @can('list_categoryInvoice')
                         <li class="nav-item has-treeview @yield('openCategoryInvoice')">
