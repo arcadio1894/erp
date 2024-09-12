@@ -16,7 +16,8 @@
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ asset('admin/dist/css/adminlte.min.css') }}">
     <!-- Google Font: Source Sans Pro -->
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('admin/dist/img/icono_logo.ico') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('admin/dist/img/logo_dashboard.ico') }}">
+
 
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 </head>
@@ -30,16 +31,16 @@
     <div class="card">
         <div class="card-body login-card-body">
             @guest
-                <h4 class="login-box-msg">Sistema interno de SERMEIND</h4>
+                <h4 class="login-box-msg">Sistema interno</h4>
             @else
                 <h4 class="login-box-msg">Bienvenido a la Intranet</h4>
                 <h4 class="login-box-msg">{{ Auth::user()->name }}</h4>
             @endguest
             <div class="row">
-                <div class="col-md-12">
+                {{--<div class="col-md-12">
                     <a href="https://www.sermeind.com.pe/" class="btn btn-primary btn-block">Regresar a la pagina principal</a>
                 </div>
-                <br><br>
+                <br><br>--}}
                 @guest
                     <div class="col-md-12">
                         <a href="{{ route('login') }}" class="btn btn-primary btn-block">Iniciar sesión</a>

@@ -309,6 +309,44 @@
             border-radius: 5px;
             padding-bottom: 10px;
         }
+
+        .product-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .product-image {
+            max-height: 150px; /* Ajusta según sea necesario */
+            object-fit: contain;
+            margin-bottom: 15px;
+        }
+
+        .cvp {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-title {
+            height: 80px; /* Altura fija para el título */
+            overflow: hidden; /* Ocultar el texto que sobrepasa el límite */
+            text-overflow: ellipsis; /* Añadir puntos suspensivos si el texto es demasiado largo */
+            display: -webkit-box;
+            -webkit-line-clamp: 2; /* Mostrar un máximo de 2 líneas */
+            -webkit-box-orient: vertical;
+        }
+
+        .product-price {
+            margin-bottom: 15px;
+        }
+
+        .btn.cart:hover {
+            color: #007bff; /* Cambia este valor al color que prefieras */
+        }
+
     </style>
 @endsection
 
@@ -583,7 +621,7 @@
 
     <template id="item-card">
         {{--<div class="col-md-4 col-sm-6">--}}
-            <div class="card mx-auto col-md-3 col-10 mt-5">
+            {{--<div class="card mx-auto col-md-3 col-10 mt-5">
                 <img class='mx-auto img-thumbnail'
                      data-image1
                      width="auto" height="auto"/>
@@ -595,7 +633,20 @@
                         <a href="#" class="btn cart px-auto" data-add_cart data-product_id data-product_price data-product_name data-product_unit data-product_tax>ADD TO CART</a>
                     </div>
                 </div>
+            </div>--}}
+        <div class="card mx-auto col-md-3 col-10 mt-1 product-card">
+            <img class='mx-auto img-thumbnail product-image'
+                 data-image1
+                 width="auto" height="auto"/>
+            <div class="card-body2 text-center mx-auto">
+                <div class='cvp'>
+                    <h5 class="card-title font-weight-bold product-title" data-name>Yail wrist watch</h5>
+                    <p class="card-text product-price" data-price>$299</p>
+                    <a href="#" class="btn details px-auto">view details</a>
+                    <a href="#" class="btn cart px-auto" data-add_cart data-product_id data-product_price data-product_name data-product_unit data-product_tax>ADD TO CART</a>
+                </div>
             </div>
+        </div>
         {{--</div>--}}
        {{-- <div class="col-md-4 col-sm-6">
             <div class="product-grid">

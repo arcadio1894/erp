@@ -92,6 +92,7 @@ class MaterialController extends Controller
                 'tipo_venta_id' => $request->get('tipo_venta'),
                 'perecible' => $request->get('perecible'),
                 'full_name' => $request->get('name'),
+                'list_price' => (float)$request->get('unit_price')+10,
             ]);
 
             $length = 5;
