@@ -43,7 +43,8 @@ class Material extends Model
         'tipo_venta_id',
         'perecible',
         'codigo',
-        'type_tax_id'
+        'type_tax_id',
+        'list_price'
     ];
 
     public function setNameProductAttribute($value)

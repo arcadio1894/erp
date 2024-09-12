@@ -250,7 +250,7 @@ class MaterialController extends Controller
             }
 
             // TODO: Guardar las promociones
-            $old_discounts = MaterialDiscountQuantity::where($material->id)->get();
+            $old_discounts = MaterialDiscountQuantity::where('material_id',$material->id)->get();
             foreach ( $old_discounts as $discount )
             {
                 $discount->delete();

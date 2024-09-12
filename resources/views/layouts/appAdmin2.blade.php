@@ -231,6 +231,26 @@
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
 
+                    <li class="nav-header">PUNTO DE VENTA</li>
+                    <li class="nav-item has-treeview @yield('openPuntoVenta')">
+                        <a href="#" class="nav-link @yield('activePuntoVenta')">
+                            <i class="nav-icon fas fa-truck-loading"></i>
+                            <p>
+                                VENTAS
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+
+                            <li class="nav-item">
+                                <a href="{{ route('puntoVenta.index') }}" class="nav-link @yield('activeCreatePuntoVenta')">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Crear venta</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
                     @can('access_permission')
                     <li class="nav-header">ADMINISTRADOR</li>
                     <li class="nav-item has-treeview @yield('openAccess')">
@@ -1029,25 +1049,7 @@
                         </li>
                     @endcan
 
-                    <li class="nav-header">PUNTO DE VENTA</li>
-                    <li class="nav-item has-treeview @yield('openPuntoVenta')">
-                        <a href="#" class="nav-link @yield('activePuntoVenta')">
-                            <i class="nav-icon fas fa-truck-loading"></i>
-                            <p>
-                                VENTAS
-                                <i class="right fas fa-angle-left"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
 
-                            <li class="nav-item">
-                                <a href="{{ route('puntoVenta.index') }}" class="nav-link @yield('activeCreatePuntoVenta')">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Crear venta</p>
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
 
                     @canany('list_entryPurchase', 'list_entryScrap')
                     <li class="nav-header">ENTRADAS A ALMACEN</li>
