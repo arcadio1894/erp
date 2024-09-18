@@ -150,7 +150,7 @@
 
     <div class="separator"></div>
 
-    <p><span class="bold">Detalle de Pago:</span> {{ strtoupper($sale->tipoPago->descripcion) }}</p>
+    <p><span class="bold">Detalle de Pago:</span> {{ strtoupper($sale->tipoPago->description) }}</p>
 
     <div class="separator"></div>
 

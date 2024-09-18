@@ -92,7 +92,7 @@ class MaterialController extends Controller
                 'tipo_venta_id' => $request->get('tipo_venta'),
                 'perecible' => $request->get('perecible'),
                 'full_name' => $request->get('name'),
-                'list_price' => (float)$request->get('unit_price')+10,
+                'list_price' => (float)($request->get('unit_price')+2),
             ]);
 
             $length = 5;
@@ -160,12 +160,13 @@ class MaterialController extends Controller
         $categories = Category::all();
         $materialTypes = MaterialType::all();
         $material = Material::with(['category', 'materialType', ])->find($id);
-        $warrants = Warrant::all();
-        $qualities = Quality::all();
+
         $typescraps = Typescrap::all();
         $unitMeasures = UnitMeasure::all();
         $generos = Genero::all();
         $tallas = Talla::all();
+        //$warrants = Warrant::all();
+        //$qualities = Quality::all();
         $tipoVentas = TipoVenta::all();
         $discountQuantities = DiscountQuantity::all();
         $materialsDiscounts = MaterialDiscountQuantity::where('material_id', $id)
@@ -207,6 +208,7 @@ class MaterialController extends Controller
             $material->tipo_venta_id = $request->get('tipo_venta');
             $material->perecible = $request->get('perecible');
             $material->codigo = $request->get('codigo');
+            $material->list_price = (float)($request->get('unit_price')+2);
             $material->save();
 
             // TODO: Tratamiento de un archivo de forma tradicional

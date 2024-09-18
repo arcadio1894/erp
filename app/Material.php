@@ -127,6 +127,16 @@ class Material extends Model
         return $this->belongsTo('App\Quality');
     }
 
+    public function genero()
+    {
+        return $this->belongsTo('App\Warrant');
+    }
+
+    public function talla()
+    {
+        return $this->belongsTo('App\Quality');
+    }
+
     public function typeScrap()
     {
         return $this->belongsTo('App\Typescrap', 'typescrap_id');
@@ -135,6 +145,11 @@ class Material extends Model
     public function typeTax()
     {
         return $this->belongsTo('App\TypeTax');
+    }
+
+    public function tipoVenta()
+    {
+        return $this->belongsTo('App\TipoVenta');
     }
 
     public function defaultItems()

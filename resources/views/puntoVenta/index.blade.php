@@ -437,7 +437,7 @@
 
                                     <button  type="button" id="btn-pay" class="btn btn-success btn-block btn-lg">PAGAR</button>
 
-                                    <a href="#" id="btn-printDocument" class="btn btn-primary btn-block btn-lg">IMPRIMIR COMPROBANTE</a>
+                                    <a href="#" target="_blank" id="btn-printDocument" class="btn btn-primary btn-block btn-lg">IMPRIMIR COMPROBANTE</a>
 
                                     <button  type="button" id="btn-newSale" class="btn btn-warning btn-block btn-lg">NUEVA VENTA</button>
 
@@ -598,6 +598,37 @@
         </div>
     </div>
 
+    <div id="modalQuantity" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Ingrese cantidad</h4>
+                </div>
+
+                <input type="hidden" id="quantity_productId">
+                <input type="hidden" id="quantity_productPrice">
+                <input type="hidden" id="quantity_productName">
+                <input type="hidden" id="quantity_productUnit">
+                <input type="hidden" id="quantity_productTax">
+                <input type="hidden" id="quantity_productType">
+
+                <div class="modal-body">
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <label for="quantity_total">Cantidad</label>
+                            <input type="number" min="0" class="form-control" id="quantity_total">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-notAddProduct">Cancelar</button>
+                    <button type="button" id="btn-add_product" class="btn btn-success">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <template id="item-cart">
         <div class="d-flex align-items-center mb-3 w-100">
             <div class="flex-grow-1 ms-3">
@@ -608,12 +639,15 @@
 
                     <div class="def-number-input number-input safari_only">
                         <button type="button" data-mdb-button-init onclick="decrementQuantity(this)" data-product_id_minus class="minus"></button>
-                        <input class="quantity fw-bold bg-body-tertiary text-body large-input" min="0" name="quantity" value="1" type="number" step="0.01">
+                        <input class="quantity fw-bold bg-body-tertiary text-body large-input" data-quantity min="0" name="quantity" type="number" step="0.01">
                         <button type="button" data-mdb-button-init onclick="incrementQuantity(this)" data-product_id_plus class="plus"></button>
                     </div>
                     <p class="fw-bold mb-0 me-5 pe-3" data-priceTotal>799$</p>
                 </div>
-                <h6 class="text-success" data-discount></h6>
+                <div class="align-items-center justify-content-between">
+                    <h6 class="text-success" data-discount></h6>
+                </div>
+                {{--<h6 class="text-success" data-discount></h6>--}}
                 <hr class="mb-4" style="height: 0.8px; background-color: #9e9e9e; opacity: 1;">
             </div>
         </div>
@@ -642,7 +676,7 @@
                 <div class='cvp'>
                     <h5 class="card-title font-weight-bold product-title" data-name>Yail wrist watch</h5>
                     <p class="card-text product-price" data-price>$299</p>
-                    <a href="#" class="btn details px-auto">view details</a>
+                    <a href="#" class="btn details px-auto" data-add_cart_special data-product_id data-product_price data-product_name data-product_unit data-product_tax data-product_type>ADD SPECIAL</a>
                     <a href="#" class="btn cart px-auto" data-add_cart data-product_id data-product_price data-product_name data-product_unit data-product_tax>ADD TO CART</a>
                 </div>
             </div>

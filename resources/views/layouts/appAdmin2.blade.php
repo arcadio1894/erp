@@ -454,6 +454,8 @@
 
                     @canany('list_material','list_unitMeasure', 'list_typeScrap', 'list_category', 'list_subcategory', 'list_materialType', 'list_subType', 'list_warrant', 'list_quality', 'list_brand', 'list_exampler')
                     <li class="nav-header">MATERIALES</li>
+                    @endcanany
+                    @canany('list_unitMeasure', 'list_typeScrap', 'list_category', 'list_subcategory', 'list_materialType', 'list_subType', 'list_warrant', 'list_quality', 'list_brand', 'list_exampler')
                     <li class="nav-item has-treeview @yield('openConfig')">
                         <a href="#" class="nav-link @yield('activeConfig')">
                             <i class="fas fa-tools nav-icon"></i>
@@ -648,7 +650,7 @@
                                     <a href="#" class="nav-link @yield('activeWarrant')">
                                         <i class="far fa-circle nav-icon text-success"></i>
                                         <p>
-                                            Cédulas
+                                            Género
                                             <i class="right fas fa-angle-left"></i>
                                         </p>
                                     </a>
@@ -657,7 +659,7 @@
                                         <li class="nav-item">
                                             <a href="{{ route('warrant.index') }}" class="nav-link @yield('activeListWarrant')">
                                                 <i class="far fa-dot-circle nav-icon text-warning"></i>
-                                                <p>Listar cédulas</p>
+                                                <p>Listar géneros</p>
                                             </a>
                                         </li>
                                         @endcan
@@ -665,7 +667,7 @@
                                         <li class="nav-item">
                                             <a href="{{ route('warrant.create') }}" class="nav-link @yield('activeCreateWarrant')">
                                                 <i class="far fa-dot-circle nav-icon text-warning"></i>
-                                                <p>Crear cédulas</p>
+                                                <p>Crear géneros</p>
                                             </a>
                                         </li>
                                         @endcan
@@ -678,7 +680,7 @@
                                     <a href="#" class="nav-link @yield('activeQuality')">
                                         <i class="far fa-circle nav-icon text-success"></i>
                                         <p>
-                                            Calidades
+                                            Tallas
                                             <i class="right fas fa-angle-left"></i>
                                         </p>
                                     </a>
@@ -687,7 +689,7 @@
                                         <li class="nav-item">
                                             <a href="{{ route('quality.index') }}" class="nav-link @yield('activeListQuality')">
                                                 <i class="far fa-dot-circle nav-icon text-warning"></i>
-                                                <p>Listar calidades</p>
+                                                <p>Listar tallas</p>
                                             </a>
                                         </li>
                                         @endcan
@@ -695,7 +697,7 @@
                                         <li class="nav-item">
                                             <a href="{{ route('quality.create') }}" class="nav-link @yield('activeCreateQuality')">
                                                 <i class="far fa-dot-circle nav-icon text-warning"></i>
-                                                <p>Crear calidades</p>
+                                                <p>Crear Tallas</p>
                                             </a>
                                         </li>
                                         @endcan
@@ -941,74 +943,76 @@
                         </li>
                     @endcan
 
-                    @can('list_area')
-                    <li class="nav-header">INVENTARIO</li>
-                    <li class="nav-item has-treeview @yield('openInventory')">
-                        <a href="#" class="nav-link @yield('activeInventory')">
-                            <i class="nav-icon fas fa-book"></i>
-                            <p>
-                                Inventario Físico
-                                <i class="right fas fa-angle-left"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            @can('list_area')
-                            <li class="nav-item">
-                                <a href="{{ route('area.index') }}" class="nav-link @yield('activeAreas')">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Áreas</p>
+                    @can('enableArea_inventory')
+                        <li class="nav-header">INVENTARIO</li>
+                        <li class="nav-item has-treeview @yield('openInventory')">
+                            <a href="#" class="nav-link @yield('activeInventory')">
+                                <i class="nav-icon fas fa-book"></i>
+                                <p>
+                                    Inventario Físico
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                @can('list_area')
+                                <li class="nav-item">
+                                    <a href="{{ route('area.index') }}" class="nav-link @yield('activeAreas')">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Áreas</p>
+                                    </a>
+                                </li>
+                                @endcan
+                                @can('list_location')
+                                <li class="nav-item">
+                                    <a href="{{ route('location.index') }}" class="nav-link @yield('activeLocations')">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Ubicaciones</p>
+                                    </a>
+                                </li>
+                                @endcan
+                                @can('list_inventory')
+                                    <li class="nav-item">
+                                        <a href="{{ route('inventory.index') }}" class="nav-link @yield('activeListInventory')">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Listado</p>
+                                        </a>
+                                    </li>
+                                @endcan
+                            </ul>
+                        </li>
+
+                        @can('list_transfer')
+                            {{--<li class="nav-header">TRANSFERENCIAS</li>--}}
+                            <li class="nav-item has-treeview @yield('openTransfer')">
+                                <a href="#" class="nav-link @yield('activeTransfer')">
+                                    <i class="nav-icon fas fa-retweet"></i>
+                                    <p>
+                                        Transferencias
+                                        <i class="right fas fa-angle-left"></i>
+                                    </p>
                                 </a>
+                                <ul class="nav nav-treeview">
+                                    @can('list_transfer')
+                                        <li class="nav-item">
+                                            <a href="{{ route('transfer.index') }}" class="nav-link @yield('activeListTransfer')">
+                                                <i class="far fa-circle nav-icon"></i>
+                                                <p>Listar traslados</p>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                    @can('create_transfer')
+                                        <li class="nav-item">
+                                            <a href="{{ route('transfer.create') }}" class="nav-link @yield('activeCreateTransfer')">
+                                                <i class="far fa-circle nav-icon"></i>
+                                                <p>Crear traslado</p>
+                                            </a>
+                                        </li>
+                                    @endcan
+                                </ul>
                             </li>
-                            @endcan
-                            @can('list_location')
-                            <li class="nav-item">
-                                <a href="{{ route('location.index') }}" class="nav-link @yield('activeLocations')">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Ubicaciones</p>
-                                </a>
-                            </li>
-                            @endcan
-                            @can('list_inventory')
-                                <li class="nav-item">
-                                    <a href="{{ route('inventory.index') }}" class="nav-link @yield('activeListInventory')">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Listado</p>
-                                    </a>
-                                </li>
-                            @endcan
-                        </ul>
-                    </li>
+                        @endcan
                     @endcan
-                    @can('list_transfer')
-                    <li class="nav-header">TRANSFERENCIAS</li>
-                    <li class="nav-item has-treeview @yield('openTransfer')">
-                        <a href="#" class="nav-link @yield('activeTransfer')">
-                            <i class="nav-icon fas fa-retweet"></i>
-                            <p>
-                                Transferencias
-                                <i class="right fas fa-angle-left"></i>
-                            </p>
-                        </a>
-                        <ul class="nav nav-treeview">
-                            @can('list_transfer')
-                                <li class="nav-item">
-                                    <a href="{{ route('transfer.index') }}" class="nav-link @yield('activeListTransfer')">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Listar traslados</p>
-                                    </a>
-                                </li>
-                            @endcan
-                            @can('create_transfer')
-                                <li class="nav-item">
-                                    <a href="{{ route('transfer.create') }}" class="nav-link @yield('activeCreateTransfer')">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Crear traslado</p>
-                                    </a>
-                                </li>
-                            @endcan
-                        </ul>
-                    </li>
-                    @endcan
+
 
                     @can('enable_referralGuide')
                         <li class="nav-header">GUIAS DE REMISIÓN</li>

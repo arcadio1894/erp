@@ -35,6 +35,7 @@ class PuntoVentaController extends Controller
         $product_search = $request->input('product_search');
 
         $query = Material::where('enable_status', 1)
+            ->where('stock_current', '>', 0)
             ->orderBy('id');
 
         // Aplicar filtros si se proporcionan
@@ -72,6 +73,7 @@ class PuntoVentaController extends Controller
                 "unit" => $product->unitMeasure->description,
                 "tax" => ($product->type_tax_id == null) ? 18 : $product->typeTax->tax,
                 "rating" => 4,
+                "type" => ($product->tipo_venta_id == null) ? 0 : $product->tipoVenta->id,
             ]);
         }
 
@@ -115,7 +117,7 @@ class PuntoVentaController extends Controller
                     "percentage" => $materialDiscount->percentage,
                     "haveDiscount" => true,
                     "valueDiscount" => round(($material->list_price - $material->unit_price)*($materialDiscount->percentage/100), 2),
-                    "stringDiscount" => "Dscto. ".$materialDiscount->discount->description." ".round(($material->list_price - $material->unit_price)*($materialDiscount->percentage/100), 2),
+                    "stringDiscount" => "<p>Dscto. ".$materialDiscount->discount->description." <strong class='float-right'> ".round(($material->list_price - $material->unit_price)*($materialDiscount->percentage/100), 2)."</strong></p>",
                 ]);
 
                 // Salir del bucle una vez que se ha encontrado el descuento aplicable
@@ -175,7 +177,13 @@ class PuntoVentaController extends Controller
                     'total' => $items[$i]->productTotal,
                     'discount' => $items[$i]->productDiscount,
                 ]);
+
+                // TODO: Actualizar stock
+                $material = Material::find($items[$i]->productId);
+                $material->stock_current = $material->stock_current - $items[$i]->productQuantity;
+                $material->save();
             }
+            
 
             // Crear notificacion
             $notification = Notification::create([
@@ -248,8 +256,10 @@ class PuntoVentaController extends Controller
         $pdf = PDF::loadHTML($view);
         // Configurar el tamaño de la página a un tamaño personalizado para el ticket
         //$customPaper = array(0, 0, 226.77, 650); // Ancho y alto en puntos (1 pulgada = 72 puntos)
-        $customPaper = array(0, 0, 250, 650);
-        $pdf->setPaper($customPaper);
+        //$customPaper = array(0, 0, 250, 650);
+        //$pdf->setPaper($customPaper);
+        $customPaper = array(0, 0, 250, 9999); // Ancho fijo, altura suficientemente grande para el contenido
+        $pdf->setPaper($customPaper, 'portrait');
         $pdf->setOptions([
             'default_font_size' => 12,
             'default_font' => 'Arial',
@@ -262,6 +272,7 @@ class PuntoVentaController extends Controller
                 'left'   => 0,
             ],
         ]);
+
 
         $length = 5;
         $codeOrder = ''.str_pad($id,$length,"0", STR_PAD_LEFT);

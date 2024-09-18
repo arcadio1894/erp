@@ -9,6 +9,8 @@ $(document).ready(function () {
 
     $(document).on('click', '[data-add_cart]', addProductCart);
 
+    $(document).on('click', '[data-add_cart_special]', addProductCartSpecial);
+
     $(document).on('input', '#importe_total', function() {
         //console.log("Input event detected!"); // Para depuración
         var $input = $(this);
@@ -36,10 +38,13 @@ $(document).ready(function () {
 
     $modalVuelto = $('#modalVuelto');
 
+    $modalQuantity = $('#modalQuantity');
+
     $(document).on('input', 'input.quantity', function() {
         console.log("Input event detected!"); // Para depuración
         var $input = $(this);
         var currentValue = parseFloat($input.val());
+        var stringDiscount = "";
         var productId = $input.siblings('button.minus').attr('data-product_id_minus');
 
         if (isNaN(currentValue) || currentValue < 0) {
@@ -47,15 +52,21 @@ $(document).ready(function () {
             $input.val(currentValue.toFixed(2));
         }
 
-        var string = changeStringPrice(productId, currentValue.toFixed(2));
-        var priceTotal = changePriceTotal(productId, currentValue.toFixed(2));
-
         getDiscountMaterial(productId, currentValue.toFixed(2)).then(function(discount) {
             console.log(discount);
-            $input.closest('.flex-grow-1').find('h6[data-discount]').html(discount.stringDiscount);
+            if ( discount != -1 )
+            {
+                $input.closest('.flex-grow-1').find('h6[data-discount]').html(discount.stringDiscount);
+            } else  {
+                $input.closest('.flex-grow-1').find('h6[data-discount]').html("");
+            }
+
             updateItems(productId, priceTotal, currentValue);
             updateTotalOrder();
         });
+
+        var string = changeStringPrice(productId, currentValue.toFixed(2));
+        var priceTotal = changePriceTotal(productId, currentValue.toFixed(2));
 
         // Actualizar el string
         $input.closest('.flex-grow-1').find('h6[data-price]').html(string);
@@ -68,6 +79,9 @@ $(document).ready(function () {
     $("#btn-printDocument").hide();
 
     $("#btn-newSale").on('click', newSale);
+
+    $("#btn-notAddProduct").on('click', notAddProduct);
+    $("#btn-add_product").on('click', addProduct);
 });
 
 let $items = [];
@@ -86,6 +100,157 @@ let $fin_vuelto = 0;
 
 let $modeEdit = 1;
 let $sale_id = null;
+let $modalQuantity;
+
+function notAddProduct() {
+    $modalQuantity.modal('hide');
+}
+
+function addProductCartSpecial() {
+    event.preventDefault(); // Evitar el comportamiento por defecto del enlace
+
+    let productId = $(this).data('product_id');
+    let productPrice = $(this).data('product_price');
+    let productName = $(this).data('product_name');
+    let productUnit = $(this).data('product_unit');
+    let productTax = $(this).data('product_tax');
+    let productType = $(this).data('product_type');
+
+    // Verificar si el producto ya está en el carrito
+    let existingProduct = $items.find(item => item.productId == productId);
+
+    if ( $modeEdit == 0 )
+    {
+        toastr.error("Lo sentimos ya no puede agregar mas productos, anule o imprima el comprobante.", 'Error', {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "2000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        });
+        return;
+    }
+
+    if (existingProduct) {
+        // Si el producto ya está en el carrito, puedes actualizar la cantidad
+        toastr.error("El producto "+productName+" ya esta agregado", 'Error',
+            {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "2000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            });
+    } else {
+        showModalQuantity(productId, productPrice, productName, productUnit, productTax, productType);
+    }
+
+}
+
+function showModalQuantity(productId, productPrice, productName, productUnit, productTax, productType) {
+
+    $("#quantity_productId").val(productId);
+    $("#quantity_productPrice").val(productPrice);
+    $("#quantity_productName").val(productName);
+    $("#quantity_productUnit").val(productUnit);
+    $("#quantity_productTax").val(productTax);
+    $("#quantity_productType").val(productType);
+
+    $modalQuantity.modal('show');
+}
+
+function addProduct() {
+    event.preventDefault(); // Evitar el comportamiento por defecto del enlace
+
+    let productId =  $("#quantity_productId").val();
+    let productPrice = $("#quantity_productPrice").val();
+    let productName = $("#quantity_productName").val();
+    let productUnit = $("#quantity_productUnit").val();
+    let productTax = $("#quantity_productTax").val();
+
+    let productType = $("#quantity_productType").val();
+
+    let quantity = $("#quantity_total").val();
+
+    if (productType == 2) {
+        // Permitir decimales en quantity, no hacemos nada
+        let precio = parseFloat(productPrice * quantity).toFixed(2);
+        $items.push({
+            "productId": productId,
+            "productPrice": productPrice,
+            "productName": productName,
+            "productUnit": productUnit,
+            "productTax": productTax,
+            "productTotal": precio,
+            "productTotalTaxes": parseFloat(precio*(1+(productTax/100))).toFixed(2),
+            "productTaxes": parseFloat(precio*(productTax/100)).toFixed(2),
+            "productQuantity": quantity,
+            "productDiscount": 0
+        });
+        // Renderizar el producto en el carrito
+        renderDataCartQuantity(productId, productPrice, productName, productUnit, quantity);
+
+        //updateTotalOrder();
+
+        /*getDiscountMaterial(productId, quantity).then(function(discount) {
+            //console.log(discount);
+            $input.closest('.flex-grow-1').find('h6[data-discount]').html(discount.stringDiscount);
+            updateItems(productId, precio, quantity);
+            updateTotalOrder();
+        });
+
+        // Actualizar el string
+        $input.closest('.flex-grow-1').find('h6[data-price]').html(string);
+        // Actualizar el precio total
+        $input.closest('.d-flex').find('p[data-priceTotal]').html(precio);*/
+
+    } else {
+        // No permitir decimales en quantity
+        if (quantity % 1 !== 0) {
+            toastr.error("Este tipo de producto no acepta decimales", 'Error', {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "2000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            });
+            $("#quantity_total").val(Math.floor(quantity)); // Elimina los decimales
+            return;
+        }
+    }
+    //renderDataCart(productId, productPrice, productName, productUnit);
+    $modalQuantity.modal('hide');
+}
 
 function newSale() {
     location.reload();
@@ -246,7 +411,7 @@ function guardarVenta() {
                 $("#btn-pay").hide();
                 $("#btn-newSale").show();
                 $("#btn-printDocument").show();
-                $("#btn-printDocument").setAttribute("href", data.url_print);
+                $("#btn-printDocument").attr("href", data.url_print);
                 //location.reload();
             }, 2000 )
         },
@@ -299,6 +464,28 @@ function guardarVenta() {
 }
 
 function deleteItem() {
+    if ( $modeEdit == 0 )
+    {
+        toastr.error("Lo sentimos ya no puede quitar productos, anule o imprima el comprobante.", 'Error', {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "2000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        });
+        return;
+    }
+
     let product_id = $(this).attr('data-delete');
 
     $items = $items.filter(item => item.productId != product_id);
@@ -648,12 +835,51 @@ function renderDataCart(productId, productPrice, productName, productUnit) {
     clone.querySelector("[data-price]").innerHTML = "<strong>" + quantity + "</strong> "+productUnit+" a " + productPrice + " / Unit";
     clone.querySelector("[data-product_id_minus]").setAttribute("data-product_id_minus", productId);
     clone.querySelector("[data-product_id_plus]").setAttribute("data-product_id_plus", productId);
+
+    var quantityInput = clone.querySelector("[data-quantity]");
+    if (quantityInput) {
+        quantityInput.value = quantity; // Usa .value en lugar de setAttribute
+    }
+
     var priceTotal;
     priceTotal = quantity * productPrice;
 
     clone.querySelector("[data-priceTotal]").innerHTML = priceTotal;
 
     $("#body-cart").append(clone);
+}
+
+function renderDataCartQuantity(productId, productPrice, productName, productUnit, productQuantity) {
+    var quantity = parseFloat(productQuantity).toFixed(2);
+    var clone = activateTemplate('#item-cart');
+    clone.querySelector("[data-delete]").setAttribute("data-delete", productId);
+    clone.querySelector("[data-name]").innerHTML = productName;
+    clone.querySelector("[data-price]").innerHTML = "<strong>" + quantity + "</strong> "+productUnit+" a " + productPrice + " / Unit";
+    clone.querySelector("[data-product_id_minus]").setAttribute("data-product_id_minus", productId);
+    clone.querySelector("[data-product_id_plus]").setAttribute("data-product_id_plus", productId);
+    //clone.querySelector("[data-quantity]").setAttribute("value", quantity);
+
+    // Aquí asegúrate de actualizar el valor del input correctamente
+    var quantityInput = clone.querySelector("[data-quantity]");
+    if (quantityInput) {
+        quantityInput.value = quantity; // Usa .value en lugar de setAttribute
+    }
+
+    var priceTotal;
+    priceTotal = quantity * productPrice;
+
+    clone.querySelector("[data-priceTotal]").innerHTML = priceTotal;
+
+    $("#body-cart").append(clone);
+
+    updateTotalOrder();
+
+    // Asegúrate de que el input exista antes de disparar el evento
+    if (quantityInput) {
+        console.log("Vamos a lanzar el evento");
+        $(quantityInput).trigger('input');
+    }
+
 }
 
 function showData() {
@@ -815,6 +1041,13 @@ function renderDataCard(data) {
     clone.querySelector("[data-add_cart]").setAttribute("data-product_name", data.full_name);
     clone.querySelector("[data-add_cart]").setAttribute("data-product_unit", data.unit);
     clone.querySelector("[data-add_cart]").setAttribute("data-product_tax", data.tax);
+
+    clone.querySelector("[data-add_cart_special]").setAttribute("data-product_id", data.id);
+    clone.querySelector("[data-add_cart_special]").setAttribute("data-product_price", data.price);
+    clone.querySelector("[data-add_cart_special]").setAttribute("data-product_name", data.full_name);
+    clone.querySelector("[data-add_cart_special]").setAttribute("data-product_unit", data.unit);
+    clone.querySelector("[data-add_cart_special]").setAttribute("data-product_tax", data.tax);
+    clone.querySelector("[data-add_cart_special]").setAttribute("data-product_type", data.type);
 
     $("#body-card").append(clone);
 
