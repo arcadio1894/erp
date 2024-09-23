@@ -165,8 +165,8 @@ class MaterialController extends Controller
         $unitMeasures = UnitMeasure::all();
         $generos = Genero::all();
         $tallas = Talla::all();
-        //$warrants = Warrant::all();
-        //$qualities = Quality::all();
+        $warrants = Warrant::all();
+        $qualities = Quality::all();
         $tipoVentas = TipoVenta::all();
         $discountQuantities = DiscountQuantity::all();
         $materialsDiscounts = MaterialDiscountQuantity::where('material_id', $id)
