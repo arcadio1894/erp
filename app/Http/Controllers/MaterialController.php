@@ -687,7 +687,8 @@ class MaterialController extends Controller
                 'stock_current'=>$material->stock_current,
                 'category'=>$material->category_id,
                 'enable_status'=>$material->enable_status,
-                'tipo_venta_id'=>$material->tipo_venta_id
+                'tipo_venta_id'=>$material->tipo_venta_id,
+                'perecible' => ($material->perecible == null) ? 'n':$material->perecible
             ]);
         }
 

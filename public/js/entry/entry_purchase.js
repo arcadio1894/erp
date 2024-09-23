@@ -125,16 +125,33 @@ $(document).ready(function () {
         } else {
             switch($material.tipo_venta_id) {
                 case 1:
-                    $('#date_vence').prop('readonly', false);
-                    $('#date_vence').prop('disabled', false);
+                    // SIN ITEMS
+                    // If con perecible o no perecible
+                    if ( $material.perecible == 'n' )
+                    {
+                        $('#date_vence').prop('readonly', true);
+                        $('#date_vence').prop('disabled', true);
+                    } else {
+                        $('#date_vence').prop('readonly', false);
+                        $('#date_vence').prop('disabled', false);
+                    }
+
                     $('#almacen').prop('readonly', false);
                     $('#almacen').prop('disabled', false);
                     $('#btn-grouped2').bootstrapSwitch('state', false, true);
                     $('#btn-grouped2').bootstrapSwitch('disabled', true);
                     break;
                 case 2:
-                    $('#date_vence').prop('readonly', false);
-                    $('#date_vence').prop('disabled', false);
+                    // AL PESO
+                    // If con perecible o no perecible
+                    if ( $material.perecible == 'n' )
+                    {
+                        $('#date_vence').prop('readonly', true);
+                        $('#date_vence').prop('disabled', true);
+                    } else {
+                        $('#date_vence').prop('readonly', false);
+                        $('#date_vence').prop('disabled', false);
+                    }
                     $('#almacen').prop('readonly', false);
                     $('#almacen').prop('disabled', false);
                     $('#btn-grouped2').bootstrapSwitch('state', false, true);
@@ -388,7 +405,7 @@ function addItems() {
         let material_price = parseFloat($('#price').val()).toFixed(2);
         //let material_location = $('#locationGroup').val();
         let material_location = $('#almacen').val();
-        let material_vence = $("#date_vence").val()
+        let material_vence = $("#date_vence").val();
         let location = $locationsComplete.find( location => location.location === material_location );
 
         for ( var j=0; j<quantity; j++ )
@@ -404,9 +421,11 @@ function addItems() {
                 'id_material': material.id,
                 'item': code,
                 'id_location':location.id,
-                'date_vence': material_vence
+                'date_vence': material_vence,
+                'state': 'good'
             });
             //renderTemplateMaterial($items.length, material_price, material_name, code,  location.location, state_description);
+            updateSummaryInvoice();
         }
         const material = $materialsComplete.find( material => material.material === material_name );
         console.log(material);
