@@ -247,6 +247,22 @@ function addProduct() {
             $("#quantity_total").val(Math.floor(quantity)); // Elimina los decimales
             return;
         }
+
+        let precio = parseFloat(productPrice * Math.floor(quantity)).toFixed(2);
+        $items.push({
+            "productId": productId,
+            "productPrice": productPrice,
+            "productName": productName,
+            "productUnit": productUnit,
+            "productTax": productTax,
+            "productTotal": precio,
+            "productTotalTaxes": parseFloat(precio*(1+(productTax/100))).toFixed(2),
+            "productTaxes": parseFloat(precio*(productTax/100)).toFixed(2),
+            "productQuantity": quantity,
+            "productDiscount": 0
+        });
+        // Renderizar el producto en el carrito
+        renderDataCartQuantity(productId, productPrice, productName, productUnit, quantity);
     }
     //renderDataCart(productId, productPrice, productName, productUnit);
     $modalQuantity.modal('hide');
