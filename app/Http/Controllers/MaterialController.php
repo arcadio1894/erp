@@ -87,8 +87,8 @@ class MaterialController extends Controller
                 'typescrap_id' => $request->get('typescrap'),
                 'enable_status' => true,
                 'codigo' => $request->get('codigo'),
-                'genero_id' => $request->get('genero'),
-                'talla_id' => $request->get('talla'),
+                'warrant_id' => $request->get('genero'),
+                'quality_id' => $request->get('talla'),
                 'tipo_venta_id' => $request->get('tipo_venta'),
                 'perecible' => $request->get('perecible'),
                 'full_name' => $request->get('name'),
@@ -203,8 +203,8 @@ class MaterialController extends Controller
             $material->brand_id = $request->get('brand');
             $material->exampler_id = $request->get('exampler');
             $material->typescrap_id = $request->get('typescrap');
-            $material->genero_id = $request->get('genero');
-            $material->talla_id = $request->get('talla');
+            $material->warrant_id = $request->get('genero');
+            $material->quality_id = $request->get('talla');
             $material->tipo_venta_id = $request->get('tipo_venta');
             $material->perecible = $request->get('perecible');
             $material->codigo = $request->get('codigo');

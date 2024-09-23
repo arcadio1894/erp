@@ -121,7 +121,7 @@
                                 <select id="genero" name="genero" class="form-control select2" style="width: 100%;">
                                     <option></option>
                                     @foreach( $generos as $genero )
-                                        <option value="{{ $genero->id }}" {{ ($genero->id === $material->genero_id) ? 'selected':'' }}>{{ $genero->description }}</option>
+                                        <option value="{{ $genero->id }}" {{ ($genero->id === $material->warrant_id) ? 'selected':'' }}>{{ $genero->description }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -130,7 +130,7 @@
                                 <select id="talla" name="talla" class="form-control select2" style="width: 100%;">
                                     <option></option>
                                     @foreach( $tallas as $talla )
-                                        <option value="{{ $talla->id }}" {{ ($talla->id === $material->talla_id) ? 'selected':'' }}>{{ $talla->description }}</option>
+                                        <option value="{{ $talla->id }}" {{ ($talla->id === $material->quality_id) ? 'selected':'' }}>{{ $talla->description }}</option>
                                     @endforeach
                                 </select>
                             </div>

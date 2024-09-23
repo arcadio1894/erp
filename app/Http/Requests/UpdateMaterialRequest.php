@@ -21,7 +21,7 @@ class UpdateMaterialRequest extends FormRequest
             'stock_min' => 'nullable|numeric|min:0',
             'unit_price' => 'nullable|numeric|between:0,99999.99',
             'image' => 'image',
-            'category' => 'required|exists:categories,id',
+            'category' => 'nullable|exists:categories,id',
             'subcategory' => 'nullable|exists:subcategories,id',
             'brand' => 'nullable|exists:brands,id',
             'exampler' => 'nullable|exists:examplers,id',
