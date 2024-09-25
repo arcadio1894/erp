@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Audit;
+use App\DataGeneral;
 use App\DetailEntry;
 use App\Entry;
 use App\EntryImage;
@@ -220,6 +221,7 @@ class EntryController extends Controller
         //dd($tipoCambioSunat);
 
         //$tipoCambioSunat = json_decode($response);
+        $flag = DataGeneral::where('name', 'type_current')->first();
 
         if ( $request->get('purchase_order') != '' || $request->get('purchase_order') != null )
         {
@@ -383,105 +385,217 @@ class EntryController extends Controller
                 {
                     if( $detail_entry->material_id == $items[$i]->id_material )
                     {
-                        if ( $entry->currency_invoice === 'PEN' )
+                        /*** if ($flag == 'dolares')
+                         * Mantener la logica desde el if hasta el final igual
+                         * if ($flag == 'soles')
+                         * Cambiar el if $entry->currency_invoice === 'USD' y multiplicar $entry->currency_venta
+                         * el else dejarlo igual al actual
+                        */
+
+                        if ( $flag->valueText == 'usd' )
                         {
-                            $precio1 = round((float)$items[$i]->price,2) / (float) $entry->currency_compra;
-                            $price1 = ($detail_entry->material->price > $precio1) ? $detail_entry->material->price : $precio1;
-                            $materialS = Material::find($detail_entry->material_id);
-                            if ( $materialS->unit_price < $price1 )
+                            if ( $entry->currency_invoice === 'PEN' )
                             {
-                                $materialS->unit_price = $price1;
-                                $materialS->save();
+                                $precio1 = round((float)$items[$i]->price,2) / (float) $entry->currency_compra;
+                                $price1 = ($detail_entry->material->price > $precio1) ? $detail_entry->material->price : $precio1;
+                                $materialS = Material::find($detail_entry->material_id);
+                                if ( $materialS->unit_price < $price1 )
+                                {
+                                    $materialS->unit_price = $price1;
+                                    $materialS->save();
 
-                                $detail_entry->unit_price = round((float)$items[$i]->price,2);
-                                $detail_entry->save();
+                                    $detail_entry->unit_price = round((float)$items[$i]->price,2);
+                                    $detail_entry->save();
+                                } else {
+                                    $detail_entry->unit_price = round((float)$items[$i]->price,2);
+                                    $detail_entry->save();
+                                }
+                                //dd($detail_entry->material->materialType);
+                                if ( isset($detail_entry->material->typeScrap) )
+                                {
+                                    $item = Item::create([
+                                        'detail_entry_id' => $detail_entry->id,
+                                        'material_id' => $detail_entry->material_id,
+                                        'code' => $items[$i]->item,
+                                        'length' => (float)$detail_entry->material->typeScrap->length,
+                                        'width' => (float)$detail_entry->material->typeScrap->width,
+                                        'weight' => 0,
+                                        'price' => round((float)$items[$i]->price,2),
+                                        'percentage' => 1,
+                                        'typescrap_id' => $detail_entry->material->typeScrap->id,
+                                        'location_id' => $items[$i]->id_location,
+                                        'state' => $items[$i]->state,
+                                        'state_item' => 'entered'
+                                    ]);
+                                    $total_detail = $total_detail + (float)$items[$i]->price;
+                                } else {
+                                    $item = Item::create([
+                                        'detail_entry_id' => $detail_entry->id,
+                                        'material_id' => $detail_entry->material_id,
+                                        'code' => $items[$i]->item,
+                                        'length' => 0,
+                                        'width' => 0,
+                                        'weight' => 0,
+                                        'price' => round((float)$items[$i]->price,2),
+                                        'percentage' => 1,
+                                        'location_id' => $items[$i]->id_location,
+                                        'state' => $items[$i]->state,
+                                        'state_item' => 'entered'
+                                    ]);
+                                    $total_detail = $total_detail + (float)$items[$i]->price;
+                                }
                             } else {
-                                $detail_entry->unit_price = round((float)$items[$i]->price,2);
-                                $detail_entry->save();
-                            }
-                            //dd($detail_entry->material->materialType);
-                            if ( isset($detail_entry->material->typeScrap) )
-                            {
-                                $item = Item::create([
-                                    'detail_entry_id' => $detail_entry->id,
-                                    'material_id' => $detail_entry->material_id,
-                                    'code' => $items[$i]->item,
-                                    'length' => (float)$detail_entry->material->typeScrap->length,
-                                    'width' => (float)$detail_entry->material->typeScrap->width,
-                                    'weight' => 0,
-                                    'price' => round((float)$items[$i]->price,2),
-                                    'percentage' => 1,
-                                    'typescrap_id' => $detail_entry->material->typeScrap->id,
-                                    'location_id' => $items[$i]->id_location,
-                                    'state' => $items[$i]->state,
-                                    'state_item' => 'entered'
-                                ]);
-                                $total_detail = $total_detail + (float)$items[$i]->price;
-                            } else {
-                                $item = Item::create([
-                                    'detail_entry_id' => $detail_entry->id,
-                                    'material_id' => $detail_entry->material_id,
-                                    'code' => $items[$i]->item,
-                                    'length' => 0,
-                                    'width' => 0,
-                                    'weight' => 0,
-                                    'price' => round((float)$items[$i]->price,2),
-                                    'percentage' => 1,
-                                    'location_id' => $items[$i]->id_location,
-                                    'state' => $items[$i]->state,
-                                    'state_item' => 'entered'
-                                ]);
-                                $total_detail = $total_detail + (float)$items[$i]->price;
-                            }
-                        } else {
-                            $price = ((float)$detail_entry->material->unit_price > round((float)$items[$i]->price,2)) ? $detail_entry->material->unit_price : round((float)$items[$i]->price,2);
-                            $materialS = Material::find($detail_entry->material_id);
-                            if ( (float)$materialS->unit_price < round((float)$items[$i]->price,2) )
-                            {
-                                $materialS->unit_price = (float) round((float)$items[$i]->price,2);
-                                $materialS->save();
+                                $price = ((float)$detail_entry->material->unit_price > round((float)$items[$i]->price,2)) ? $detail_entry->material->unit_price : round((float)$items[$i]->price,2);
+                                $materialS = Material::find($detail_entry->material_id);
+                                if ( (float)$materialS->unit_price < round((float)$items[$i]->price,2) )
+                                {
+                                    $materialS->unit_price = (float) round((float)$items[$i]->price,2);
+                                    $materialS->save();
 
-                                $detail_entry->unit_price = (float) round((float)$items[$i]->price,2);
-                                $detail_entry->save();
-                            } else {
-                                $detail_entry->unit_price = (float) round((float)$items[$i]->price,2);
-                                $detail_entry->save();
+                                    $detail_entry->unit_price = (float) round((float)$items[$i]->price,2);
+                                    $detail_entry->save();
+                                } else {
+                                    $detail_entry->unit_price = (float) round((float)$items[$i]->price,2);
+                                    $detail_entry->save();
+                                }
+                                //dd($detail_entry->material->materialType);
+                                if ( isset($detail_entry->material->typeScrap) )
+                                {
+                                    $item = Item::create([
+                                        'detail_entry_id' => $detail_entry->id,
+                                        'material_id' => $detail_entry->material_id,
+                                        'code' => $items[$i]->item,
+                                        'length' => (float)$detail_entry->material->typeScrap->length,
+                                        'width' => (float)$detail_entry->material->typeScrap->width,
+                                        'weight' => 0,
+                                        'price' => (float)$price,
+                                        'percentage' => 1,
+                                        'typescrap_id' => $detail_entry->material->typeScrap->id,
+                                        'location_id' => $items[$i]->id_location,
+                                        'state' => $items[$i]->state,
+                                        'state_item' => 'entered'
+                                    ]);
+                                    $total_detail = $total_detail + (float)$items[$i]->price;
+                                } else {
+                                    $item = Item::create([
+                                        'detail_entry_id' => $detail_entry->id,
+                                        'material_id' => $detail_entry->material_id,
+                                        'code' => $items[$i]->item,
+                                        'length' => 0,
+                                        'width' => 0,
+                                        'weight' => 0,
+                                        'price' => (float)$price,
+                                        'percentage' => 1,
+                                        'location_id' => $items[$i]->id_location,
+                                        'state' => $items[$i]->state,
+                                        'state_item' => 'entered'
+                                    ]);
+                                    $total_detail = $total_detail + (float)$items[$i]->price;
+                                }
                             }
-                            //dd($detail_entry->material->materialType);
-                            if ( isset($detail_entry->material->typeScrap) )
+                        } elseif ( $flag->valueText == 'pen' )
+                        {
+                            if ( $entry->currency_invoice === 'USD' )
                             {
-                                $item = Item::create([
-                                    'detail_entry_id' => $detail_entry->id,
-                                    'material_id' => $detail_entry->material_id,
-                                    'code' => $items[$i]->item,
-                                    'length' => (float)$detail_entry->material->typeScrap->length,
-                                    'width' => (float)$detail_entry->material->typeScrap->width,
-                                    'weight' => 0,
-                                    'price' => (float)$price,
-                                    'percentage' => 1,
-                                    'typescrap_id' => $detail_entry->material->typeScrap->id,
-                                    'location_id' => $items[$i]->id_location,
-                                    'state' => $items[$i]->state,
-                                    'state_item' => 'entered'
-                                ]);
-                                $total_detail = $total_detail + (float)$items[$i]->price;
+                                $precio1 = round((float)$items[$i]->price,2) * (float) $entry->currency_venta;
+                                $price1 = ($detail_entry->material->price > $precio1) ? $detail_entry->material->price : $precio1;
+                                $materialS = Material::find($detail_entry->material_id);
+                                if ( $materialS->unit_price < $price1 )
+                                {
+                                    $materialS->unit_price = $price1;
+                                    $materialS->save();
+
+                                    $detail_entry->unit_price = round((float)$items[$i]->price,2);
+                                    $detail_entry->save();
+                                } else {
+                                    $detail_entry->unit_price = round((float)$items[$i]->price,2);
+                                    $detail_entry->save();
+                                }
+                                //dd($detail_entry->material->materialType);
+                                if ( isset($detail_entry->material->typeScrap) )
+                                {
+                                    $item = Item::create([
+                                        'detail_entry_id' => $detail_entry->id,
+                                        'material_id' => $detail_entry->material_id,
+                                        'code' => $items[$i]->item,
+                                        'length' => (float)$detail_entry->material->typeScrap->length,
+                                        'width' => (float)$detail_entry->material->typeScrap->width,
+                                        'weight' => 0,
+                                        'price' => round((float)$items[$i]->price,2),
+                                        'percentage' => 1,
+                                        'typescrap_id' => $detail_entry->material->typeScrap->id,
+                                        'location_id' => $items[$i]->id_location,
+                                        'state' => $items[$i]->state,
+                                        'state_item' => 'entered'
+                                    ]);
+                                    $total_detail = $total_detail + (float)$items[$i]->price;
+                                } else {
+                                    $item = Item::create([
+                                        'detail_entry_id' => $detail_entry->id,
+                                        'material_id' => $detail_entry->material_id,
+                                        'code' => $items[$i]->item,
+                                        'length' => 0,
+                                        'width' => 0,
+                                        'weight' => 0,
+                                        'price' => round((float)$items[$i]->price,2),
+                                        'percentage' => 1,
+                                        'location_id' => $items[$i]->id_location,
+                                        'state' => $items[$i]->state,
+                                        'state_item' => 'entered'
+                                    ]);
+                                    $total_detail = $total_detail + (float)$items[$i]->price;
+                                }
                             } else {
-                                $item = Item::create([
-                                    'detail_entry_id' => $detail_entry->id,
-                                    'material_id' => $detail_entry->material_id,
-                                    'code' => $items[$i]->item,
-                                    'length' => 0,
-                                    'width' => 0,
-                                    'weight' => 0,
-                                    'price' => (float)$price,
-                                    'percentage' => 1,
-                                    'location_id' => $items[$i]->id_location,
-                                    'state' => $items[$i]->state,
-                                    'state_item' => 'entered'
-                                ]);
-                                $total_detail = $total_detail + (float)$items[$i]->price;
+                                $price = ((float)$detail_entry->material->unit_price > round((float)$items[$i]->price,2)) ? $detail_entry->material->unit_price : round((float)$items[$i]->price,2);
+                                $materialS = Material::find($detail_entry->material_id);
+                                if ( (float)$materialS->unit_price < round((float)$items[$i]->price,2) )
+                                {
+                                    $materialS->unit_price = (float) round((float)$items[$i]->price,2);
+                                    $materialS->save();
+
+                                    $detail_entry->unit_price = (float) round((float)$items[$i]->price,2);
+                                    $detail_entry->save();
+                                } else {
+                                    $detail_entry->unit_price = (float) round((float)$items[$i]->price,2);
+                                    $detail_entry->save();
+                                }
+                                //dd($detail_entry->material->materialType);
+                                if ( isset($detail_entry->material->typeScrap) )
+                                {
+                                    $item = Item::create([
+                                        'detail_entry_id' => $detail_entry->id,
+                                        'material_id' => $detail_entry->material_id,
+                                        'code' => $items[$i]->item,
+                                        'length' => (float)$detail_entry->material->typeScrap->length,
+                                        'width' => (float)$detail_entry->material->typeScrap->width,
+                                        'weight' => 0,
+                                        'price' => (float)$price,
+                                        'percentage' => 1,
+                                        'typescrap_id' => $detail_entry->material->typeScrap->id,
+                                        'location_id' => $items[$i]->id_location,
+                                        'state' => $items[$i]->state,
+                                        'state_item' => 'entered'
+                                    ]);
+                                    $total_detail = $total_detail + (float)$items[$i]->price;
+                                } else {
+                                    $item = Item::create([
+                                        'detail_entry_id' => $detail_entry->id,
+                                        'material_id' => $detail_entry->material_id,
+                                        'code' => $items[$i]->item,
+                                        'length' => 0,
+                                        'width' => 0,
+                                        'weight' => 0,
+                                        'price' => (float)$price,
+                                        'percentage' => 1,
+                                        'location_id' => $items[$i]->id_location,
+                                        'state' => $items[$i]->state,
+                                        'state_item' => 'entered'
+                                    ]);
+                                    $total_detail = $total_detail + (float)$items[$i]->price;
+                                }
                             }
                         }
+
 
 
                     }
