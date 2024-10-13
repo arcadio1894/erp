@@ -196,6 +196,9 @@ $(document).ready(function () {
     $('#btn-generateCode').on('click', generateCodeProduct);
 
     getSubcategory();
+
+    $('#checkboxPack').on('change', checkInputPack);
+
 });
 
 var $formEdit;
@@ -207,6 +210,16 @@ var $selectType;
 var $selectSubtype;
 let $caracteres = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 let $longitud = 20;
+
+function checkInputPack() {
+    if ($('#checkboxPack').is(':checked')) {
+        $('#inputPack').val(1);
+        $('#inputPack').prop('disabled', false);  // Activa el input si el checkbox está marcado
+    } else {
+        $('#inputPack').val('');
+        $('#inputPack').prop('disabled', true);  // Desactiva el input si el checkbox no está marcado
+    }
+}
 
 function generateCodeProduct() {
     let codigo = rand_code($caracteres, $longitud);

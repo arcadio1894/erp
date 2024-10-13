@@ -838,6 +838,24 @@
                                         </a>
                                     </li>
                                 @endcan
+                                    <li class="nav-item">
+                                        <a href="{{ route('material.separate.pack') }}" class="nav-link @yield('activeSeparatePackMaterial')">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Separar paquetes</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('index.combos') }}" class="nav-link @yield('listComboMaterial')">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Listado de combos</p>
+                                        </a>
+                                    </li>
+                                    {{--<li class="nav-item">
+                                        <a href="{{ route('material.generate.combo') }}" class="nav-link @yield('activeGenerateComboMaterial')">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Generar combo</p>
+                                        </a>
+                                    </li>--}}
                             </ul>
                         </li>
                     @endcan

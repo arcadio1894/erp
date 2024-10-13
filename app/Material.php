@@ -44,7 +44,10 @@ class Material extends Model
         'perecible',
         'codigo',
         'type_tax_id',
-        'list_price'
+        'list_price',
+        'isPack',
+        'quantityPack',
+        'stock_unPack'
     ];
 
     public function setNameProductAttribute($value)

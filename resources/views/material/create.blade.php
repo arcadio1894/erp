@@ -148,6 +148,17 @@
                                 </select>
 
                             </div>
+                            <div class="col-md-4">
+                                <label for="subcategory">Cantidad por paquete </label>
+                                <div class="form-group clearfix">
+                                    <div class="icheck-primary d-inline">
+                                        <input type="checkbox" name="pack" id="checkboxPack">
+                                        <label for="checkboxPack">Es paquete</label>
+                                        <input type="number" class="form-control form-control-sm d-inline ml-2" style="width: 70px;" id="inputPack" name="inputPack" value="1" min="0">
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
 
                         {{--<div class="form-group row" id="feature-body" style="display: none">

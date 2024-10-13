@@ -579,6 +579,7 @@ Route::middleware('auth')->group(function (){
         Route::get('/get/materials', 'MaterialController@getJsonMaterials');
         Route::get('/get/materials/transfer', 'MaterialController@getJsonMaterialsTransfer');
         Route::get('/get/materials/quote', 'MaterialController@getJsonMaterialsQuote');
+        Route::get('/get/materials/combo', 'MaterialController@getJsonMaterialsCombo');
         Route::get('/get/materials/scrap', 'MaterialController@getJsonMaterialsScrap');
         Route::get('/get/locations', 'LocationController@getJsonLocations');
         Route::get('/get/items/{id_material}', 'ItemController@getJsonItems');
@@ -2646,6 +2647,26 @@ Route::middleware('auth')->group(function (){
         Route::get('imprimir/documento/venta/{id}', 'PuntoVentaController@printDocumentSale')
             ->name('puntoVenta.print');
         //get/data/products
+
+        // TODO: Rutas Punto de Venta
+        Route::get('/separar/paquetes/materiales', 'MaterialController@materialSeparatePack')
+            ->name('material.separate.pack');
+        Route::get('/get/data/material/pack/V2/{numberPage}', 'MaterialController@getDataMaterialsPack');
+        Route::post('/store/separate/pack', 'MaterialController@storeSeparatePack')
+            ->name('save.separate.pack');
+        Route::get('/generar/combos/materiales', 'ComboController@generateComboMaterials')
+            ->name('material.generate.combo');
+        Route::post('/store/generate/pack', 'ComboController@storeGeneratePack')
+            ->name('save.separate.pack');
+        Route::get('/get/data/combos/V2/{numberPage}', 'ComboController@getDataCombos');
+        Route::get('/listado/combos/materiales', 'ComboController@index')
+            ->name('index.combos');
+        Route::post('combo/destroy', 'ComboController@destroy')
+            ->name('combo.destroy')/*
+            ->middleware('permission:destroy_category')*/;
+        Route::get('/get/materials/combo/{combo}', 'ComboController@getDataMaterialsCombo');
+
+
     });
 });
 

@@ -93,6 +93,8 @@ class MaterialController extends Controller
                 'perecible' => $request->get('perecible'),
                 'full_name' => $request->get('name'),
                 'list_price' => (float)($request->get('unit_price')+2),
+                'pack' => $request->has('pack') ? 1 : 0,
+                'quantityPack' => $request->has('pack') ? $request->get('inputPack') : 0,
             ]);
 
             $length = 5;
@@ -209,6 +211,8 @@ class MaterialController extends Controller
             $material->perecible = $request->get('perecible');
             $material->codigo = $request->get('codigo');
             $material->list_price = (float)($request->get('unit_price')+2);
+            $material->pack = $request->has('pack') ? 1 : 0;
+            $material->quantityPack = $request->has('pack') ? $request->get('inputPack') : 0;
             $material->save();
 
             // TODO: Tratamiento de un archivo de forma tradicional
@@ -729,6 +733,21 @@ class MaterialController extends Controller
         return $array;
     }
 
+    public function getJsonMaterialsCombo()
+    {
+        $materials = Material::with('unitMeasure')
+            ->where('enable_status', 1)->get();
+
+        $array = [];
+        foreach ( $materials as $material )
+        {
+            array_push($array, ['id'=> $material->id, 'material' => $material->full_name, 'unit' => $material->unitMeasure->name, 'code' => $material->code, 'price' => $material->list_price]);
+        }
+
+        //dd($materials);
+        return $array;
+    }
+
     public function getJsonMaterialsScrap()
     {
         $materials = Material::with('subcategory', 'materialType', 'subtype', 'warrant', 'quality')
@@ -894,4 +913,211 @@ class MaterialController extends Controller
         dump($end);
         dd();
     }
+
+    public function getDataMaterialsPack(Request $request, $pageNumber = 1)
+    {
+        $perPage = 10;
+        $description = $request->input('description');
+        $code = $request->input('code');
+        $category = $request->input('category');
+        $subcategory = $request->input('subcategory');
+        $material_type = $request->input('material_type');
+        $sub_type = $request->input('sub_type');
+        $cedula = $request->input('cedula');
+        $calidad = $request->input('calidad');
+        $marca = $request->input('marca');
+        $retaceria = $request->input('retaceria');
+        $rotation = $request->input('rotation');
+
+        $query = Material::with('category:id,name', 'materialType:id,name','unitMeasure:id,name','subcategory:id,name','subType:id,name','exampler:id,name','brand:id,name','warrant:id,name','quality:id,name','typeScrap:id,name')
+            ->where('enable_status', 1)
+            ->where('isPack',1)
+            /*->orderBy('rotation', "desc")*/
+            ->orderBy('id');
+
+        // Aplicar filtros si se proporcionan
+        if ($description != "") {
+            // Convertir la cadena de búsqueda en un array de palabras clave
+            $keywords = explode(' ', $description);
+
+            // Construir la consulta para buscar todas las palabras clave en el campo full_name
+            $query->where(function ($query) use ($keywords) {
+                foreach ($keywords as $keyword) {
+                    $query->where('full_name', 'LIKE', '%' . $keyword . '%');
+                }
+            });
+
+            // Asegurarse de que todas las palabras clave estén presentes en la descripción
+            foreach ($keywords as $keyword) {
+                $query->where('full_name', 'LIKE', '%' . $keyword . '%');
+            }
+        }
+
+        if ($code != "") {
+            $query->where('code', 'LIKE', '%'.$code.'%');
+        }
+
+        if ($category != "") {
+            $query->where('category_id', $category);
+        }
+
+        if ($subcategory != "") {
+            $query->where('subcategory_id', $subcategory);
+        }
+
+        if ($material_type != "") {
+            $query->where('material_type_id', $material_type);
+        }
+
+        if ($sub_type != "") {
+            $query->where('subtype_id', $sub_type);
+        }
+
+        if ($cedula != "") {
+            $query->where('warrant_id', $cedula);
+        }
+
+        if ($calidad != "") {
+            $query->where('quality_id', $calidad);
+        }
+
+        if ($marca != "") {
+            $query->where('brand_id', $marca);
+        }
+
+        if ($retaceria != "") {
+            $query->where('typescrap_id', $retaceria);
+        }
+
+        if ( $rotation != "" ) {
+            $query->where('rotation', $rotation);
+        }
+
+        $totalFilteredRecords = $query->count();
+        $totalPages = ceil($totalFilteredRecords / $perPage);
+
+        $startRecord = ($pageNumber - 1) * $perPage + 1;
+        $endRecord = min($totalFilteredRecords, $pageNumber * $perPage);
+
+        $materials = $query->skip(($pageNumber - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        $array = [];
+
+        foreach ( $materials as $material )
+        {
+            $priority = '';
+            if ( $material->stock_current > $material->stock_max ){
+                $priority = 'Completo';
+            } else if ( $material->stock_current == $material->stock_max ){
+                $priority = 'Aceptable';
+            } else if ( $material->stock_current > $material->stock_min && $material->stock_current < $material->stock_max ){
+                $priority = 'Aceptable';
+            } else if ( $material->stock_current == $material->stock_min ){
+                $priority = 'Por agotarse';
+            } else if ( $material->stock_current < $material->stock_min || $material->stock_current == 0 ){
+                $priority = 'Agotado';
+            }
+
+            $rotacion = "";
+            if ( $material->rotation == "a" )
+            {
+                $rotacion = '<span class="badge bg-success text-md">ALTA</span>';
+            } elseif ( $material->rotation == "m" ) {
+                $rotacion = '<span class="badge bg-warning text-md">MEDIA</span>';
+            } else {
+                $rotacion = '<span class="badge bg-danger text-md">BAJA</span>';
+            }
+
+            array_push($array, [
+                "id" => $material->id,
+                "codigo" => $material->code,
+                "descripcion" => $material->full_name,
+                "medida" => $material->measure,
+                "unidad_medida" => ($material->unitMeasure == null) ? '':$material->unitMeasure->name,
+                "stock_max" => $material->stock_max,
+                "stock_min" => $material->stock_min,
+                "stock_actual" => $material->stock_current,
+                "prioridad" => $priority,
+                "precio_unitario" => $material->unit_price,
+                "categoria" => ($material->category == null) ? '': $material->category->name,
+                "sub_categoria" => ($material->subcategory == null) ? '': $material->subcategory->name,
+                "tipo" => ($material->materialType == null) ? '': $material->materialType->name,
+                "sub_tipo" => ($material->subType == null) ? '': $material->subType->name,
+                "cedula" => ($material->warrant == null) ? '':$material->warrant->name,
+                "calidad" => ($material->quality == null) ? '': $material->quality->name,
+                "marca" => ($material->brand == null) ? '': $material->brand->name,
+                "modelo" => ($material->exampler == null) ? '': $material->exampler->name,
+                "retaceria" => ($material->typeScrap == null) ? '':$material->typeScrap->name,
+                "image" => ($material->image == null || $material->image == "" ) ? 'no_image.png':$material->image,
+                "rotation" => $rotacion,
+                "update_price" => $material->state_update_price
+            ]);
+        }
+
+        $pagination = [
+            'currentPage' => (int)$pageNumber,
+            'totalPages' => (int)$totalPages,
+            'startRecord' => $startRecord,
+            'endRecord' => $endRecord,
+            'totalRecords' => $totalFilteredRecords,
+            'totalFilteredRecords' => $totalFilteredRecords
+        ];
+
+        return ['data' => $array, 'pagination' => $pagination];
+    }
+
+    public function materialSeparatePack()
+    {
+        $user = Auth::user();
+        $permissions = $user->getPermissionsViaRoles()->pluck('name')->toArray();
+
+        $arrayCategories = Category::where('id', '<>', 8)->select('id', 'name')->get()->toArray();
+
+        $arrayCedulas = Warrant::select('id', 'name')->get()->toArray();
+
+        $arrayCalidades = Quality::select('id', 'name')->get()->toArray();
+
+        $arrayMarcas = Brand::select('id', 'name')->get()->toArray();
+
+        $arrayRetacerias = Typescrap::select('id', 'name')->get()->toArray();
+
+        $arrayRotations = [
+            ["value" => "a", "display" => "ALTA"],
+            ["value" => "m", "display" => "MEDIA"],
+            ["value" => "b", "display" => "BAJA"]
+        ];
+
+        return view('material.separatePack', compact( 'permissions', 'arrayCategories', 'arrayCedulas', 'arrayCalidades', 'arrayMarcas', 'arrayRetacerias', 'arrayRotations'));
+
+    }
+
+    public function storeSeparatePack(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $material_id = $request->get('material_id');
+            $quantityUnpack = $request->get('packs_separate');
+
+            $material = Material::find($material_id);
+
+            if ( isset($material) )
+            {
+                $material->stock_unPack = $material->stock_unPack + ($quantityUnpack*$material->quantityPack);
+                $material->stock_current = $material->stock_current - $quantityUnpack;
+                $material->save();
+            }
+
+            DB::commit();
+
+        } catch ( \Throwable $e ) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+        return response()->json(['message' => 'Separación de paquetes con éxito.'], 200);
+
+    }
+
+
 }
