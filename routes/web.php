@@ -2666,6 +2666,21 @@ Route::middleware('auth')->group(function (){
             ->middleware('permission:destroy_category')*/;
         Route::get('/get/materials/combo/{combo}', 'ComboController@getDataMaterialsCombo');
 
+        Route::get('/ver/caja/{type}', 'CashRegisterController@indexCashRegister')
+            ->name('index.cashRegister');
+        Route::post('open/cashRegister', 'CashRegisterController@openCashRegister')
+            ->name('open.cashRegister')/*
+            ->middleware('permission:destroy_category')*/;
+        Route::post('close/cashRegister', 'CashRegisterController@closeCashRegister')
+            ->name('close.cashRegister')/*
+            ->middleware('permission:destroy_category')*/;
+        Route::post('income/cashRegister', 'CashRegisterController@incomeCashRegister')
+            ->name('income.cashRegister')/*
+            ->middleware('permission:destroy_category')*/;
+        Route::post('expense/cashRegister', 'CashRegisterController@expenseCashRegister')
+            ->name('expense.cashRegister')/*
+            ->middleware('permission:destroy_category')*/;
+        Route::get('/get/data/movements/V2/{numberPage}', 'CashRegisterController@getDataMovements');
 
     });
 });
