@@ -583,9 +583,19 @@
                     </div>
 
                     <div class="form-group row">
-                        <div class="col-md-6 offset-3">
+                        <div class="col-md-6 ">
                             <label for="vuelto">Vuelto</label>
                             <input type="number" min="0" class="form-control" id="vuelto" readonly>
+                        </div>
+                        <div class="col-md-6 ">
+                            <label for="vuelto">Caja</label>
+                            <select id="type_caja" class="form-control select2" name="type_caja" data-states style="width: 100%;">
+                                <option></option>
+                                <option value="efectivo" selected>Efectivo</option>
+                                <option value="yape">Yape</option>
+                                <option value="plin">Plin</option>
+                                <option value="bancario">Bancario</option>
+                            </select>
                         </div>
                     </div>
 
@@ -770,6 +780,11 @@
             placeholder: "Seleccione",
             allowClear: true
         });
+        $('#type_caja').select2({
+            placeholder: "Seleccione",
+            allowClear: true
+        });
+
 
     </script>
     <script src="{{ asset('js/puntoVenta/index.js') }}?v={{ time() }}"></script>

@@ -97,6 +97,7 @@ let $fin_total_gravada = 0;
 let $fin_total_descuentos = 0;
 let $fin_total_importe = 0;
 let $fin_vuelto = 0;
+let $type_vuelto;
 
 let $modeEdit = 1;
 let $sale_id = null;
@@ -353,6 +354,7 @@ function guardarVenta() {
     $("#btn-pay").attr("disabled", true);
 
     $fin_vuelto = $("#vuelto").val();
+    $type_vuelto = $("#type_caja").val();
 
     if ( $items.length == 0 )
     {
@@ -390,6 +392,7 @@ function guardarVenta() {
     form.append('total_descuentos', $fin_total_descuentos);
     form.append('total_importe', $fin_total_importe);
     form.append('total_vuelto', $fin_vuelto);
+    form.append('type_vuelto', $type_vuelto);
     form.append('tipo_pago', tipo_pago);
 
     $.ajax({

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Audit;
+use App\CashMovement;
+use App\CashRegister;
 use App\Category;
 use App\Material;
 use App\MaterialDiscountQuantity;
@@ -183,7 +185,78 @@ class PuntoVentaController extends Controller
                 $material->stock_current = $material->stock_current - $items[$i]->productQuantity;
                 $material->save();
             }
-            
+
+            // Agregar movimientos a la caja
+            $paymentType = $request->get('tipo_pago');
+            $vuelto = $request->get('total_vuelto');
+            $typeVuelto = $request->get('type_vuelto');
+
+            // Mapear tipo de pago a los nombres de las cajas
+            $paymentTypeMap = [
+                1 => 'yape',
+                2 => 'plin',
+                3 => 'bancario',
+                4 => 'efectivo'
+            ];
+
+            // Obtener la caja del tipo de pago
+            $cashRegister = CashRegister::where('type', $paymentTypeMap[$paymentType])
+                ->where('user_id', Auth::user()->id)
+                ->where('status', 1) // Caja abierta
+                ->latest()
+                ->first();
+
+            if (!isset($cashRegister)) {
+                return response()->json(['message' => 'No hay caja abierta para este tipo de pago.'], 422);
+            }
+
+            // Crear el movimiento de ingreso (venta)
+            CashMovement::create([
+                'cash_register_id' => $cashRegister->id,
+                'type' => 'sale', // Tipo de movimiento: venta
+                'amount' => (float)$request->get('total_importe')+(float)$request->get('total_vuelto'),
+                'description' => 'Venta registrada con tipo de pago: ' . $paymentTypeMap[$paymentType],
+            ]);
+
+            // Actualizar el saldo actual y el total de ventas en la caja
+            $cashRegister->current_balance += (float)$request->get('total_importe')+(float)$request->get('total_vuelto');
+            $cashRegister->total_sales += (float)$request->get('total_importe')+(float)$request->get('total_vuelto');
+            $cashRegister->save();
+
+            // Registrar el vuelto como egreso si el tipo de pago es efectivo y hay vuelto
+            if ($vuelto && $paymentType == 4) {
+                // Mapear el type_vuelto (la caja desde donde se dará el vuelto)
+                $typeVueltoMap = [
+                    'efectivo' => 'efectivo',
+                    'yape' => 'yape',
+                    'plin' => 'plin',
+                    'bancario' => 'bancario'
+                ];
+
+                // Obtener la caja para el vuelto
+                $vueltoCashRegister = CashRegister::where('type', $typeVueltoMap[$typeVuelto])
+                    ->where('user_id', Auth::user()->id)
+                    ->where('status', 1) // Caja abierta
+                    ->latest()
+                    ->first();
+
+                if (!isset($vueltoCashRegister)) {
+                    return response()->json(['message' => 'No hay caja abierta para dar el vuelto.'], 422);
+                }
+
+                // Crear el movimiento de egreso (vuelto)
+                CashMovement::create([
+                    'cash_register_id' => $vueltoCashRegister->id,
+                    'type' => 'expense', // Tipo de movimiento: egreso
+                    'amount' => $vuelto,
+                    'description' => 'Vuelto entregado de la venta',
+                ]);
+
+                // Actualizar el saldo de la caja del vuelto
+                $vueltoCashRegister->current_balance -= $vuelto;
+                $vueltoCashRegister->total_expenses += $vuelto;
+                $vueltoCashRegister->save();
+            }
 
             // Crear notificacion
             $notification = Notification::create([

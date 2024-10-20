@@ -652,7 +652,7 @@ function renderDataTable(data) {
     var trElement = clone.querySelector('tr');
     if (trElement) {
         // Aplicar la clase CSS dependiendo del tipo de movimiento
-        if (data.type === 'Ingreso') {
+        if (data.type === 'Ingreso' || data.type === 'Venta') {
             trElement.classList.add('income-row'); // Agregar clase de fondo verde
         } else if (data.type === 'Egreso') {
             trElement.classList.add('expense-row'); // Agregar clase de fondo rojo claro
