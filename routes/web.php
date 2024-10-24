@@ -2682,6 +2682,16 @@ Route::middleware('auth')->group(function (){
             ->middleware('permission:destroy_category')*/;
         Route::get('/get/data/movements/V2/{numberPage}', 'CashRegisterController@getDataMovements');
 
+        // TODO: Promotions Seasonal
+        Route::get('/get/data/promotions/seasonal/V2/{numberPage}', 'SeasonalPromotionController@getDataPromotions');
+        Route::get('/listado/promocion/temporada', 'SeasonalPromotionController@index')
+            ->name('promotion.seasonal.index');
+        Route::get('/crear/promocion/temporada', 'SeasonalPromotionController@create')
+            ->name('promotion.seasonal.create');
+        Route::post('/store/promotion/seasonal/', 'SeasonalPromotionController@store')
+            ->name('promotion.seasonal.store');
+        Route::post('/destroy/promotion/seasonal/', 'SeasonalPromotionController@destroy')
+            ->name('promotion.seasonal.destroy');
     });
 });
 

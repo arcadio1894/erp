@@ -1,23 +1,19 @@
 @extends('layouts.appAdmin2')
 
-@section('openConfigRH')
+@section('openPromotions')
     menu-open
 @endsection
 
-@section('activeConfigRH')
+@section('activePromotions')
     active
 @endsection
 
-@section('openCivilStatus')
-    menu-open
-@endsection
-
-@section('activeCreateCivilStatus')
+@section('activePromotionsSeasonal')
     active
 @endsection
 
 @section('title')
-    Estados Civiles
+    Crear promociones por temporada
 @endsection
 
 @section('styles-plugins')
@@ -38,12 +34,12 @@
 @endsection
 
 @section('page-header')
-    <h1 class="page-title">Estado civil</h1>
+    <h1 class="page-title">Crear promociones</h1>
 @endsection
 
 @section('page-title')
-    <h5 class="card-title">Crear estado civil</h5>
-    <a href="{{ route('civilStatuses.index') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-arrow-left font-20"></i> Listado de Estados Civiles</a>
+    <h5 class="card-title">Crear promoción</h5>
+    <a href="{{ route('promotion.seasonal.index') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-arrow-left font-20"></i> Listado de Promociones por temporada</a>
 @endsection
 
 @section('page-breadcrumb')
@@ -52,23 +48,58 @@
             <a href="{{ route('dashboard.principal') }}"><i class="fa fa-home"></i> Dashboard</a>
         </li>
         <li class="breadcrumb-item">
-            <a href="{{ route('civilStatuses.index') }}"><i class="fa fa-archive"></i> Estados Civiles</a>
+            <a href="{{ route('promotion.seasonal.index') }}"><i class="fa fa-archive"></i> Promociones por temporada</a>
         </li>
         <li class="breadcrumb-item"><i class="fa fa-plus-circle"></i> Nuevo</li>
     </ol>
 @endsection
 
 @section('content')
-    <form id="formCreate" class="form-horizontal" data-url="{{ route('civilStatuses.store') }}" enctype="multipart/form-data">
+    <form id="formCreate" class="form-horizontal" data-url="{{ route('promotion.seasonal.store') }}" enctype="multipart/form-data">
         @csrf
-        <div class="form-group row">
+        <div class="row">
             <div class="col-md-6">
-                <label for="description">Descripción <span class="right badge badge-danger">(*)</span></label>
-                <div class="input-group">
-                    <div class="input-group-prepend">
-                        <span class="input-group-text"><i class="far fa-keyboard"></i></span>
+                <div class="form-group">
+                    <label for="description" class="col-12 col-form-label">Descripción <span class="right badge badge-danger">(*)</span></label>
+                    <input type="text" class="form-control" name="description" id="description">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="category_id" class="col-12 col-form-label">Seleccione Categoría <span class="right badge badge-danger">(*)</span></label>
+                    <div class="col-sm-12">
+                        <select id="category_id" name="category_id" class="form-control select2" style="width: 100%;">
+                            <option></option>
+                            @foreach( $categories as $category )
+                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
-                    <input id="description" type="text" class="form-control" name="description" >
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="start_date">Fecha de Inicio: <span class="right badge badge-danger">(*)</span></label>
+                    <input type="date" id="start_date" name="start_date" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="end_date">Fecha de Finalización: <span class="right badge badge-danger">(*)</span></label>
+                    <input type="date" id="end_date" name="end_date" class="form-control" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="discount_percentage">Porcentaje de Descuento (%): <span class="right badge badge-danger">(*)</span></label>
+                    <input type="number" id="discount_percentage" step="0.01" name="discount_percentage" class="form-control" required min="0" max="100">
                 </div>
             </div>
         </div>
@@ -95,5 +126,14 @@
 @endsection
 
 @section('scripts')
+    <script>
+        $(function () {
+            $('#category_id').select2({
+                placeholder: "Seleccione",
+                allowClear: true
+            });
+
+        })
+    </script>
     <script src="{{ asset('js/civilStatus/create.js') }}"></script>
 @endsection

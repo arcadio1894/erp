@@ -15,10 +15,12 @@ class CreateSeasonalPromotionsTable extends Migration
     {
         Schema::create('seasonal_promotions', function (Blueprint $table) {
             $table->id();
+            $table->mediumText('description')->nullable();
             $table->foreignId('category_id')->nullable()->constrained('categories');  // Tipo de producto o categoría
-            $table->date('start_date');  // Fecha de inicio de la promoción
-            $table->date('end_date');    // Fecha de finalización
-            $table->decimal('discount_percentage', 6, 2);  // Porcentaje de descuento
+            $table->date('start_date')->nullable();  // Fecha de inicio de la promoción
+            $table->date('end_date')->nullable();    // Fecha de finalización
+            $table->decimal('discount_percentage', 6, 2)->nullable();  // Porcentaje de descuento
+            $table->boolean('enable')->nullable()->default(1);
             $table->timestamps();
         });
     }

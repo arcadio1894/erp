@@ -289,6 +289,45 @@
                         </ul>
                     </li>
 
+                    <li class="nav-header">PROMOCIONES</li>
+                    <li class="nav-item has-treeview @yield('openPromotions')">
+
+                        <a href="#" class="nav-link @yield('activePromotions')">
+                            <i class="nav-icon fas fa-eye-slash"></i>
+                            <p>
+                                Promociones
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            {{--@can('list_permission')--}}
+                                <li class="nav-item">
+                                    <a href="{{ route('promotion.seasonal.index') }}" class="nav-link @yield('activePromotionsSeasonal')">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Por Temporada</p>
+                                    </a>
+                                </li>
+                            {{--@endcan
+                            @can('list_role')--}}
+                                <li class="nav-item">
+                                    <a href="{{ route('index.combos') }}" class="nav-link @yield('activePromotionsCombo')">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Por combos</p>
+                                    </a>
+                                </li>
+                            {{--@endcan
+                            @can('list_user')--}}
+                                <li class="nav-item">
+                                    <a href="#" class="nav-link @yield('activePromotionsDiscount')">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Por descuento</p>
+                                    </a>
+                                </li>
+
+                            {{--@endcan--}}
+                        </ul>
+                    </li>
+
                     @can('access_permission')
                     <li class="nav-header">ADMINISTRADOR</li>
                     <li class="nav-item has-treeview @yield('openAccess')">
