@@ -47,7 +47,8 @@ class Material extends Model
         'list_price',
         'isPack',
         'quantityPack',
-        'stock_unPack'
+        'stock_unPack',
+        'percentage_price'
     ];
 
     public function setNameProductAttribute($value)

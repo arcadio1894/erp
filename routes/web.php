@@ -2657,7 +2657,7 @@ Route::middleware('auth')->group(function (){
         Route::get('/generar/combos/materiales', 'ComboController@generateComboMaterials')
             ->name('material.generate.combo');
         Route::post('/store/generate/pack', 'ComboController@storeGeneratePack')
-            ->name('save.separate.pack');
+            ->name('save.generate.pack');
         Route::get('/get/data/combos/V2/{numberPage}', 'ComboController@getDataCombos');
         Route::get('/listado/combos/materiales', 'ComboController@index')
             ->name('index.combos');
@@ -2692,6 +2692,14 @@ Route::middleware('auth')->group(function (){
             ->name('promotion.seasonal.store');
         Route::post('/destroy/promotion/seasonal/', 'SeasonalPromotionController@destroy')
             ->name('promotion.seasonal.destroy');
+
+        Route::get('/get/price/list/material/{material_id}', 'MaterialController@getPriceListMaterial');
+        Route::get('/get/price/percentage/material/{material_id}', 'MaterialController@getPricePercentageMaterial');
+
+        Route::post('/set/price/directo/material', 'MaterialController@setPriceDirectoMaterial')
+            ->name('material.set.price.directo');
+        Route::post('/set/price/porcentaje/material', 'MaterialController@setPricePorcentajeMaterial')
+            ->name('material.set.price.porcentaje');
     });
 });
 

@@ -142,6 +142,18 @@ $(document).ready(function () {
 
     });
 
+    $(document).on('click', '[data-precioDirecto]', openModalPrecioDirecto);
+    $(document).on('click', '[data-precioPorcentaje]', openModalPrecioPorcentaje);
+
+    $modalPrecioDirecto = $('#modalPrecioDirecto');
+    $modalPrecioPercentage = $('#modalPrecioPercentage');
+
+    $formPrecioDirecto = $('#formPrecioDirecto');
+    $formPrecioPorcentaje = $('#formPrecioPorcentaje');
+
+    $('#btn-submit_priceList').on('click', setPriceList);
+    $('#btn-submit_pricePercentage').on('click', setPricePercentage);
+
 });
 
 var $formDelete;
@@ -151,6 +163,279 @@ var $selectCategory;
 var $selectSubCategory;
 var $selectType;
 var $selectSubtype;
+
+var $modalPrecioDirecto;
+var $modalPrecioPercentage;
+var $formPrecioDirecto;
+var $formPrecioPorcentaje;
+
+function setPricePercentage() {
+    event.preventDefault();
+    $("#btn-submit_pricePercentage").attr("disabled", true);
+    // Obtener la URL
+    var createUrl = $formPrecioPorcentaje.data('url');
+    var form = new FormData($('#formPrecioPorcentaje')[0]);
+    $.ajax({
+        url: createUrl,
+        method: 'POST',
+        data: form,
+        processData:false,
+        contentType:false,
+        success: function (data) {
+            console.log(data);
+            toastr.success(data.message, 'Éxito',
+                {
+                    "closeButton": true,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": true,
+                    "positionClass": "toast-top-right",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "2000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                });
+            setTimeout( function () {
+                $("#btn-submit_pricePercentage").attr("disabled", false);
+                $modalPrecioPercentage.modal('hide');
+                var activeColumns = getActiveColumns();
+                console.log(activeColumns);
+                getDataMaterials(1, activeColumns);
+            }, 2000 )
+        },
+        error: function (data) {
+            for ( var property in data.responseJSON.errors ) {
+                toastr.error(data.responseJSON.errors[property], 'Error',
+                    {
+                        "closeButton": true,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": true,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "4000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    });
+            }
+            $("#btn-submit_pricePercentage").attr("disabled", false);
+
+        },
+    });
+}
+
+function setPriceList() {
+    event.preventDefault();
+    $("#btn-submit_priceList").attr("disabled", true);
+    // Obtener la URL
+    var createUrl = $formPrecioDirecto.data('url');
+    var form = new FormData($('#formPrecioDirecto')[0]);
+    $.ajax({
+        url: createUrl,
+        method: 'POST',
+        data: form,
+        processData:false,
+        contentType:false,
+        success: function (data) {
+            console.log(data);
+            toastr.success(data.message, 'Éxito',
+                {
+                    "closeButton": true,
+                    "debug": false,
+                    "newestOnTop": false,
+                    "progressBar": true,
+                    "positionClass": "toast-top-right",
+                    "preventDuplicates": false,
+                    "onclick": null,
+                    "showDuration": "300",
+                    "hideDuration": "1000",
+                    "timeOut": "2000",
+                    "extendedTimeOut": "1000",
+                    "showEasing": "swing",
+                    "hideEasing": "linear",
+                    "showMethod": "fadeIn",
+                    "hideMethod": "fadeOut"
+                });
+            setTimeout( function () {
+                $("#btn-submit_priceList").attr("disabled", false);
+                $modalPrecioDirecto.modal('hide');
+                var activeColumns = getActiveColumns();
+                console.log(activeColumns);
+                getDataMaterials(1, activeColumns);
+            }, 2000 )
+        },
+        error: function (data) {
+            for ( var property in data.responseJSON.errors ) {
+                toastr.error(data.responseJSON.errors[property], 'Error',
+                    {
+                        "closeButton": true,
+                        "debug": false,
+                        "newestOnTop": false,
+                        "progressBar": true,
+                        "positionClass": "toast-top-right",
+                        "preventDuplicates": false,
+                        "onclick": null,
+                        "showDuration": "300",
+                        "hideDuration": "1000",
+                        "timeOut": "4000",
+                        "extendedTimeOut": "1000",
+                        "showEasing": "swing",
+                        "hideEasing": "linear",
+                        "showMethod": "fadeIn",
+                        "hideMethod": "fadeOut"
+                    });
+            }
+            $("#btn-submit_priceList").attr("disabled", false);
+
+        },
+    });
+}
+
+function openModalPrecioDirecto() {
+    var material_id = $(this).data('material');
+
+    var priceList = 0;
+
+    $.get('/dashboard/get/price/list/material/'+material_id, function(data) {
+        priceList = data.priceList;
+        $modalPrecioDirecto.find('[id=material_priceList]').val(priceList);
+
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        // Función de error, se ejecuta cuando la solicitud GET falla
+        console.error(textStatus, errorThrown);
+        if (jqXHR.responseJSON.message && !jqXHR.responseJSON.errors) {
+            toastr.error(jqXHR.responseJSON.message, 'Error', {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "2000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            });
+        }
+        for (var property in jqXHR.responseJSON.errors) {
+            toastr.error(jqXHR.responseJSON.errors[property], 'Error', {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "2000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            });
+        }
+    }, 'json')
+        .done(function() {
+            // Configuración de encabezados
+            var headers = {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            };
+
+            $.ajaxSetup({
+                headers: headers
+            });
+        });
+
+    $modalPrecioDirecto.find('[id=material_id]').val(material_id);
+
+    $modalPrecioDirecto.modal('show');
+}
+
+function openModalPrecioPorcentaje() {
+    var material_id = $(this).data('material');
+
+    var pricePercentage = 0;
+
+    $.get('/dashboard/get/price/percentage/material/'+material_id, function(data) {
+        pricePercentage = data.pricePercentage;
+        $modalPrecioPercentage.find('[id=material_pricePercentage]').val(pricePercentage);
+
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        // Función de error, se ejecuta cuando la solicitud GET falla
+        console.error(textStatus, errorThrown);
+        if (jqXHR.responseJSON.message && !jqXHR.responseJSON.errors) {
+            toastr.error(jqXHR.responseJSON.message, 'Error', {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "2000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            });
+        }
+        for (var property in jqXHR.responseJSON.errors) {
+            toastr.error(jqXHR.responseJSON.errors[property], 'Error', {
+                "closeButton": true,
+                "debug": false,
+                "newestOnTop": false,
+                "progressBar": true,
+                "positionClass": "toast-top-right",
+                "preventDuplicates": false,
+                "onclick": null,
+                "showDuration": "300",
+                "hideDuration": "1000",
+                "timeOut": "2000",
+                "extendedTimeOut": "1000",
+                "showEasing": "swing",
+                "hideEasing": "linear",
+                "showMethod": "fadeIn",
+                "hideMethod": "fadeOut"
+            });
+        }
+    }, 'json')
+        .done(function() {
+            // Configuración de encabezados
+            var headers = {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+            };
+
+            $.ajaxSetup({
+                headers: headers
+            });
+        });
+
+    $modalPrecioPercentage.find('[id=material_id]').val(material_id);
+
+    $modalPrecioPercentage.modal('show');
+}
 
 // Función para obtener los nombres clave de los checkboxes activos
 function getActiveColumns() {
@@ -635,6 +920,13 @@ function renderDataTable(data, activeColumns) {
             element.style.display = 'none';
         }
     }
+
+
+    clone.querySelector("[data-precioPorcentaje]").setAttribute("data-material", data.id);
+    clone.querySelector("[data-precioPorcentaje]").setAttribute("data-description", data.descripcion);
+    clone.querySelector("[data-precioDirecto]").setAttribute("data-material", data.id);
+    clone.querySelector("[data-precioDirecto]").setAttribute("data-description", data.descripcion);
+
 
     let url2 = document.location.origin + '/dashboard/view/material/items/' + data.id;
     clone.querySelector("[data-ver_items]").setAttribute("href", url2);

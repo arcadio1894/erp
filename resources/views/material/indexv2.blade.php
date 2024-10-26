@@ -472,6 +472,8 @@
                 <a data-editar_material href="{{--'+document.location.origin+ '/dashboard/editar/material/'+item.id+'--}}" class="btn btn-outline-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Editar"><i class="fa fa-pen"></i> </a>
                 <button data-deshabilitar data-delete="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" data-measure="{{--'+item.measure+'--}}" class="btn btn-outline-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Deshabilitar"><i class="fas fa-bell-slash"></i> </button>
                 <a data-ver_items href="{{--'+document.location.origin+ '/dashboard/view/material/items/'+item.id+'--}}" class="btn btn-outline-info btn-sm" data-toggle="tooltip" data-placement="top" title="Ver items"><i class="fa fa-eye"></i> </a>
+                <button data-precioPorcentaje data-material="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" class="btn btn-outline-primary btn-sm" data-toggle="tooltip" data-placement="top" title="Precio Lista Porcentaje"><i class="fas fa-percent"></i> </button>
+                <button data-precioDirecto data-material="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" class="btn btn-outline-success btn-sm" data-toggle="tooltip" data-placement="top" title="Precio Lista Directo"><i class="fas fa-tag"></i> </button>
 
             </td>
         </tr>
@@ -482,6 +484,60 @@
             <td colspan="20" align="center">No se ha encontrado ningún dato</td>
         </tr>
     </template>
+
+    <div id="modalPrecioDirecto" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Confirmar precio directo</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <form id="formPrecioDirecto" data-url="{{ route('material.set.price.directo') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" id="material_id" name="material_id">
+                        <p>¿Está seguro de colocar el precio directamente?</p>
+                        <p id="descriptionDelete"></p>
+                        <div class="form-group">
+                            <label for="material_priceList">Precio Directo: <span class="right badge badge-danger">(*)</span></label>
+                            <input type="number" id="material_priceList" step="0.01" name="material_priceList" class="form-control" required min="0">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" id="btn-submit_priceList" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalPrecioPercentage" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Confirmar precio porcentaje</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <form id="formPrecioPorcentaje" data-url="{{ route('material.set.price.porcentaje') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" id="material_id" name="material_id">
+                        <p>¿Está seguro de colocar el precio por porcentaje?</p>
+                        <p id="descriptionDelete"></p>
+                        <div class="form-group">
+                            <label for="material_pricePercentage">Precio Porcentaje (%): <span class="right badge badge-danger">(*)</span></label>
+                            <input type="number" id="material_pricePercentage" step="0.01" name="material_pricePercentage" class="form-control" required min="0">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" id="btn-submit_pricePercentage" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     @can('enable_material')
         <div id="modalDelete" class="modal fade" tabindex="-1">

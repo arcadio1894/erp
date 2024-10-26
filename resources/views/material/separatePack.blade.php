@@ -485,7 +485,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h4 class="modal-title">Confirmar inhabilitación</h4>
+                        <h4 class="modal-title">Confirmar separación</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                     </div>
                     <form id="formSeparate" data-url="{{ route('save.separate.pack') }}">
@@ -506,6 +506,19 @@
                                     <div class="form-group">
                                         <label for="stock_max">Cantidad a separar <span class="right badge badge-danger">(*)</span></label>
                                         <input type="number" id="packs_separate" name="packs_separate" class="form-control" placeholder="0.00" min="0" value="0" step="1">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="material">Seleccione el material <span class="right badge badge-danger">(*)</span></label>
+                                        <select id="material" name="material" class="form-control select2" style="width: 100%;">
+                                            <option></option>
+                                            @for( $i=0; $i<count($arrayMaterials); $i++ )
+                                                <option value="{{ $arrayMaterials[$i]['id'] }}">{{ $arrayMaterials[$i]['full_name'] }}</option>
+                                            @endfor
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -602,6 +615,12 @@
                 placeholder: "Seleccione Rotación",
                 allowClear: true
             });
+
+            $('#material').select2({
+                placeholder: "Seleccione material",
+                allowClear: true
+            });
+
 
         })
     </script>

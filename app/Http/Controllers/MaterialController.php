@@ -1089,7 +1089,21 @@ class MaterialController extends Controller
             ["value" => "b", "display" => "BAJA"]
         ];
 
-        return view('material.separatePack', compact( 'permissions', 'arrayCategories', 'arrayCedulas', 'arrayCalidades', 'arrayMarcas', 'arrayRetacerias', 'arrayRotations'));
+        $materials = Material::where('isPack', 0)
+            ->where('enable_status', 1)->get();
+
+        //dd($array);
+
+        $arrayMaterials = [];
+        foreach ( $materials as $material )
+        {
+            array_push($arrayMaterials, [
+                'id'=> $material->id,
+                'full_name' => $material->full_name,
+            ]);
+        }
+
+        return view('material.separatePack', compact( 'permissions', 'arrayCategories', 'arrayCedulas', 'arrayCalidades', 'arrayMarcas', 'arrayRetacerias', 'arrayRotations', 'arrayMaterials'));
 
     }
 
@@ -1099,12 +1113,17 @@ class MaterialController extends Controller
         try {
             $material_id = $request->get('material_id');
             $quantityUnpack = $request->get('packs_separate');
+            $materialUnpack = $request->get('material');
 
             $material = Material::find($material_id);
 
             if ( isset($material) )
             {
-                $material->stock_unPack = $material->stock_unPack + ($quantityUnpack*$material->quantityPack);
+                $materialToUnpack = Material::find($materialUnpack);
+                //$materialToUnpack->stock_unPack = $material->stock_unPack + ($quantityUnpack*$material->quantityPack);
+                $materialToUnpack->stock_current = $materialToUnpack->stock_current + ($quantityUnpack*$material->quantityPack);
+                $materialToUnpack->save();
+
                 $material->stock_current = $material->stock_current - $quantityUnpack;
                 $material->save();
             }
@@ -1119,5 +1138,78 @@ class MaterialController extends Controller
 
     }
 
+    public function getPriceListMaterial($material)
+    {
+        $material = Material::find($material);
+
+        if ( !isset($material) )
+        {
+            return response()->json(['message' => "No existe el material"], 422);
+        } else {
+            return response()->json(['priceList' => ($material->list_price == null) ? 0 : $material->list_price], 200);
+        }
+    }
+
+    public function getPricePercentageMaterial($material)
+    {
+        $material = Material::find($material);
+
+        if ( !isset($material) )
+        {
+            return response()->json(['message' => "No existe el material"], 422);
+        } else {
+            return response()->json(['pricePercentage' => ($material->percentage_price == null) ? 0 : $material->percentage_price], 200);
+        }
+    }
+
+    public function setPriceDirectoMaterial(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $material_id = $request->get('material_id');
+            $price = $request->get('material_priceList');
+
+            $material = Material::find($material_id);
+
+            if ( isset($material) )
+            {
+                $material->percentage_price = null;
+                $material->list_price = $price;
+                $material->save();
+            }
+
+            DB::commit();
+
+        } catch ( \Throwable $e ) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+        return response()->json(['message' => 'Cambio de precio de lista con éxito.'], 200);
+    }
+
+    public function setPricePorcentajeMaterial(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $material_id = $request->get('material_id');
+            $price = (float)($request->get('material_pricePercentage'));
+
+            $material = Material::find($material_id);
+
+            if ( isset($material) )
+            {
+                $material->percentage_price = ($material->unit_price*(1+($price/100)));
+                $material->list_price = null;
+                $material->save();
+            }
+
+            DB::commit();
+
+        } catch ( \Throwable $e ) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+        return response()->json(['message' => 'Cambio de precio de porcentaje con éxito.'], 200);
+    }
 
 }
