@@ -70,7 +70,7 @@ class PuntoVentaController extends Controller
                 "id" => $product->id,
                 "full_name" => $product->full_name,
                 "category" => ($product->category_id == null) ? '': $product->category->description,
-                "price" => ( $product->percentage_price == null || $product->percentage_price == 0) ? $product->list_price: $product->percentage_price,
+                "price" => $product->list_price,
                 "image" => $product->image,
                 "unit" => $product->unitMeasure->description,
                 "tax" => ($product->type_tax_id == null) ? 18 : $product->typeTax->tax,

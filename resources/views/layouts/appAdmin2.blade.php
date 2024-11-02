@@ -288,6 +288,24 @@
                             </li>
                         </ul>
                     </li>
+                    <li class="nav-item has-treeview @yield('openGanancias')">
+                        <a href="#" class="nav-link @yield('activeGanancias')">
+                            <i class="nav-icon fas fa-truck-loading"></i>
+                            <p>
+                                GANANCIA DIARIA
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+
+                            <li class="nav-item">
+                                <a href="{{ route('ganancia.index') }}" class="nav-link @yield('activeGananciaDiaria')">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Ganancia Diaria</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
 
                     <li class="nav-header">PROMOCIONES</li>
                     <li class="nav-item has-treeview @yield('openPromotions')">

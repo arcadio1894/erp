@@ -2700,6 +2700,14 @@ Route::middleware('auth')->group(function (){
             ->name('material.set.price.directo');
         Route::post('/set/price/porcentaje/material', 'MaterialController@setPricePorcentajeMaterial')
             ->name('material.set.price.porcentaje');
+
+        // TODO: Ganancia Diaria
+        Route::get('/get/data/ganancias/V2/{numberPage}', 'GananciaDiariaController@getDataGanancias');
+        Route::get('/get/data/ganancia/details/V2/{numberPage}', 'GananciaDiariaController@getDataGananciaDetails');
+        Route::get('/listado/ganancias/diarias', 'GananciaDiariaController@index')
+            ->name('ganancia.index');
+        Route::get('/listado/ganancia/detalles/{id}', 'GananciaDiariaController@indexDetail')
+            ->name('ganancia.detail.index');
     });
 });
 

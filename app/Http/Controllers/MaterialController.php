@@ -93,7 +93,7 @@ class MaterialController extends Controller
                 'perecible' => $request->get('perecible'),
                 'full_name' => $request->get('name'),
                 'list_price' => (float)($request->get('unit_price')+2),
-                'pack' => $request->has('pack') ? 1 : 0,
+                'isPack' => $request->has('pack') ? 1 : 0,
                 'quantityPack' => $request->has('pack') ? $request->get('inputPack') : 0,
             ]);
 
@@ -211,7 +211,7 @@ class MaterialController extends Controller
             $material->perecible = $request->get('perecible');
             $material->codigo = $request->get('codigo');
             $material->list_price = (float)($request->get('unit_price')+2);
-            $material->pack = $request->has('pack') ? 1 : 0;
+            $material->isPack = $request->has('pack') ? 1 : 0;
             $material->quantityPack = $request->has('pack') ? $request->get('inputPack') : 0;
             $material->save();
 
@@ -1158,7 +1158,7 @@ class MaterialController extends Controller
         {
             return response()->json(['message' => "No existe el material"], 422);
         } else {
-            return response()->json(['pricePercentage' => ($material->percentage_price == null) ? 0 : $material->percentage_price], 200);
+            return response()->json(['pricePercentage' => ($material->percentage_price == null) ? 0 : 1-$material->percentage_price], 200);
         }
     }
 
@@ -1198,8 +1198,8 @@ class MaterialController extends Controller
 
             if ( isset($material) )
             {
-                $material->percentage_price = ($material->unit_price*(1+($price/100)));
-                $material->list_price = null;
+                $material->percentage_price = (float)(1+($price/100));
+                $material->list_price = ($material->unit_price*(1+($price/100)));;
                 $material->save();
             }
 
