@@ -322,15 +322,21 @@ class CashRegisterController extends Controller
 
         $type = strtolower($request->input('type'));
 
-        $cashRegister = CashRegister::where('type', $type)
-            ->where('user_id', Auth::user()->id)->latest()->first();
+        /*$cashRegister = CashRegister::where('type', $type)
+            ->where('user_id', Auth::user()->id)->get();*/
+        $cashRegisterIds = CashRegister::where('type', $type)
+            ->where('user_id', Auth::user()->id)
+            ->pluck('id'); // Devuelve una colección de IDs de CashRegister
 
         $array = [];
         $pagination = [];
 
-        if ( isset($cashRegister) )
+        if ( isset($cashRegisterIds) )
         {
-            $query = CashMovement::where('cash_register_id', $cashRegister->id)->orderBy('id', 'desc');
+            //$query = CashMovement::where('cash_register_id', $cashRegister->id)->orderBy('id', 'desc');
+            $query = CashMovement::whereIn('cash_register_id', $cashRegisterIds)
+                ->orderBy('created_at', 'desc'); // Asegúrate de que haya un campo de fecha para ordenar
+
             $totalFilteredRecords = $query->count();
             $totalPages = ceil($totalFilteredRecords / $perPage);
 
