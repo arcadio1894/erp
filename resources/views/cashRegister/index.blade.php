@@ -147,7 +147,7 @@
                             </div>
                         </div>
                         <h5>Monto inicial</h5>
-                        <input type="number" class="form-control" name="balance_total_open" id="balance_total_open">
+                        <input type="number" readonly class="form-control" name="balance_total_open" id="balance_total_open">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
