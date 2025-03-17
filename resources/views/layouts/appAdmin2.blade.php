@@ -248,6 +248,13 @@
                                     <p>Crear venta</p>
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a href="{{ route('puntoVenta.list') }}" class="nav-link @yield('activeListPuntoVenta')">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Listar ventas</p>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 

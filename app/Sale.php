@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
@@ -37,5 +38,10 @@ class Sale extends Model
     public function details()
     {
         return $this->hasMany('App\SaleDetail');
+    }
+
+    public function getFormattedSaleDateAttribute()
+    {
+        return Carbon::parse($this->date_sale)->isoFormat('DD/MM/YYYY [a las] h:mm A');
     }
 }

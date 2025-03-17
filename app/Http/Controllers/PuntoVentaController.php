@@ -354,4 +354,107 @@ class PuntoVentaController extends Controller
         return $pdf->stream($name);
 
     }
+
+    public function listar() {
+        $registros = Sale::all();
+
+        $arrayYears = $registros->pluck('created_at')->map(function ($date) {
+            return Carbon::parse($date)->format('Y');
+        })->unique()->toArray();
+
+        $arrayYears = array_values($arrayYears);
+
+        return view('puntoVenta.list', compact('arrayYears'));
+    }
+
+    public function getSalesAdmin(Request $request, $pageNumber = 1)
+    {
+        $perPage = 10;
+        $code = $request->input('code');
+        $year = $request->input('year');
+        $startDate = $request->input('startDate');
+        $endDate = $request->input('endDate');
+
+        if ( $startDate == "" || $endDate == "" )
+        {
+            $query = Sale::orderBy('date_sale', 'DESC');
+        } else {
+            $fechaInicio = Carbon::createFromFormat('d/m/Y', $startDate);
+            $fechaFinal = Carbon::createFromFormat('d/m/Y', $endDate);
+
+            $query = Sale::whereDate('date_sale', '>=', $fechaInicio)
+                ->whereDate('date_sale', '<=', $fechaFinal)
+                ->orderBy('date_sale', 'DESC');
+        }
+
+        // Aplicar filtros si se proporcionan
+        if ($code != "") {
+            $query->where('id', 'LIKE', '%'.$code.'%');
+
+        }
+
+        if ($year != "") {
+            $query->whereYear('date_sale', $year);
+
+        }
+
+        $totalFilteredRecords = $query->count();
+        $totalPages = ceil($totalFilteredRecords / $perPage);
+
+        $startRecord = ($pageNumber - 1) * $perPage + 1;
+        $endRecord = min($totalFilteredRecords, $pageNumber * $perPage);
+
+        $sales = $query->skip(($pageNumber - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        $arraySales = [];
+
+        foreach ( $sales as $sale )
+        {
+            array_push($arraySales, [
+                "id" => $sale->id,
+                "code" => "VENTA - ".$sale->id,
+                "date" => ($sale->date_sale != null) ? $sale->formatted_sale_date : "",
+                "currency" => ($sale->currency == 'PEN') ? 'Soles' : 'Dólares',
+                "total" => $sale->importe_total,
+                "tipo_pago" => ($sale->tipo_pago_id == null) ? 'Sin método de pago':$sale->tipoPago->description ,
+            ]);
+        }
+
+        $pagination = [
+            'currentPage' => (int)$pageNumber,
+            'totalPages' => (int)$totalPages,
+            'startRecord' => $startRecord,
+            'endRecord' => $endRecord,
+            'totalRecords' => $totalFilteredRecords,
+            'totalFilteredRecords' => $totalFilteredRecords
+        ];
+
+        return ['data' => $arraySales, 'pagination' => $pagination];
+    }
+
+    public function getOrderDetails($orderId)
+    {
+
+        $sale = Sale::with([
+            'details.material'
+        ])->find($orderId);
+
+        if (!$sale) {
+            return response()->json(['error' => 'Pedido no encontrado'], 404);
+        }
+
+        $details = $sale->details->map(function ($detail) {
+            return [
+                'code' => $detail->material->code,
+                'producto' => $detail->material->full_name,
+                'quantity' => $detail->quantity,
+                'price' => $detail->price,
+                'total' => number_format($detail->total, 2),
+            ];
+        });
+
+        return response()->json(['details' => $details], 200);
+    }
 }

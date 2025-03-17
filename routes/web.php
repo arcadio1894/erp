@@ -2646,6 +2646,11 @@ Route::middleware('auth')->group(function (){
             ->name('puntoVenta.store');
         Route::get('imprimir/documento/venta/{id}', 'PuntoVentaController@printDocumentSale')
             ->name('puntoVenta.print');
+        Route::get('/listado/ventas/', 'PuntoVentaController@listar')
+            ->name('puntoVenta.list');
+        Route::get('/get/data/sales/{page}', 'PuntoVentaController@getSalesAdmin');
+        Route::get('/sales/{orderId}/details', 'PuntoVentaController@getOrderDetails');
+
         //get/data/products
 
         // TODO: Rutas Punto de Venta
@@ -2708,6 +2713,8 @@ Route::middleware('auth')->group(function (){
             ->name('ganancia.index');
         Route::get('/listado/ganancia/detalles/{id}', 'GananciaDiariaController@indexDetail')
             ->name('ganancia.detail.index');
+
+
     });
 });
 
