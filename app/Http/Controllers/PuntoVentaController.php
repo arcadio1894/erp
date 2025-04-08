@@ -209,19 +209,32 @@ class PuntoVentaController extends Controller
             if (!isset($cashRegister)) {
                 return response()->json(['message' => 'No hay caja abierta para este tipo de pago.'], 422);
             }
+            if ( $paymentType != 3 ) {
+                // Crear el movimiento de ingreso (venta)
+                CashMovement::create([
+                    'cash_register_id' => $cashRegister->id,
+                    'type' => 'sale', // Tipo de movimiento: venta
+                    'amount' => (float)$request->get('total_importe')+(float)$request->get('total_vuelto'),
+                    'description' => 'Venta registrada con tipo de pago: ' . $paymentTypeMap[$paymentType],
+                    'sale_id' => $sale->id
+                ]);
 
-            // Crear el movimiento de ingreso (venta)
-            CashMovement::create([
-                'cash_register_id' => $cashRegister->id,
-                'type' => 'sale', // Tipo de movimiento: venta
-                'amount' => (float)$request->get('total_importe')+(float)$request->get('total_vuelto'),
-                'description' => 'Venta registrada con tipo de pago: ' . $paymentTypeMap[$paymentType],
-            ]);
+                // Actualizar el saldo actual y el total de ventas en la caja
+                $cashRegister->current_balance += (float)$request->get('total_importe')+(float)$request->get('total_vuelto');
+                $cashRegister->total_sales += (float)$request->get('total_importe')+(float)$request->get('total_vuelto');
+                $cashRegister->save();
+            } else {
+                // Crear el movimiento de ingreso (venta)
+                CashMovement::create([
+                    'cash_register_id' => $cashRegister->id,
+                    'type' => 'sale', // Tipo de movimiento: venta
+                    'amount' => (float)$request->get('total_importe')+(float)$request->get('total_vuelto'),
+                    'description' => 'Venta registrada con tipo de pago: ' . $paymentTypeMap[$paymentType],
+                    'regularize' => 0,
+                    'sale_id' => $sale->id
+                ]);
+            }
 
-            // Actualizar el saldo actual y el total de ventas en la caja
-            $cashRegister->current_balance += (float)$request->get('total_importe')+(float)$request->get('total_vuelto');
-            $cashRegister->total_sales += (float)$request->get('total_importe')+(float)$request->get('total_vuelto');
-            $cashRegister->save();
 
             // Registrar el vuelto como egreso si el tipo de pago es efectivo y hay vuelto
             if ($vuelto && $paymentType == 4) {
@@ -250,6 +263,7 @@ class PuntoVentaController extends Controller
                     'type' => 'expense', // Tipo de movimiento: egreso
                     'amount' => $vuelto,
                     'description' => 'Vuelto entregado de la venta',
+                    'sale_id' => $sale->id
                 ]);
 
                 // Actualizar el saldo de la caja del vuelto
@@ -377,12 +391,12 @@ class PuntoVentaController extends Controller
 
         if ( $startDate == "" || $endDate == "" )
         {
-            $query = Sale::orderBy('date_sale', 'DESC');
+            $query = Sale::where('state_annulled', 0)->orderBy('date_sale', 'DESC');
         } else {
             $fechaInicio = Carbon::createFromFormat('d/m/Y', $startDate);
             $fechaFinal = Carbon::createFromFormat('d/m/Y', $endDate);
 
-            $query = Sale::whereDate('date_sale', '>=', $fechaInicio)
+            $query = Sale::where('state_annulled', 0)->whereDate('date_sale', '>=', $fechaInicio)
                 ->whereDate('date_sale', '<=', $fechaFinal)
                 ->orderBy('date_sale', 'DESC');
         }
@@ -456,5 +470,97 @@ class PuntoVentaController extends Controller
         });
 
         return response()->json(['details' => $details], 200);
+    }
+
+    public function anularOrder($id)
+    {
+        DB::beginTransaction();
+        try {
+
+            $sale = Sale::find($id);
+
+            if (!$sale) {
+                return response()->json(['message' => 'Orden no encontrada'], 422);
+            }
+
+            $sale->state_annulled = 1;
+            $sale->save();
+
+            // Cambios en los movimientos
+            // Revertir los movimientos de caja asociados a la orden
+            $movements = CashMovement::where('sale_id', $sale->id)->get();
+            $tipoPago = $sale->tipoPago->description;
+            foreach ($movements as $movement) {
+                // Si es un movimiento de tipo "sale"
+                if ($movement->type === 'sale') {
+                    // Caso de pago POS (no pago directo)
+                    if ($tipoPago === 'POS') {
+                        if ($movement->regularize == 0) {
+                            // No se regularizó: se elimina el movimiento
+                            $movement->delete();
+                        } elseif ($movement->regularize == 1) {
+                            // Si se regularizó, se crea un movimiento inverso de tipo "expense"
+                            CashMovement::create([
+                                'cash_register_id' => $movement->cash_register_id,
+                                'sale_id'         => $sale->id,
+                                'type'             => 'expense',
+                                'amount'           => $movement->amount,
+                                'description'      => 'Reversión de venta (POS regularizado) por anulación de orden',
+                                'regularize'       => $movement->regularize
+                            ]);
+                            $cashRegister = CashRegister::find($movement->cash_register_id);
+                            $cashRegister->current_balance -= $movement->amount;
+                            $cashRegister->total_sales    -= $movement->amount;
+                            $cashRegister->total_incomes  -= $movement->amount;
+                            $cashRegister->total_expenses += $movement->amount;
+                            $cashRegister->save();
+                        }
+                    } else {
+                        // Para ventas normales, se revierte creando un movimiento de tipo "expense"
+                        CashMovement::create([
+                            'cash_register_id' => $movement->cash_register_id,
+                            'sale_id'         => $sale->id,
+                            'type'             => 'expense',
+                            'amount'           => $movement->amount,
+                            'description'      => 'Reversión de venta por anulación de orden',
+                            'regularize'       => $movement->regularize
+                        ]);
+                        $cashRegister = CashRegister::find($movement->cash_register_id);
+                        $cashRegister->current_balance -= $movement->amount;
+                        $cashRegister->total_sales    -= $movement->amount;
+                        $cashRegister->total_incomes  -= $movement->amount;
+                        $cashRegister->total_expenses += $movement->amount;
+                        $cashRegister->save();
+                    }
+                }
+                // Si es un movimiento de tipo "expense" (por ejemplo, el vuelto)
+                elseif ($movement->type === 'expense') {
+                    // Se revierte creando un movimiento de tipo "income"
+                    CashMovement::create([
+                        'cash_register_id' => $movement->cash_register_id,
+                        'sale_id'          => $sale->id,
+                        'type'             => 'income',
+                        'amount'           => $movement->amount,
+                        'description'      => 'Reversión de gasto (vuelto) por anulación de orden',
+                        'subtype'          => $movement->subtype,
+                        'regularize'       => $movement->regularize
+                    ]);
+                    $cashRegister = CashRegister::find($movement->cash_register_id);
+                    $cashRegister->current_balance += $movement->amount;
+                    $cashRegister->total_incomes  += $movement->amount;
+                    $cashRegister->total_expenses -= $movement->amount;
+                    $cashRegister->save();
+                }
+            }
+
+            DB::commit();
+
+            return response()->json(['message' => 'Orden anulada con éxito'], 200);
+
+        } catch ( \Throwable $e ) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
     }
 }

@@ -1,7 +1,25 @@
 $(document).ready(function () {
     //$permissions = JSON.parse($('#permissions').val());
 
+    $('#modalVuelto').on('hidden.bs.modal', function () {
+        $('#btn-pay').prop('disabled', false);
+    });
+
+    // Detectar cambio en el select de tipo de vista
+    $("#type_id").on("change", function() {
+        if ($(this).val() === "f") {
+            showDataSearchTable();
+        } else {
+            showDataSearch();
+        }
+    });
+
     $(document).on('click', '[data-item]', showData);
+
+    $(document).on('click', '.pagination-btn', function() {
+        var page = $(this).data('page');
+        getDataTableNew(page);
+    });
 
     getData(1);
 
@@ -904,11 +922,161 @@ function renderDataCartQuantity(productId, productPrice, productName, productUni
 function showData() {
     var numberPage = $(this).attr('data-item');
     console.log(numberPage);
-    getData(numberPage)
+    var type = $("#type_id").val();
+    if (type === "f") {
+        getDataTableNew(numberPage)
+    } else {
+        getData(numberPage)
+    }
 }
 
 function showDataSearch() {
     getData(1)
+}
+
+function showDataSearchTable() {
+    getDataTableNew(1);
+}
+
+function getDataTableNew($numberPage) {
+    var category_id = $('#category_id').val();
+    var product_search = $("#product_search").val();
+
+    $.get('/dashboard/get/data/products/'+$numberPage, {
+        category_id: category_id,
+        product_search: product_search
+    }, function(data) {
+        if (data.data.length == 0) {
+            renderDataTableEmptyNew();
+        } else {
+            renderDataTableNew(data);
+        }
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.error(textStatus, errorThrown);
+        toastr.error("Error al obtener los productos", "Error", {
+            "closeButton": true,
+            "progressBar": true
+        });
+    });
+}
+
+function renderDataTableEmptyNew() {
+    $("#table-body").html('');
+    $("#pagination").html('');
+    $("#textPagination").html('No se encontraron productos.');
+}
+
+function renderDataTableNew(data) {
+    var dataAccounting = data.data;
+    var pagination = data.pagination;
+
+    // Limpiar contenido anterior
+    $("#body-card").html('');
+    $("#pagination").html('');
+    $("#textPagination").html('Mostrando '+pagination.startRecord+' a '+pagination.endRecord+' de '+pagination.totalFilteredRecords+' productos.');
+
+    var table = `
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Imagen</th>
+                        <th>Nombre</th>
+                        <th>Precio</th>
+                        <th>Unidad</th>
+                        <th>Impuesto</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    // Agregar las filas de datos
+    for (let j = 0; j < dataAccounting.length; j++) {
+        table += `
+            <tr>
+                <td><img src="${document.location.origin}/images/material/${dataAccounting[j].image}" width="50"></td>
+                <td>${dataAccounting[j].full_name}</td>
+                <td>${dataAccounting[j].price}</td>
+                <td>${dataAccounting[j].unit}</td>
+                <td>${dataAccounting[j].tax}</td>
+                <td>
+                    <button class="btn btn-primary btn-sm add-to-cart" 
+                        data-add_cart
+                        data-product_id="${dataAccounting[j].id}" 
+                        data-product_price="${dataAccounting[j].price}" 
+                        data-product_name="${dataAccounting[j].full_name}" 
+                        data-product_unit="${dataAccounting[j].unit}" 
+                        data-product_tax="${dataAccounting[j].tax}">
+                        ADD TO CART
+                    </button>
+                    <button class="btn btn-success btn-sm add-to-cart" 
+                        data-add_cart_special
+                        data-product_id="${dataAccounting[j].id}" 
+                        data-product_price="${dataAccounting[j].price}" 
+                        data-product_name="${dataAccounting[j].full_name}" 
+                        data-product_unit="${dataAccounting[j].unit}" 
+                        data-product_tax="${dataAccounting[j].tax}"
+                        data-product_type="${dataAccounting[j].type}">
+                        ADD ESPECIAL
+                    </button>
+                </td>
+            </tr>
+        `;
+    }
+
+    // Cerrar la tabla y el div
+    table += `
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    // Insertar la tabla en el contenedor
+    $("#body-card").append(table);
+
+    renderPaginationNew(pagination);
+}
+
+function renderPaginationNew(pagination) {
+    $("#pagination").html('');
+
+    if (pagination.currentPage > 1)
+    {
+        renderPreviousPage(pagination.currentPage-1);
+    }
+
+    if (pagination.totalPages > 1)
+    {
+        if (pagination.currentPage > 3)
+        {
+            renderItemPage(1);
+
+            if (pagination.currentPage > 4) {
+                renderDisabledPage();
+            }
+        }
+
+        for (var i = Math.max(1, pagination.currentPage - 2); i <= Math.min(pagination.totalPages, pagination.currentPage + 2); i++)
+        {
+            renderItemPage(i, pagination.currentPage);
+        }
+
+        if (pagination.currentPage < pagination.totalPages - 2)
+        {
+            if (pagination.currentPage < pagination.totalPages - 3)
+            {
+                renderDisabledPage();
+            }
+            renderItemPage(i, pagination.currentPage);
+        }
+
+    }
+
+    if (pagination.currentPage < pagination.totalPages)
+    {
+        renderNextPage(pagination.currentPage+1);
+    }
 }
 
 function getData($numberPage) {
@@ -984,14 +1152,14 @@ function renderDataEmpty(data) {
     var dataAccounting = data.data;
     var pagination = data.pagination;
 
-    $("#body-table").html('');
+    $("#body-card").html('');
     $("#pagination").html('');
     $("#textPagination").html('');
     $("#textPagination").html('Mostrando '+pagination.startRecord+' a '+pagination.endRecord+' de '+pagination.totalFilteredRecords+' productos.');
     $('#numberItems').html('');
     $('#numberItems').html(pagination.totalFilteredRecords);
 
-    renderDataTableEmpty();
+    renderDataCardEmpty();
 }
 
 function renderData(data) {
@@ -1073,9 +1241,9 @@ function renderDataCard(data) {
     $('[data-toggle="tooltip"]').tooltip();
 }
 
-function renderDataTableEmpty() {
+function renderDataCardEmpty() {
     var clone = activateTemplate('#item-card-empty');
-    $("#body-table").append(clone);
+    $("#body-card").append(clone);
 }
 
 function renderPreviousPage($numberPage) {

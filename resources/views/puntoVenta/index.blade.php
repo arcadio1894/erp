@@ -664,20 +664,6 @@
     </template>
 
     <template id="item-card">
-        {{--<div class="col-md-4 col-sm-6">--}}
-            {{--<div class="card mx-auto col-md-3 col-10 mt-5">
-                <img class='mx-auto img-thumbnail'
-                     data-image1
-                     width="auto" height="auto"/>
-                <div class="card-body2 text-center mx-auto">
-                    <div class='cvp'>
-                        <h5 class="card-title font-weight-bold" data-name>Yail wrist watch</h5>
-                        <p class="card-text"  data-price>$299</p>
-                        <a href="#" class="btn details px-auto">view details</a><br />
-                        <a href="#" class="btn cart px-auto" data-add_cart data-product_id data-product_price data-product_name data-product_unit data-product_tax>ADD TO CART</a>
-                    </div>
-                </div>
-            </div>--}}
         <div class="card mx-auto col-md-3 col-10 mt-1 product-card">
             <img class='mx-auto img-thumbnail product-image'
                  data-image1
@@ -691,34 +677,6 @@
                 </div>
             </div>
         </div>
-        {{--</div>--}}
-       {{-- <div class="col-md-4 col-sm-6">
-            <div class="product-grid">
-                <div class="product-image">
-                    <a href="#" class="image">
-                        <img class="pic-1" data-image1 src="{{ asset('images/sale/img-1.jpg') }}">
-                        <img class="pic-2" data-image2 src="{{ asset('images/sale/img-1.jpg') }}">
-                    </a>
-                    <ul class="product-links">
-                        <li><a href="#" data-add_cart data-product_id data-product_price data-product_name data-product_unit data-product_tax><i class="fa fa-shopping-cart"></i></a></li>
-                        <li><a href="#"><i class="far fa-heart"></i></a></li>
-                        <li><a href="#"><i class="fa fa-random"></i></a></li>
-                        <li><a href="#"><i class="fa fa-search"></i></a></li>
-                    </ul>
-                </div>
-                <div class="product-content">
-                    <ul class="rating">
-                        <li class="fa fa-star"></li>
-                        <li class="fa fa-star"></li>
-                        <li class="fa fa-star"></li>
-                        <li class="fa fa-star"></li>
-                        <li class="far fa-star"></li>
-                    </ul>
-                    <h3 class="title"><a href="#" data-name>Women's Blouse Top</a></h3>
-                    <div class="price" data-price>$85.55</div>
-                </div>
-            </div>
-        </div>--}}
     </template>
 
     <template id="item-card-empty">
@@ -753,6 +711,40 @@
         <li class="page-item disabled">
             <span class="page-link">...</span>
         </li>
+    </template>
+
+    <template id="item-table">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Imagen</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody id="table-body">
+            <tr data-row>
+                <td>
+                    <img class="img-thumbnail product-image" data-image1 width="50" height="50"/>
+                </td>
+                <td class="product-title" data-name>Yail wrist watch</td>
+                <td class="product-price" data-price>$299</td>
+                <td>
+                    <a href="#" class="btn details btn-sm"
+                       data-add_cart_special data-product_id data-product_price
+                       data-product_name data-product_unit data-product_tax data-product_type>
+                        ADD SPECIAL
+                    </a>
+                    <a href="#" class="btn cart btn-sm btn-primary"
+                       data-add_cart data-product_id data-product_price
+                       data-product_name data-product_unit data-product_tax>
+                        ADD TO CART
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
     </template>
 @endsection
 

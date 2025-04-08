@@ -20,7 +20,8 @@ class Sale extends Model
         'total_descuentos',
         'importe_total',
         'vuelto',
-        'tipo_pago_id'
+        'tipo_pago_id',
+        'state_annulled'
     ];
 
     protected $dates = ['date_sale'];

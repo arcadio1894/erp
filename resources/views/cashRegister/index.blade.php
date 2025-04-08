@@ -38,6 +38,10 @@
         .expense-row {
             background-color: #f8d7da; /* Rojo claro */
         }
+
+        .regularize-row {
+            background-color: #f4c3a1; /* Verde claro */
+        }
     </style>
 @endsection
 
@@ -248,6 +252,35 @@
         </div>
     </div>
 
+    <div id="modalRegularize" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Regularizar Venta POS</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <form id="formRegularize" data-url="{{ route('regularize.cashRegister') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" id="active_regularize" name="active_regularize">
+                        <input type="hidden" id="cash_movement_id" name="cash_movement_id">
+                        <div class="col-md-12">
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <strong>Importante!</strong> Se va a regularizar con el monto ingresado.
+                            </div>
+                        </div>
+                        <h5>Monto regularización venta POS</h5>
+                        <input type="number" class="form-control" step="0.01" min="0" name="regularize_amount" id="regularize_amount">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" id="btn_regularizar" class="btn btn-success">Regularizar Venta POS</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <template id="previous-page">
         <li class="page-item previous">
             <a href="#" class="page-link" data-item>
@@ -296,7 +329,11 @@
     </template>
 
     <template id="template-button">
-        <button data-anular data-toggle="tooltip" data-placement="top" title="Anular combo" data-delete="{{--'+item.id+'--}}" data-description="" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash"></i> </button>
+        {{--<button data-anular data-toggle="tooltip" data-placement="top" title="Anular combo" data-delete="--}}{{--'+item.id+'--}}{{--" data-description="" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash"></i> </button>
+        --}}
+        <a href="" target="_blank" data-print_nota data-id="" class="btn btn-outline-dark btn-sm" data-toggle="tooltip" data-placement="top" title="Imprimir boleta"><i class="fas fa-print"></i></a>
+        <button data-regularizar data-id="" class="btn btn-outline-success btn-sm" data-toggle="tooltip" data-placement="top" title="Regularizar Venta POS"><i class="fas fa-check-double"></i></button>
+
     </template>
 @endsection
 

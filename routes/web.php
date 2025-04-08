@@ -2650,7 +2650,7 @@ Route::middleware('auth')->group(function (){
             ->name('puntoVenta.list');
         Route::get('/get/data/sales/{page}', 'PuntoVentaController@getSalesAdmin');
         Route::get('/sales/{orderId}/details', 'PuntoVentaController@getOrderDetails');
-
+        Route::post('/anular/order/{order}', 'PuntoVentaController@anularOrder');
         //get/data/products
 
         // TODO: Rutas Punto de Venta
@@ -2686,6 +2686,8 @@ Route::middleware('auth')->group(function (){
             ->name('expense.cashRegister')/*
             ->middleware('permission:destroy_category')*/;
         Route::get('/get/data/movements/V2/{numberPage}', 'CashRegisterController@getDataMovements');
+        Route::post('regularize/cashRegister', 'CashRegisterController@regularizeCashRegister')
+            ->name('regularize.cashRegister');
 
         // TODO: Promotions Seasonal
         Route::get('/get/data/promotions/seasonal/V2/{numberPage}', 'SeasonalPromotionController@getDataPromotions');
@@ -2714,7 +2716,10 @@ Route::middleware('auth')->group(function (){
         Route::get('/listado/ganancia/detalles/{id}', 'GananciaDiariaController@indexDetail')
             ->name('ganancia.detail.index');
 
-
+        Route::get('/material-unpack/{id}/childs', 'MaterialUnpackController@getChilds');
+        Route::delete('/material-unpack/{id}', 'MaterialUnpackController@destroy');
+        Route::post('/material-unpack/store', 'MaterialUnpackController@store');
+        Route::get('/material-unpack/{id}/child-materials', 'MaterialUnpackController@getChildMaterials');
     });
 });
 

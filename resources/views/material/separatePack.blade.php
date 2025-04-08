@@ -469,7 +469,8 @@
             </td>
             <td data-column="rotation" data-rotation></td>
             <td>
-                <button data-separate data-material="{{--'+item.id+'--}}" data-quantity data-description="{{--'+item.full_description+'--}}" data-measure="{{--'+item.measure+'--}}" class="btn btn-outline-primary btn-sm" data-toggle="tooltip" data-placement="top" title="Separar Paquete"><i class="far fa-object-ungroup"></i></button>
+                <button data-separate data-material="" data-quantity data-description="" data-measure="" class="btn btn-outline-primary btn-sm" data-toggle="tooltip" data-placement="top" title="Separar Paquete"><i class="far fa-object-ungroup"></i></button>
+                <button data-assign_child data-material="" data-description="" class="btn btn-outline-success btn-sm" data-toggle="tooltip" data-placement="top" title="Asignar Hijos"><i class="fas fa-boxes"></i></button>
             </td>
         </tr>
     </template>
@@ -480,58 +481,129 @@
         </tr>
     </template>
 
-    @can('enable_material')
-        <div id="modalSeparate" class="modal fade" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Confirmar separación</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    </div>
-                    <form id="formSeparate" data-url="{{ route('save.separate.pack') }}">
-                        @csrf
-                        <div class="modal-body">
-                            <input type="hidden" id="material_id" name="material_id">
-                            <strong id="name_material"></strong>
-                            <br>
-                            <p>¿Cuántos paquetes necesitas separar</p>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="stock_max">Cantidad Total </label>
-                                        <input type="number" id="packs_total" name="packs_total" class="form-control" placeholder="0.00" min="0" value="0" step="1" readonly>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="stock_max">Cantidad a separar <span class="right badge badge-danger">(*)</span></label>
-                                        <input type="number" id="packs_separate" name="packs_separate" class="form-control" placeholder="0.00" min="0" value="0" step="1">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <label for="material">Seleccione el material <span class="right badge badge-danger">(*)</span></label>
-                                        <select id="material" name="material" class="form-control select2" style="width: 100%;">
-                                            <option></option>
-                                            @for( $i=0; $i<count($arrayMaterials); $i++ )
-                                                <option value="{{ $arrayMaterials[$i]['id'] }}">{{ $arrayMaterials[$i]['full_name'] }}</option>
-                                            @endfor
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                            <button type="button" id="btn-submitSeparate" class="btn btn-success">Separar</button>
-                        </div>
-                    </form>
+    <div id="modalAssignChild" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Asignar Productos Hijos</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
+                <form id="formAssignChild" data-url="{{--{{ route('save.assign.child') }}--}}">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" id="material_id" name="material_id">
+                        <strong id="name_material"></strong>
+                        <br>
+                        <p>Listado de productos hijos</p>
+
+                        <div class="row">
+                            <div class="col-md-10">
+                                <div class="form-group">
+                                    <label for="material">Seleccione el material <span class="right badge badge-danger">(*)</span></label>
+                                    <select id="material" name="material" class="form-control select2" style="width: 100%;">
+                                        <option></option>
+                                        @for( $i=0; $i<count($arrayMaterials); $i++ )
+                                            <option value="{{ $arrayMaterials[$i]['id'] }}">{{ $arrayMaterials[$i]['full_name'] }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label for="material">&nbsp;&nbsp;&nbsp;&nbsp;</label><br>
+                                    <button type="button" class="btn btn-outline-success" id="btn-submitAssignChild"><i class="fas fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead class="thead-dark">
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Producto</th>
+                                            <th scope="col"></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody id="body-childs">
+                                        <tr>
+                                            <th scope="row">1</th>
+                                            <td>Mark</td>
+                                            <td>
+                                                <button type="button" class="btn btn-outline-danger btn-block"><i class="fas fa-trash-alt"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th scope="row">2</th>
+                                            <td>Jacob</td>
+                                            <td>
+                                                <button type="button" class="btn btn-outline-danger btn-block"><i class="fas fa-trash-alt"></i></button>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-    @endcan
+    </div>
+
+    <div id="modalSeparate" class="modal fade" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Confirmar separación</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <form id="formSeparate" data-url="{{ route('save.separate.pack') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" id="material_id" name="material_id">
+                        <strong id="name_material"></strong>
+                        <br>
+                        <p>¿Cuántos paquetes necesitas separar</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="stock_max">Cantidad Total </label>
+                                    <input type="number" id="packs_total" name="packs_total" class="form-control" placeholder="0.00" min="0" value="0" step="1" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="stock_max">Cantidad a separar <span class="right badge badge-danger">(*)</span></label>
+                                    <input type="number" id="packs_separate" name="packs_separate" class="form-control" placeholder="0.00" min="0" value="0" step="1">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="materialChild">Seleccione el material <span class="right badge badge-danger">(*)</span></label>
+                                    <select id="materialChild" name="materialChild" class="form-control select2" style="width: 100%;">
+                                        <option></option>
+                                        @for( $i=0; $i<count($arrayMaterials); $i++ )
+                                            <option value="{{ $arrayMaterials[$i]['id'] }}">{{ $arrayMaterials[$i]['full_name'] }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" id="btn-submitSeparate" class="btn btn-success">Separar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <div id="modalImage" class="modal fade" tabindex="-1">
         <div class="modal-dialog modal-lg">

@@ -25,7 +25,7 @@ $(document).ready(function () {
 
     $(document).on('click', '[data-ver_detalles]', showDetails);
 
-    /*$(document).on('click', '[data-anular]', anularOrder);*/
+    $(document).on('click', '[data-anular]', anularOrder);
 
     /*$(document).on('click', '[data-generar_comprobante]', function () {
         const orderId = $(this).data('order-id');
@@ -447,10 +447,7 @@ function renderDataTable(data) {
     let url = document.location.origin + '/dashboard/imprimir/documento/venta/' + data.id;
     cloneBtnActive.querySelector("[data-print_recibo]").setAttribute("href", url);
 
-    /*cloneBtnActive.querySelector("[data-anular]").setAttribute("data-id", data.id);*/
-
-    /*cloneBtnActive.querySelector("[data-generar_comprobante]").setAttribute("data-order-id", data.id);
-    cloneBtnActive.querySelector("[data-imprimir_comprobante]").setAttribute("data-order-id", data.id);*/
+    cloneBtnActive.querySelector("[data-anular]").setAttribute("data-id", data.id);
 
     botones.append(cloneBtnActive);
 

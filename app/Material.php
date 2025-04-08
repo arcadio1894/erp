@@ -176,6 +176,16 @@ class Material extends Model
         return $this->hasMany('App\OutputDetail');
     }
 
+    public function unpackedChild()
+    {
+        return $this->hasOne(MaterialUnpack::class, 'parent_product_id');
+    }
+
+    public function unpackedParents()
+    {
+        return $this->hasMany(MaterialUnpack::class, 'child_product_id');
+    }
+
     protected $dates = ['deleted_at'];
 
     public function toArray()

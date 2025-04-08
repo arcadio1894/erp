@@ -11,6 +11,8 @@ class CashMovement extends Model
         'type',
         'amount',
         'description',
+        'regularize',
+        'sale_id'
     ];
 
     protected $dates = ['created_at', 'updated_at'];
@@ -18,5 +20,10 @@ class CashMovement extends Model
     public function cashRegister()
     {
         return $this->belongsTo('App\CashRegister');
+    }
+
+    public function sale()
+    {
+        return $this->belongsTo('App\Sale');
     }
 }

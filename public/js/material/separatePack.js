@@ -148,7 +148,63 @@ $(document).ready(function () {
 
     $('#btn-submitSeparate').on('click', submitSeparate);
 
+
+    $(document).on('click', '[data-assign_child]', openModalAssignChild);
+    $formAssignChild = $('#formAssignChild');
+    $modalAssignChild = $('#modalAssignChild');
+
+    $('#btn-submitAssignChild').on('click', submitAssignChild);
+
+    // Evento delegado para eliminar un hijo
+    $(document).on('click', '.btn-remove-child', function() {
+        var button = $(this);
+        var material_id = button.data('material_id');
+        var unpack_id = button.data('material_unpack_id');
+
+        if (!confirm('¿Estás seguro de eliminar este hijo?')) return;
+
+        $.ajax({
+            url: '/dashboard/material-unpack/' + unpack_id,
+            type: 'DELETE',
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content') // CSRF token
+            },
+            success: function(response) {
+                // Recargar hijos después de eliminar
+                $.get('/dashboard/material-unpack/' + material_id + '/childs', function(res) {
+                    $('#body-childs').empty();
+                    if (res.length > 0) {
+                        $.each(res, function(index, item) {
+                            var row = `
+                            <tr>
+                                <th scope="row">${index + 1}</th>
+                                <td>${item.name}</td>
+                                <td>
+                                    <button 
+                                        type="button" 
+                                        class="btn btn-outline-danger btn-block btn-remove-child" 
+                                        data-material_id="${material_id}" 
+                                        data-material_unpack_id="${item.id}">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                            $('#body-childs').append(row);
+                        });
+                    }
+                });
+            },
+            error: function() {
+                alert('Hubo un error al intentar eliminar.');
+            }
+        });
+    });
+
 });
+
+var $formAssignChild;
+var $modalAssignChild;
 
 var $formSeparate;
 var $modalDelete;
@@ -158,6 +214,106 @@ var $selectSubCategory;
 var $selectType;
 var $selectSubtype;
 var $modalSeparate;
+
+function submitAssignChild() {
+    var child_id = $('#material').val();
+    var parent_id = $('#material_id').val();
+
+    if (!child_id) {
+        $.alert({
+            title: 'Error',
+            content: 'Debes seleccionar un material hijo.',
+            type: 'red',
+            typeAnimated: true
+        });
+        return;
+    }
+
+    $.post('/dashboard/material-unpack/store', {
+        _token: $('meta[name="csrf-token"]').attr('content'),
+        parent_material_id: parent_id,
+        child_material_id: child_id
+    }, function(response) {
+        $.alert({
+            title: 'Éxito',
+            content: 'Material hijo asignado correctamente.',
+            type: 'green',
+            typeAnimated: true
+        });
+
+        // Vaciar el select (opcional)
+        $('#material').val(null).trigger('change');
+
+        // Volver a cargar hijos
+        $.get('/dashboard/material-unpack/' + parent_id + '/childs', function(res) {
+            $('#body-childs').empty();
+            if (res.length > 0) {
+                $.each(res, function(index, item) {
+                    var row = `
+                        <tr>
+                            <th scope="row">${index + 1}</th>
+                            <td>${item.name}</td>
+                            <td>
+                                <button 
+                                    type="button" 
+                                    class="btn btn-outline-danger btn-block btn-remove-child" 
+                                    data-material_id="${parent_id}" 
+                                    data-material_unpack_id="${item.id}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    $('#body-childs').append(row);
+                });
+            }
+        });
+    }).fail(function() {
+        $.alert({
+            title: 'Error',
+            content: 'No se pudo asignar el material. Intenta nuevamente.',
+            type: 'red',
+            typeAnimated: true
+        });
+    });
+}
+
+function openModalAssignChild() {
+    var material_id = $(this).data('material');
+    var description = $(this).data('description');
+
+    // Traer los hijos si hay
+// Limpiar tabla
+    $('#body-childs').empty();
+
+    // Obtener hijos vía AJAX
+    $.get('/dashboard/material-unpack/' + material_id + '/childs', function(response) {
+        if (response.length > 0) {
+            $.each(response, function(index, item) {
+                var row = `
+                    <tr>
+                        <th scope="row">${index + 1}</th>
+                        <td>${item.name}</td>
+                        <td>
+                            <button 
+                                type="button" 
+                                class="btn btn-outline-danger btn-block btn-remove-child" 
+                                data-material_id="${material_id}" 
+                                data-material_unpack_id="${item.id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                $('#body-childs').append(row);
+            });
+        }
+    });
+
+    $modalAssignChild.find('[id=material_id]').val(material_id);
+    $modalAssignChild.find('[id=name_material]').html(description);
+    $modalAssignChild.modal('show');
+}
 
 function submitSeparate() {
     event.preventDefault();
@@ -236,6 +392,24 @@ function openModalSeparate() {
     $modalSeparate.find('[id=name_material]').html(description);
     $modalSeparate.find('[id=packs_total]').val(quantity);
     $modalSeparate.find('[id=packs_separate]').val(0);
+
+    // Limpiar y deshabilitar temporalmente el select
+    let $select = $modalSeparate.find('#materialChild');
+    $select.empty().append('<option value="">Cargando...</option>').prop('disabled', true);
+
+    // Obtener los materiales hijos
+    $.get('/dashboard/material-unpack/' + material_id + '/child-materials', function(res) {
+        $select.empty().append('<option value="">Seleccione un material</option>');
+
+        if (res.length > 0) {
+            $.each(res, function(index, item) {
+                $select.append('<option value="' + item.id + '">' + item.name + '</option>');
+            });
+        }
+
+        $select.prop('disabled', false);
+    });
+
     $modalSeparate.modal('show');
 }
 
@@ -701,6 +875,8 @@ function renderDataTable(data, activeColumns) {
 
     clone.querySelector("[data-rotation]").innerHTML = data.rotation;
 
+    clone.querySelector("[data-assign_child]").setAttribute("data-material", data.id);
+    clone.querySelector("[data-assign_child]").setAttribute("data-description", data.descripcion);
 
     if ($.inArray('enable_material', $permissions) !== -1) {
         clone.querySelector("[data-separate]").setAttribute("data-material", data.id);
