@@ -54,7 +54,6 @@
 
     <!-- Tu script que usa faceapi -->
     <script defer>
-        // Esperar a que todo cargue
         window.addEventListener('DOMContentLoaded', function () {
             const labeledDescriptors = [];
             const faces = @json($faces);  // Rostros registrados
@@ -64,7 +63,12 @@
                 faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
                 faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
                 faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-            ]).then(start)  // Solo se ejecuta cuando todos los modelos estén cargados
+            ]).then(() => {
+                console.log("Modelos cargados correctamente");
+                start();  // Solo se ejecuta cuando todos los modelos estén cargados
+            }).catch(err => {
+                console.error("Error al cargar los modelos: ", err);
+            });
 
             async function start() {
                 const video = document.getElementById('videoElement');
