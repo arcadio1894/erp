@@ -2720,6 +2720,11 @@ Route::middleware('auth')->group(function (){
         Route::delete('/material-unpack/{id}', 'MaterialUnpackController@destroy');
         Route::post('/material-unpack/store', 'MaterialUnpackController@store');
         Route::get('/material-unpack/{id}/child-materials', 'MaterialUnpackController@getChildMaterials');
+
+        // TODO: Faces
+        Route::get('/faces', [\App\Http\Controllers\FaceController::class, 'index'])->name('faces.index');
+        Route::post('/faces', [\App\Http\Controllers\FaceController::class, 'store'])->name('faces.store');
+        Route::get('/faces/verify', [\App\Http\Controllers\FaceController::class, 'verify'])->name('faces.verify');
     });
 });
 
