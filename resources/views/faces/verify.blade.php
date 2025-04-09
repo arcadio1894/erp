@@ -61,9 +61,9 @@
 
             // Cargar los modelos de cara
             Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri('/storage/models'),
-                faceapi.nets.faceLandmark68Net.loadFromUri('/storage/models'),
-                faceapi.nets.faceRecognitionNet.loadFromUri('/storage/models'),
+                faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+                faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+                faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
             ]).then(start)  // Solo se ejecuta cuando todos los modelos estén cargados
 
             async function start() {
