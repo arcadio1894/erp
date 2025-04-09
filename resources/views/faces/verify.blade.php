@@ -58,17 +58,19 @@
             const labeledDescriptors = [];
             const faces = @json($faces);  // Rostros registrados
 
-            // Cargar los modelos de cara
+            // Cargar los modelos de cara de manera más explícita
             Promise.all([
                 faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
                 faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
                 faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-            ]).then(() => {
-                console.log("Modelos cargados correctamente");
-                start();  // Solo se ejecuta cuando todos los modelos estén cargados
-            }).catch(err => {
-                console.error("Error al cargar los modelos: ", err);
-            });
+            ])
+                .then(() => {
+                    console.log("Modelos cargados correctamente");
+                    start();  // Solo se ejecuta cuando todos los modelos estén cargados
+                })
+                .catch(err => {
+                    console.error("Error al cargar los modelos:", err);
+                });
 
             async function start() {
                 const video = document.getElementById('videoElement');
