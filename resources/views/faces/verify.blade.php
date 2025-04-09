@@ -56,17 +56,15 @@
     <script defer>
         // Esperar a que todo cargue
         window.addEventListener('DOMContentLoaded', function () {
-            // Aquí va todo tu código JS que usa faceapi
             const labeledDescriptors = [];
+            const faces = @json($faces);  // Rostros registrados
 
-            // Cargar rostros registrados
-            const faces = @json($faces);
-
+            // Cargar los modelos de cara
             Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-                faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-                faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-            ]).then(start)
+                faceapi.nets.tinyFaceDetector.loadFromUri('/storage/models'),
+                faceapi.nets.faceLandmark68Net.loadFromUri('/storage/models'),
+                faceapi.nets.faceRecognitionNet.loadFromUri('/storage/models'),
+            ]).then(start)  // Solo se ejecuta cuando todos los modelos estén cargados
 
             async function start() {
                 const video = document.getElementById('videoElement');
@@ -79,7 +77,7 @@
                         video.srcObject = stream;
                     });
 
-                // Esperar video
+                // Esperar a que el video esté listo
                 video.addEventListener('playing', async () => {
                     const displaySize = { width: video.videoWidth, height: video.videoHeight };
                     faceapi.matchDimensions(canvas, displaySize);
@@ -96,6 +94,7 @@
 
                     const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, 0.6);
 
+                    // Detectar rostros en intervalos
                     setInterval(async () => {
                         const detections = await faceapi
                             .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
