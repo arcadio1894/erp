@@ -58,20 +58,18 @@
             const labeledDescriptors = [];
             const faces = @json($faces);  // Rostros registrados
 
-            // Cargar los modelos de cara
             try {
+                // Asegurarse de que los modelos estén cargados antes de proceder
                 await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
                 await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
                 await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
                 console.log("Modelos cargados correctamente.");
             } catch (err) {
                 console.error("Error al cargar los modelos:", err);
-                return;  // Si hay un error en la carga de los modelos, se detiene la ejecución
+                return;  // Si hay un error, detenemos la ejecución
             }
 
-            // Iniciar detección después de que los modelos estén completamente cargados
-            start();
-
+            // Función que comienza la detección después de que los modelos estén cargados
             async function start() {
                 const video = document.getElementById('videoElement');
                 const canvas = document.getElementById('overlay');
@@ -148,6 +146,9 @@
                     }
                 }, 500);
             }
+
+            // Solo iniciar la detección después de que los modelos estén completamente cargados
+            await start();  // Llamar a la función `start` después de que todo esté listo
         });
     </script>
     {{--<script defer>
