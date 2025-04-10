@@ -53,36 +53,39 @@
     <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
 
     <!-- Tu script que usa faceapi -->
-    {{--<script defer>
-        window.addEventListener('DOMContentLoaded', function () {
+    <script defer>
+        window.addEventListener('DOMContentLoaded', async function () {
             const labeledDescriptors = [];
             const faces = @json($faces);  // Rostros registrados
 
-            // Asegurarse de que los modelos estén cargados antes de proceder
-            Promise.all([
-                faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-                faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-                faceapi.nets.faceRecognitionNet.loadFromUri('/models')
-            ])
-                .then(() => {
-                    console.log("Modelos cargados correctamente.");
-                    start();  // Solo inicia la detección después de que los modelos estén cargados
-                })
-                .catch(err => {
-                    console.error("Error al cargar los modelos:", err);
-                });
+            // Cargar los modelos de cara
+            try {
+                await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+                await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
+                await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
+                await faceapi.nets.ssdMobilenetv1.loadFromUri('/models');
+                console.log("Modelos cargados correctamente.");
+            } catch (err) {
+                console.error("Error al cargar los modelos:", err);
+                return;  // Si hay un error en la carga de los modelos, se detiene la ejecución
+            }
+
+            // Ahora que los modelos están cargados, iniciamos la detección de rostros
+            start();
 
             async function start() {
                 const video = document.getElementById('videoElement');
                 const canvas = document.getElementById('overlay');
                 const resultBox = document.getElementById('result');
-                const motionBox = document.getElementById('motionResult');
 
                 // Iniciar cámara
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(stream => {
-                        video.srcObject = stream;
-                    });
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                    video.srcObject = stream;
+                } catch (err) {
+                    console.error('Error al acceder a la cámara', err);
+                    return;
+                }
 
                 // Esperar a que el video esté listo para la detección
                 video.addEventListener('playing', async () => {
@@ -117,8 +120,24 @@
                             const drawBox = new faceapi.draw.DrawBox(box, { label: bestMatch.toString() });
                             drawBox.draw(canvas);
 
-                            resultBox.innerHTML = `<strong>Resultado:</strong> ${bestMatch.toString()}`;
-                            resultBox.className = bestMatch.label !== 'unknown' ? 'alert alert-success' : 'alert alert-danger';
+                            // Comprobar prueba de vida (parpadeo o movimiento)
+                            const landmarks = resizedDetections[i].landmarks;
+                            const leftEye = landmarks.getLeftEye();
+                            const rightEye = landmarks.getRightEye();
+
+                            const blinkDetected = isBlinking(leftEye, rightEye);
+                            if (blinkDetected) {
+                                resultBox.innerHTML = `<strong>Resultado:</strong> ${bestMatch.toString()} - Parpadeo Detectado!`;
+                                resultBox.className = bestMatch.label !== 'unknown' ? 'alert alert-success' : 'alert alert-danger';
+                            } else {
+                                resultBox.innerHTML = `<strong>Resultado:</strong> ${bestMatch.toString()} - Sin Parpadeo`;
+                                resultBox.className = 'alert alert-warning';
+                            }
+
+                            // Si no hay parpadeo, marcarlo como un posible intento de fraude
+                            if (!blinkDetected) {
+                                resultBox.innerHTML += "<br><strong>Advertencia:</strong> No se detectó parpadeo, verifique si es una imagen.";
+                            }
                         });
 
                         if (results.length === 0) {
@@ -127,31 +146,19 @@
                         }
                     }, 1000);
                 });
+            }
 
-                // Añadir lógica de detección de movimiento (Ejemplo: movimiento de cabeza)
-                let lastPosition = null;
-
-                setInterval(async () => {
-                    const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks();
-                    if (detections.length > 0) {
-                        const positions = detections[0].landmarks.positions;
-                        const movementDetected = lastPosition && Math.abs(positions[0].x - lastPosition.x) > 20;  // Movimiento horizontal de cabeza
-                        lastPosition = positions[0];
-
-                        if (movementDetected) {
-                            motionBox.innerHTML = "¡Movimiento detectado! (Prueba de vida)";
-                            motionBox.className = 'alert alert-success';
-                        } else {
-                            motionBox.innerHTML = "Por favor, mueve la cabeza para verificar la prueba de vida.";
-                            motionBox.className = 'alert alert-warning';
-                        }
-                    }
-                }, 500);
+            // Función para detectar parpadeos
+            function isBlinking(leftEye, rightEye) {
+                const leftEyeHeight = Math.abs(leftEye[1].y - leftEye[5].y);
+                const rightEyeHeight = Math.abs(rightEye[1].y - rightEye[5].y);
+                return (leftEyeHeight < 5 && rightEyeHeight < 5);  // Si la altura de los ojos es pequeña, podría ser parpadeo
             }
         });
-    </script>--}}
+    </script>
 
-    <script defer>
+
+    {{--<script defer>
         window.addEventListener('DOMContentLoaded', async function () {
             const labeledDescriptors = [];
             const faces = @json($faces);  // Rostros registrados
@@ -227,5 +234,5 @@
                 });
             }
         });
-    </script>
+    </script>--}}
 @endsection
