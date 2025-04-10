@@ -54,22 +54,24 @@
 
     <!-- Tu script que usa faceapi -->
     <script defer>
-        window.addEventListener('DOMContentLoaded', async function () {
+        window.addEventListener('DOMContentLoaded', function () {
             const labeledDescriptors = [];
             const faces = @json($faces);  // Rostros registrados
 
-            try {
-                // Asegurarse de que los modelos estén cargados antes de proceder
-                await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
-                await faceapi.nets.faceLandmark68Net.loadFromUri('/models');
-                await faceapi.nets.faceRecognitionNet.loadFromUri('/models');
-                console.log("Modelos cargados correctamente.");
-            } catch (err) {
-                console.error("Error al cargar los modelos:", err);
-                return;  // Si hay un error, detenemos la ejecución
-            }
+            // Asegurarse de que los modelos estén cargados antes de proceder
+            Promise.all([
+                faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+                faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+                faceapi.nets.faceRecognitionNet.loadFromUri('/models')
+            ])
+                .then(() => {
+                    console.log("Modelos cargados correctamente.");
+                    start();  // Solo inicia la detección después de que los modelos estén cargados
+                })
+                .catch(err => {
+                    console.error("Error al cargar los modelos:", err);
+                });
 
-            // Función que comienza la detección después de que los modelos estén cargados
             async function start() {
                 const video = document.getElementById('videoElement');
                 const canvas = document.getElementById('overlay');
@@ -82,7 +84,7 @@
                         video.srcObject = stream;
                     });
 
-                // Esperar a que el video esté listo
+                // Esperar a que el video esté listo para la detección
                 video.addEventListener('playing', async () => {
                     const displaySize = { width: video.videoWidth, height: video.videoHeight };
                     faceapi.matchDimensions(canvas, displaySize);
@@ -146,11 +148,9 @@
                     }
                 }, 500);
             }
-
-            // Solo iniciar la detección después de que los modelos estén completamente cargados
-            await start();  // Llamar a la función `start` después de que todo esté listo
         });
     </script>
+
     {{--<script defer>
         window.addEventListener('DOMContentLoaded', async function () {
             const labeledDescriptors = [];
