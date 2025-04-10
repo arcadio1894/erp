@@ -69,7 +69,7 @@
                 return;  // Si hay un error en la carga de los modelos, se detiene la ejecución
             }
 
-            // Iniciar detección
+            // Iniciar detección después de que los modelos estén completamente cargados
             start();
 
             async function start() {
