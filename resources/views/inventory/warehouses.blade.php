@@ -160,6 +160,69 @@
         </div>
     </div>
     @endcan
+
+    <div id="modalCreateVisual" class="modal fade" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Creación Visual de posiciones</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <form id="formCreateVisual" class="form-horizontal" data-url="{{ route('warehouse.create.visual') }}" >
+                    @csrf
+                    <input type="hidden" name="area_id" id="area_id" value="{{$area->id}}">
+                    <input type="hidden" name="warehouse_id" id="warehouse_id">
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                <label class="col-sm-12 control-label " for="nameCreateVisual"> Almacén <span class="right badge badge-danger">(*)</span></label>
+
+                                <div class="col-sm-12">
+                                    <input type="text" id="nameCreateVisual" onkeyup="mayus(this);" name="name" class="form-control" readonly />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="col-sm-12 control-label" for="commentCreateVisual"> Comentario </label>
+
+                                <div class="col-sm-12">
+                                    <input type="text" id="commentCreateVisual" onkeyup="mayus(this);" name="comment" class="form-control" readonly/>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <label class="col-sm-12 control-label " for="quantityAnaqueles"> # de Anaqueles <span class="right badge badge-danger">(*)</span></label>
+
+                                <div class="col-sm-12">
+                                    <input type="text" id="quantityAnaqueles" name="quantityAnaqueles" class="form-control" required />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="col-sm-12 control-label " for="quantityNiveles"> # de Niveles <span class="right badge badge-danger">(*)</span></label>
+
+                                <div class="col-sm-12">
+                                    <input type="text" id="quantityNiveles" name="quantityNiveles" class="form-control" required />
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="col-sm-12 control-label " for="quantityColumnas"> # de Columnas <span class="right badge badge-danger">(*)</span></label>
+
+                                <div class="col-sm-12">
+                                    <input type="text" id="quantityColumnas" name="quantityColumnas" class="form-control" required />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" data-dismiss="modal">Cancelar</button>
+                        <button type="button" id="btn-generatePosition" class="btn btn-outline-primary">Generar posiciones</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('plugins')

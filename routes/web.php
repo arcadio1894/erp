@@ -498,6 +498,11 @@ Route::middleware('auth')->group(function (){
         Route::post('warehouse/destroy', 'WarehouseController@destroy')->name('warehouse.destroy')
             ->middleware('permission:destroy_warehouse');
         Route::get('/all/warehouses/{id_area}', 'WarehouseController@getWarehouses');
+        Route::post('warehouse/generate/visual', 'WarehouseController@generateStructure')->name('warehouse.create.visual')
+            ->middleware('permission:update_warehouse');
+        Route::get('/ver/estructura/almacen/{warehouse_id}', 'WarehouseController@showCreateVisual');
+        Route::post('/positions/toggle-status', 'WarehouseController@toggleStatus')->name('positions.toggleStatus');
+
 
         //SHELF
         Route::get('ver/anaqueles/almacen/{almacen}/area/{area}', 'ShelfController@index')->name('shelf.index')

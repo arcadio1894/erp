@@ -3,9 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Area;
+use App\Container;
 use App\Http\Requests\DeleteWarehouseRequest;
 use App\Http\Requests\StoreWarehouseRequest;
 use App\Http\Requests\UpdateWarehouseRequest;
+use App\Level;
+use App\Location;
+use App\Position;
+use App\Shelf;
 use App\Warehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -84,5 +89,92 @@ class WarehouseController extends Controller
 
         //dd(datatables($materials)->toJson());
         return datatables($warehouses)->toJson();
+    }
+
+    public function generateStructure(Request $request)
+    {
+        $quantityAnaqueles = $request->input('quantityAnaqueles');
+        $quantityNiveles = $request->input('quantityNiveles');
+        $quantityColumnas = $request->input('quantityColumnas');
+        $warehouse_id = $request->input('warehouse_id');
+        $area_id = $request->input('area_id');
+
+        $levelLetters = range('A', 'Z'); // A, B, C, ...
+
+        for ($s = 1; $s <= $quantityAnaqueles; $s++) {
+            // Crear Anaquel
+            $shelf = Shelf::create([
+                'name' => 'ANAQUEL ' . $s,
+                'comment' => 'Generado automáticamente',
+                'warehouse_id' => $warehouse_id,
+            ]);
+
+            for ($n = 0; $n < $quantityNiveles; $n++) {
+                $levelLetter = $levelLetters[$n]; // A, B, C...
+
+                // Crear Nivel
+                $level = Level::create([
+                    'name' => $levelLetter,
+                    'comment' => 'Nivel ' . $levelLetter,
+                    'shelf_id' => $shelf->id,
+                ]);
+
+                for ($c = 1; $c <= $quantityColumnas; $c++) {
+                    // Crear Contenedor
+                    $container = Container::create([
+                        'name' => 'Columna ' . $c,
+                        'comment' => 'Contenedor ' . $c,
+                        'level_id' => $level->id,
+                    ]);
+
+                    // ⚠️ Aquí el número se calcula con base en anaquel y columna
+                    $positionNumber = (($s - 1) * $quantityColumnas) + $c;
+                    $positionName = $levelLetter . $positionNumber;
+
+                    // Crear Posición
+                    $position = Position::create([
+                        'name' => $positionName,
+                        'comment' => 'Posición única',
+                        'container_id' => $container->id,
+                    ]);
+
+                    // Crear Ubicación
+                    Location::create([
+                        'area_id' => $area_id,
+                        'warehouse_id' => $warehouse_id,
+                        'shelf_id' => $shelf->id,
+                        'level_id' => $level->id,
+                        'container_id' => $container->id,
+                        'position_id' => $position->id,
+                        'description' => 'Ubicación generada automáticamente'
+                    ]);
+                }
+            }
+        }
+
+        return response()->json(['message' => 'Estructura generada correctamente']);
+    }
+
+    public function showCreateVisual($warehouse_id)
+    {
+        $user = Auth::user();
+        $permissions = $user->getPermissionsViaRoles()->pluck('name')->toArray();
+
+        $shelves = Shelf::with('levels.containers.positions')
+            ->where('warehouse_id', $warehouse_id)->get();
+
+        return view('inventory.warehouse_visual', compact('shelves', 'permissions'));
+    }
+
+    public function toggleStatus(Request $request)
+    {
+        $position = Position::findOrFail($request->id);
+        $position->status = $position->status === 'active' ? 'inactive' : 'active';
+        $position->save();
+
+        return response()->json([
+            'success' => true,
+            'new_status' => $position->status,
+        ]);
     }
 }

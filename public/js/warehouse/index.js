@@ -24,6 +24,12 @@ $(document).ready(function () {
                     if ( $.inArray('destroy_warehouse', $permissions) !== -1 ) {
                         text = text + ' <button data-delete="'+item.id+'" data-comment="'+item.comment+'" data-name="'+item.name+'" class="btn btn-outline-danger btn-sm"><i class="fa fa-trash"></i> Eliminar</button>';
                     }
+                    if ( $.inArray('update_warehouse', $permissions) !== -1 ) {
+                        text = text + ' <button data-create_visual="'+item.id+'" data-comment="'+item.comment+'" data-name="'+item.name+'" class="btn btn-outline-success btn-sm"><i class="fas fa-th"></i> Creación Visual</button>';
+                    }
+                    if ( $.inArray('update_warehouse', $permissions) !== -1 ) {
+                        text = text + ' <a target="_blank" href="'+document.location.origin+ '/dashboard/ver/estructura/almacen/'+item.id+'" class="btn btn-outline-primary btn-sm"><i class="fa fa-eye"></i> Ver estructura</a>';
+                    }
                     return text;
 
                 }
@@ -185,7 +191,15 @@ $(document).ready(function () {
     $modalDelete = $('#modalDelete');
     $(document).on('click', '[data-delete]', openModalDelete);
 
+    $formCreateVisual = $('#formCreateVisual');
+    $("#btn-generatePosition").on('click', createVisual);
+    $modalCreateVisual = $('#modalCreateVisual');
+    $(document).on('click', '[data-create_visual]', openModalCreateVisual);
+
 });
+
+var $formCreateVisual;
+var $modalCreateVisual;
 
 var $formCreate;
 var $modalCreate;
@@ -200,6 +214,69 @@ var $permissions;
 
 function mayus(e) {
     e.value = e.value.toUpperCase();
+}
+
+function createVisual() {
+    let form = $("#formCreateVisual");
+    let url = form.data('url');
+    let data = form.serialize();
+
+    $("#btn-generatePosition").attr("disabled", true);
+    $.ajax({
+        url: url,
+        method: 'POST',
+        data: data,
+        success: function(response) {
+            $.confirm({
+                title: 'Éxito',
+                content: response.message || 'Estructura generada correctamente',
+                type: 'green',
+                buttons: {
+                    ok: {
+                        text: 'Aceptar',
+                        btnClass: 'btn-green'
+                    }
+                }
+            });
+            $("#btn-generatePosition").attr("disabled", false);
+            // Aquí podrías recargar tabla, cerrar modal, etc.
+            $modalCreateVisual.modal('hide');
+        },
+        error: function(xhr) {
+            let message = 'Ocurrió un error al generar la estructura.';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                message = xhr.responseJSON.message;
+            }
+            $("#btn-generatePosition").attr("disabled", false);
+            $.confirm({
+                title: 'Error',
+                content: message,
+                type: 'red',
+                buttons: {
+                    ok: {
+                        text: 'Cerrar',
+                        btnClass: 'btn-red'
+                    }
+                }
+            });
+        }
+    });
+}
+
+function openModalCreateVisual() {
+    var warehouse_id = $(this).data('create_visual');
+    var name = $(this).data('name');
+    var comment = $(this).data('comment');
+
+    console.log(warehouse_id);
+    console.log(name);
+    console.log(comment);
+
+    $modalCreateVisual.find('[id=warehouse_id]').val(warehouse_id);
+    $modalCreateVisual.find('[id=nameCreateVisual]').val(name);
+    $modalCreateVisual.find('[id=commentCreateVisual]').val(comment);
+
+    $modalCreateVisual.modal('show');
 }
 
 function openModalCreate() {

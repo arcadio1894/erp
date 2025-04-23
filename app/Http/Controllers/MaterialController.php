@@ -317,6 +317,7 @@ class MaterialController extends Controller
         $marca = $request->input('marca');
         $retaceria = $request->input('retaceria');
         $rotation = $request->input('rotation');
+        $isPack = $request->input('isPack');
 
         $query = Material::with('category:id,name', 'materialType:id,name','unitMeasure:id,name','subcategory:id,name','subType:id,name','exampler:id,name','brand:id,name','warrant:id,name','quality:id,name','typeScrap:id,name')
             ->where('enable_status', 1)
@@ -382,6 +383,10 @@ class MaterialController extends Controller
             $query->where('rotation', $rotation);
         }
 
+        if ( $isPack != "" ) {
+            $query->where('isPack', $isPack);
+        }
+
         $totalFilteredRecords = $query->count();
         $totalPages = ceil($totalFilteredRecords / $perPage);
 
@@ -441,7 +446,8 @@ class MaterialController extends Controller
                 "retaceria" => ($material->typeScrap == null) ? '':$material->typeScrap->name,
                 "image" => ($material->image == null || $material->image == "" ) ? 'no_image.png':$material->image,
                 "rotation" => $rotacion,
-                "update_price" => $material->state_update_price
+                "update_price" => $material->state_update_price,
+                "isPack" => $material->isPack
             ]);
         }
 
@@ -478,7 +484,21 @@ class MaterialController extends Controller
             ["value" => "b", "display" => "BAJA"]
         ];
 
-        return view('material.indexv2', compact( 'permissions', 'arrayCategories', 'arrayCedulas', 'arrayCalidades', 'arrayMarcas', 'arrayRetacerias', 'arrayRotations'));
+        $materials = Material::where('isPack', 0)
+            ->where('enable_status', 1)->get();
+
+        //dd($array);
+
+        $arrayMaterials = [];
+        foreach ( $materials as $material )
+        {
+            array_push($arrayMaterials, [
+                'id'=> $material->id,
+                'full_name' => $material->full_name,
+            ]);
+        }
+
+        return view('material.indexv2', compact( 'permissions', 'arrayCategories', 'arrayCedulas', 'arrayCalidades', 'arrayMarcas', 'arrayRetacerias', 'arrayRotations', 'arrayMaterials'));
 
     }
 
