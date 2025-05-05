@@ -11,13 +11,19 @@ use App\Genero;
 use App\Http\Requests\DeleteMaterialRequest;
 use App\Http\Requests\StoreMaterialRequest;
 use App\Http\Requests\UpdateMaterialRequest;
+use App\Location;
 use App\Material;
 use App\MaterialDiscountQuantity;
 use App\MaterialType;
+use App\MaterialUnpack;
 use App\Quality;
+use App\Shelf;
 use App\Specification;
 use App\Item;
 use APP\DetailEntry;
+use App\StoreMaterial;
+use App\StoreMaterialLocation;
+use App\StoreMaterialVencimiento;
 use App\Subcategory;
 use App\Subtype;
 use App\Talla;
@@ -1232,4 +1238,386 @@ class MaterialController extends Controller
         return response()->json(['message' => 'Cambio de precio de porcentaje con éxito.'], 200);
     }
 
+    public function sendMaterialToStore($material_id)
+    {
+        $user = Auth::user();
+        $permissions = $user->getPermissionsViaRoles()->pluck('name')->toArray();
+
+        $material = Material::find($material_id);
+
+        $warehouse_id = 5; // TODO: HACERLO DINAMICO
+
+        $shelves = Shelf::with('levels.containers.positions')
+            ->where('warehouse_id', $warehouse_id)->get();
+
+        return view('material.sendToStore', compact( 'permissions', 'material', 'shelves'));
+
+    }
+
+    public function guardarTraslado( Request $request )
+    {
+        $request->validate([
+            'material_id'   => 'required|integer|exists:materials,id',
+            'position_id'   => 'required|integer|exists:positions,id',
+            'quantity'      => 'required|numeric|min:1',
+            'unit_price'    => 'required|numeric|min:0.01',
+            'fechas'        => 'required|array|min:1',
+            'fechas.*'      => 'date|after_or_equal:today',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // 1. Buscar el material
+            $material = Material::findOrFail($request->material_id);
+
+            // 2. Crear StoreMaterial
+            $storeMaterial = StoreMaterial::create([
+                'material_id'    => $material->id,
+                'full_name'      => $material->full_name,
+                'stock_max'      => $material->stock_max,
+                'stock_min'      => $material->stock_min,
+                'stock_current'  => $request->quantity,
+                'unit_price'     => $request->unit_price,
+                'enable_status'  => 1,
+                'codigo'         => $material->codigo,
+                'isPack'         => $material->isPack,
+                'quantityPack'   => $material->quantityPack,
+            ]);
+
+            // 3. Obtener location_id a partir del position_id
+            $location = Location::where('position_id', $request->position_id)->first();
+            if (!$location) {
+                throw new \Exception("No se encontró una ubicación válida para esta posición.");
+            }
+
+            // 4. Crear StoreMaterialLocation
+            StoreMaterialLocation::create([
+                'store_material_id' => $storeMaterial->id,
+                'location_id'       => $location->id,
+            ]);
+
+            // 5. Crear fechas de vencimiento
+            foreach ($request->fechas as $fecha) {
+                StoreMaterialVencimiento::create([
+                    'store_material_id'  => $storeMaterial->id,
+                    'fecha_vencimiento'  => $fecha,
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json(['message' => 'Traslado guardado correctamente.'], 200);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'message' => 'Error al guardar el traslado.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function indexMaterialStore()
+    {
+        $user = Auth::user();
+        $permissions = $user->getPermissionsViaRoles()->pluck('name')->toArray();
+
+        $arrayCategories = Category::where('id', '<>', 8)->select('id', 'name')->get()->toArray();
+
+        $arrayCedulas = Warrant::select('id', 'name')->get()->toArray();
+
+        $arrayCalidades = Quality::select('id', 'name')->get()->toArray();
+
+        $arrayMarcas = Brand::select('id', 'name')->get()->toArray();
+
+        $arrayRetacerias = Typescrap::select('id', 'name')->get()->toArray();
+
+        $arrayRotations = [
+            ["value" => "a", "display" => "ALTA"],
+            ["value" => "m", "display" => "MEDIA"],
+            ["value" => "b", "display" => "BAJA"]
+        ];
+
+        $materials = Material::where('isPack', 0)
+            ->where('enable_status', 1)->get();
+
+        //dd($array);
+
+        $arrayMaterials = [];
+        foreach ( $materials as $material )
+        {
+            array_push($arrayMaterials, [
+                'id'=> $material->id,
+                'full_name' => $material->full_name,
+            ]);
+        }
+
+        $warehouse_id = 5; // TODO: HACERLO DINAMICO
+
+        $shelves = Shelf::with('levels.containers.positions')
+            ->where('warehouse_id', $warehouse_id)->get();
+
+        return view('material.indexStore', compact( 'permissions', 'arrayCategories', 'arrayCedulas', 'arrayCalidades', 'arrayMarcas', 'arrayRetacerias', 'arrayRotations', 'arrayMaterials', 'shelves'));
+
+    }
+
+    public function getDataMaterialStore(Request $request, $pageNumber = 1)
+    {
+        $perPage = 10;
+        $description = $request->input('description');
+        $code = $request->input('code');
+        $category = $request->input('category');
+        $subcategory = $request->input('subcategory');
+        $material_type = $request->input('material_type');
+        $sub_type = $request->input('sub_type');
+        $cedula = $request->input('cedula');
+        $calidad = $request->input('calidad');
+        $marca = $request->input('marca');
+        $retaceria = $request->input('retaceria');
+        $rotation = $request->input('rotation');
+        $isPack = $request->input('isPack');
+
+        $materialIds = StoreMaterial::where('enable_status', 1)
+            ->pluck('material_id')
+            ->unique()
+            ->toArray();
+
+        $query = Material::with('category:id,name', 'materialType:id,name','unitMeasure:id,name','subcategory:id,name','subType:id,name','exampler:id,name','brand:id,name','warrant:id,name','quality:id,name','typeScrap:id,name')
+            ->whereIn('id', $materialIds)
+            ->where('enable_status', 1)
+            ->orderBy('id');
+
+        // Aplicar filtros si se proporcionan
+        if ($description != "") {
+            // Convertir la cadena de búsqueda en un array de palabras clave
+            $keywords = explode(' ', $description);
+
+            // Construir la consulta para buscar todas las palabras clave en el campo full_name
+            $query->where(function ($query) use ($keywords) {
+                foreach ($keywords as $keyword) {
+                    $query->where('full_name', 'LIKE', '%' . $keyword . '%');
+                }
+            });
+
+            // Asegurarse de que todas las palabras clave estén presentes en la descripción
+            foreach ($keywords as $keyword) {
+                $query->where('full_name', 'LIKE', '%' . $keyword . '%');
+            }
+        }
+
+        if ($code != "") {
+            $query->where('code', 'LIKE', '%'.$code.'%');
+        }
+
+        if ($category != "") {
+            $query->where('category_id', $category);
+        }
+
+        if ($subcategory != "") {
+            $query->where('subcategory_id', $subcategory);
+        }
+
+        if ($material_type != "") {
+            $query->where('material_type_id', $material_type);
+        }
+
+        if ($sub_type != "") {
+            $query->where('subtype_id', $sub_type);
+        }
+
+        if ($cedula != "") {
+            $query->where('warrant_id', $cedula);
+        }
+
+        if ($calidad != "") {
+            $query->where('quality_id', $calidad);
+        }
+
+        if ($marca != "") {
+            $query->where('brand_id', $marca);
+        }
+
+        if ($retaceria != "") {
+            $query->where('typescrap_id', $retaceria);
+        }
+
+        if ( $rotation != "" ) {
+            $query->where('rotation', $rotation);
+        }
+
+        if ( $isPack != "" ) {
+            $query->where('isPack', $isPack);
+        }
+
+        $totalFilteredRecords = $query->count();
+        $totalPages = ceil($totalFilteredRecords / $perPage);
+
+        $startRecord = ($pageNumber - 1) * $perPage + 1;
+        $endRecord = min($totalFilteredRecords, $pageNumber * $perPage);
+
+        $materials = $query->skip(($pageNumber - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        $array = [];
+
+        foreach ( $materials as $material )
+        {
+            $priority = '';
+            if ( $material->stock_current > $material->stock_max ){
+                $priority = 'Completo';
+            } else if ( $material->stock_current == $material->stock_max ){
+                $priority = 'Aceptable';
+            } else if ( $material->stock_current > $material->stock_min && $material->stock_current < $material->stock_max ){
+                $priority = 'Aceptable';
+            } else if ( $material->stock_current == $material->stock_min ){
+                $priority = 'Por agotarse';
+            } else if ( $material->stock_current < $material->stock_min || $material->stock_current == 0 ){
+                $priority = 'Agotado';
+            }
+
+            $rotacion = "";
+            if ( $material->rotation == "a" )
+            {
+                $rotacion = '<span class="badge bg-success text-md">ALTA</span>';
+            } elseif ( $material->rotation == "m" ) {
+                $rotacion = '<span class="badge bg-warning text-md">MEDIA</span>';
+            } else {
+                $rotacion = '<span class="badge bg-danger text-md">BAJA</span>';
+            }
+
+            array_push($array, [
+                "id" => $material->id,
+                "codigo" => $material->code,
+                "descripcion" => $material->full_name,
+                "medida" => $material->measure,
+                "unidad_medida" => ($material->unitMeasure == null) ? '':$material->unitMeasure->name,
+                "stock_max" => $material->stock_max,
+                "stock_min" => $material->stock_min,
+                "stock_actual" => $material->stock_store,
+                "prioridad" => $priority,
+                "precio_unitario" => $material->unit_price,
+                "categoria" => ($material->category == null) ? '': $material->category->name,
+                "sub_categoria" => ($material->subcategory == null) ? '': $material->subcategory->name,
+                "tipo" => ($material->materialType == null) ? '': $material->materialType->name,
+                "sub_tipo" => ($material->subType == null) ? '': $material->subType->name,
+                "cedula" => ($material->warrant == null) ? '':$material->warrant->name,
+                "calidad" => ($material->quality == null) ? '': $material->quality->name,
+                "marca" => ($material->brand == null) ? '': $material->brand->name,
+                "modelo" => ($material->exampler == null) ? '': $material->exampler->name,
+                "retaceria" => ($material->typeScrap == null) ? '':$material->typeScrap->name,
+                "image" => ($material->image == null || $material->image == "" ) ? 'no_image.png':$material->image,
+                "rotation" => $rotacion,
+                "update_price" => $material->state_update_price,
+                "isPack" => $material->isPack
+            ]);
+        }
+
+        $pagination = [
+            'currentPage' => (int)$pageNumber,
+            'totalPages' => (int)$totalPages,
+            'startRecord' => $startRecord,
+            'endRecord' => $endRecord,
+            'totalRecords' => $totalFilteredRecords,
+            'totalFilteredRecords' => $totalFilteredRecords
+        ];
+
+        return ['data' => $array, 'pagination' => $pagination];
+    }
+
+    public function getFechasVencimiento($material_id)
+    {
+        $storeMaterials = StoreMaterial::where('material_id', $material_id)
+            ->where('enable_status', 1)
+            ->pluck('id'); // IDs de store_materials activos
+
+        $vencimientos = StoreMaterialVencimiento::whereIn('store_material_id', $storeMaterials)
+            ->orderBy('fecha_vencimiento', 'asc')
+            ->get(['id', 'fecha_vencimiento']);
+
+        return response()->json($vencimientos);
+    }
+
+    public function deleteFechasVencimiento($id)
+    {
+        $vencimiento = StoreMaterialVencimiento::findOrFail($id);
+        $vencimiento->delete();
+
+        return response()->json(['message' => 'Fecha eliminada exitosamente']);
+    }
+
+    public function ocupadas($materialId)
+    {
+        $storeMaterials = StoreMaterial::where('material_id', $materialId)
+            ->where('enable_status', 1)
+            ->pluck('id');
+
+        $locationIds = StoreMaterialLocation::whereIn('store_material_id', $storeMaterials)
+            ->pluck('location_id')
+            ->toArray();
+
+        $positionIds = Location::whereIn('id', $locationIds)
+            ->pluck('position_id')
+            ->toArray();
+
+        return response()->json([
+            'locations' => $positionIds
+        ]);
+    }
+
+    public function obtenerDetalleUbicacion(Request $request)
+    {
+        $position_id = $request->position_id;
+
+        $location = Location::where('position_id', $position_id)->first();
+        if (!$location) {
+            return response()->json(['error' => 'Ubicación no encontrada'], 404);
+        }
+
+        $storeLocation = StoreMaterialLocation::where('location_id', $location->id)->first();
+        if (!$storeLocation) {
+            return response()->json(['error' => 'No hay material en esta ubicación'], 404);
+        }
+
+        $storeMaterial = StoreMaterial::find($storeLocation->store_material_id);
+        if (!$storeMaterial) {
+            return response()->json(['error' => 'Material no encontrado'], 404);
+        }
+
+        return response()->json([
+            'store_material_id' => $storeMaterial->id,
+            'store_material_location_id' => $storeLocation->id,
+            'stock_current' => $storeMaterial->stock_current,
+            'material_name' => $storeMaterial->full_name
+        ]);
+    }
+
+    public function eliminarUbicacionOcupada(Request $request)
+    {
+        $storeMaterialLocation = StoreMaterialLocation::find($request->store_material_location_id);
+
+        if (!$storeMaterialLocation) {
+            return response()->json(['error' => 'Ubicación no encontrada'], 404);
+        }
+
+        $storeMaterial = StoreMaterial::find($storeMaterialLocation->store_material_id);
+        if (!$storeMaterial) {
+            return response()->json(['error' => 'Material no encontrado'], 404);
+        }
+
+        $material = Material::find($storeMaterial->material_id);
+        if ($material) {
+            // Devolver stock al material original
+            $material->stock_current += $storeMaterial->stock_current;
+            $material->save();
+        }
+
+        // Eliminar vencimientos y ubicaciones
+        StoreMaterialVencimiento::where('store_material_id', $storeMaterial->id)->delete();
+        StoreMaterialLocation::where('store_material_id', $storeMaterial->id)->delete();
+        $storeMaterial->delete();
+
+        return response()->json(['success' => true]);
+    }
 }

@@ -92,6 +92,67 @@
         .datepicker-orient-top {
             top: 100px !important;
         }
+
+        .circle-btn.ocupada {
+            background-color: orange !important;
+            border-color: #d17a00;
+        }
+
+        .bubble-popup {
+            position: absolute;
+            z-index: 1050;
+            background-color: white;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+        .bubble-popup::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 20px;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: transparent transparent #ccc transparent;
+        }
+        .bubble-popup .bubble-content {
+            pointer-events: auto;
+        }
+        .shelf-name {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .shelf-grid {
+            display: flex;
+            flex-direction: column;
+        }
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 35px;
+            height: 35px;
+        }
+        .circle-btn {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            border: 1px solid #1e3a8a;
+            background-color: white;
+            cursor: pointer;
+        }
+        .circle-btn.active {
+            background-color: #4CAF50; /* verde */
+        }
+
+        .circle-btn.inactive {
+            background-color: #ccc; /* gris claro */
+            opacity: 0.5;
+        }
     </style>
 @endsection
 
@@ -477,15 +538,13 @@
             </td>
             <td data-column="rotation" data-rotation></td>
             <td>
-                <a data-editar_material href="{{--'+document.location.origin+ '/dashboard/editar/material/'+item.id+'--}}" class="btn btn-outline-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Editar"><i class="fa fa-pen"></i> </a>
-                <button data-deshabilitar data-delete="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" data-measure="{{--'+item.measure+'--}}" class="btn btn-outline-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Deshabilitar"><i class="fas fa-bell-slash"></i> </button>
-                <a data-ver_items href="{{--'+document.location.origin+ '/dashboard/view/material/items/'+item.id+'--}}" class="btn btn-outline-info btn-sm" data-toggle="tooltip" data-placement="top" title="Ver items"><i class="fa fa-eye"></i> </a>
-                <button data-precioPorcentaje data-material="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" class="btn btn-outline-primary btn-sm" data-toggle="tooltip" data-placement="top" title="Precio Lista Porcentaje"><i class="fas fa-percent"></i> </button>
-                <button data-precioDirecto data-material="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" class="btn btn-outline-success btn-sm" data-toggle="tooltip" data-placement="top" title="Precio Lista Directo"><i class="fas fa-tag"></i> </button>
-                <button data-separate data-material="" data-quantity data-description="" data-measure="" class="btn btn-outline-primary btn-sm" data-toggle="tooltip" data-placement="top" title="Separar Paquete"><i class="far fa-object-ungroup"></i></button>
-                <button data-assign_child data-material="" data-description="" class="btn btn-outline-success btn-sm" data-toggle="tooltip" data-placement="top" title="Asignar Hijos"><i class="fas fa-boxes"></i></button>
+                <a data-editar_store_material href="{{--'+document.location.origin+ '/dashboard/editar/material/'+item.id+'--}}" class="btn btn-outline-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Editar"><i class="fa fa-pen"></i> </a>
 
-                <a data-send_store href="" class="btn btn-outline-info btn-sm" data-toggle="tooltip" data-placement="top" title="Enviar a tienda"><i class="fas fa-share"></i> </a>
+                <button data-deshabilitar data-delete="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" data-measure="{{--'+item.measure+'--}}" class="btn btn-outline-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Deshabilitar"><i class="fas fa-bell-slash"></i> </button>
+
+                <button data-show_vencimiento data-material="" data-description="" class="btn btn-outline-success btn-sm" data-toggle="tooltip" data-placement="top" title="Ver fechas"><i class="fas fa-boxes"></i></button>
+
+                <button data-show_location data-material="" data-description="" class="btn btn-outline-success btn-sm" data-toggle="tooltip" data-placement="top" title="Ver posiciones"><i class="fas fa-map-marker-alt"></i></button>
 
             </td>
         </tr>
@@ -497,180 +556,21 @@
         </tr>
     </template>
 
-    <div id="modalPrecioDirecto" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
+    <!-- Modal para ver vencimientos -->
+    <div class="modal fade" id="modalVencimientos" tabindex="-1" role="dialog" aria-labelledby="modalVencimientosLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Confirmar precio directo</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title" id="modalVencimientosLabel">Fechas de Vencimiento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <form id="formPrecioDirecto" data-url="{{ route('material.set.price.directo') }}">
-                    @csrf
-                    <div class="modal-body">
-                        <input type="hidden" id="material_id" name="material_id">
-                        <p>¿Está seguro de colocar el precio directamente?</p>
-                        <p id="descriptionDelete"></p>
-                        <div class="form-group">
-                            <label for="material_priceList">Precio Directo: <span class="right badge badge-danger">(*)</span></label>
-                            <input type="number" id="material_priceList" step="0.01" name="material_priceList" class="form-control" required min="0">
-                        </div>
+                <div class="modal-body">
+                    <div id="vencimientos-content" class="list-group">
+                        <!-- Aquí se llenarán las fechas -->
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="button" id="btn-submit_priceList" class="btn btn-success">Guardar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalPrecioPercentage" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Confirmar precio porcentaje</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
-                <form id="formPrecioPorcentaje" data-url="{{ route('material.set.price.porcentaje') }}">
-                    @csrf
-                    <div class="modal-body">
-                        <input type="hidden" id="material_id" name="material_id">
-                        <p>¿Está seguro de colocar el precio por porcentaje?</p>
-                        <p id="descriptionDelete"></p>
-                        <div class="form-group">
-                            <label for="material_pricePercentage">Precio Porcentaje (%): <span class="right badge badge-danger">(*)</span></label>
-                            <input type="number" id="material_pricePercentage" step="0.01" name="material_pricePercentage" class="form-control" required min="0">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="button" id="btn-submit_pricePercentage" class="btn btn-success">Guardar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalAssignChild" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Asignar Productos Hijos</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                </div>
-                <form id="formAssignChild" data-url="{{--{{ route('save.assign.child') }}--}}">
-                    @csrf
-                    <div class="modal-body">
-                        <input type="hidden" id="material_id" name="material_id">
-                        <strong id="name_material"></strong>
-                        <br>
-                        <p>Listado de productos hijos</p>
-
-                        <div class="row">
-                            <div class="col-md-10">
-                                <div class="form-group">
-                                    <label for="material">Seleccione el material <span class="right badge badge-danger">(*)</span></label>
-                                    <select id="material" name="material" class="form-control select2" style="width: 100%;">
-                                        <option></option>
-                                        @for( $i=0; $i<count($arrayMaterials); $i++ )
-                                            <option value="{{ $arrayMaterials[$i]['id'] }}">{{ $arrayMaterials[$i]['full_name'] }}</option>
-                                        @endfor
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-2">
-                                <div class="form-group">
-                                    <label for="material">&nbsp;&nbsp;&nbsp;&nbsp;</label><br>
-                                    <button type="button" class="btn btn-outline-success" id="btn-submitAssignChild"><i class="fas fa-plus"></i></button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="table-responsive">
-                                    <table class="table">
-                                        <thead class="thead-dark">
-                                        <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col">Producto</th>
-                                            <th scope="col"></th>
-                                        </tr>
-                                        </thead>
-                                        <tbody id="body-childs">
-                                        <tr>
-                                            <th scope="row">1</th>
-                                            <td>Mark</td>
-                                            <td>
-                                                <button type="button" class="btn btn-outline-danger btn-block"><i class="fas fa-trash-alt"></i></button>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th scope="row">2</th>
-                                            <td>Jacob</td>
-                                            <td>
-                                                <button type="button" class="btn btn-outline-danger btn-block"><i class="fas fa-trash-alt"></i></button>
-                                            </td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div id="modalSeparate" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Confirmar separación</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                </div>
-                <form id="formSeparate" data-url="{{ route('save.separate.pack') }}">
-                    @csrf
-                    <div class="modal-body">
-                        <input type="hidden" id="material_id" name="material_id">
-                        <strong id="name_material"></strong>
-                        <br>
-                        <p>¿Cuántos paquetes necesitas separar</p>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="stock_max">Cantidad Total </label>
-                                    <input type="number" id="packs_total" name="packs_total" class="form-control" placeholder="0.00" min="0" value="0" step="1" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label for="stock_max">Cantidad a separar <span class="right badge badge-danger">(*)</span></label>
-                                    <input type="number" id="packs_separate" name="packs_separate" class="form-control" placeholder="0.00" min="0" value="0" step="1">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="materialChild">Seleccione el material <span class="right badge badge-danger">(*)</span></label>
-                                    <select id="materialChild" name="materialChild" class="form-control select2" style="width: 100%;">
-                                        <option></option>
-                                        @for( $i=0; $i<count($arrayMaterials); $i++ )
-                                            <option value="{{ $arrayMaterials[$i]['id'] }}">{{ $arrayMaterials[$i]['full_name'] }}</option>
-                                        @endfor
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button type="button" id="btn-submitSeparate" class="btn btn-success">Separar</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
@@ -712,6 +612,64 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalUbicaciones" tabindex="-1" role="dialog" aria-labelledby="modalUbicacionesLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalUbicacionesLabel">Ubicaciones del material</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            @foreach($shelves as $shelf)
+                                <div class="col-sm-3">
+                                    <div class="shelf-name font-weight-bold">{{ $shelf->name }}</div>
+                                    <div class="shelf-grid">
+                                        @foreach($shelf->levels as $level)
+                                            <div class="row mb-2">
+                                                <div class="label col-auto">{{ $level->name }}</div>
+
+                                                @foreach($level->containers as $container)
+                                                    <div class="cell col">
+                                                        @foreach($container->positions as $position)
+                                                            <button
+                                                                    class="circle-btn {{ $position->status == 'active' ? 'active' : 'inactive' }}"
+                                                                    data-position-id="{{ $position->id }}"
+                                                                    data-position-name="{{ $position->name }}"
+                                                                    data-position-status="{{ $position->status }}"
+                                                                    title="{{ $position->name }}"
+                                                            ></button>
+                                                        @endforeach
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+
+                    <!-- Burbuja flotante para mostrar info de posición ocupada -->
+                    <div id="bubblePopup" class="bubble-popup d-none">
+                        <div class="bubble-content">
+                            <span id="bubblePositionName"></span>
+                            <button id="bubbleDeleteBtn" class="btn btn-danger btn-sm mt-2">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>
@@ -795,6 +753,6 @@
 
         })
     </script>
-    <script src="{{ asset('js/material/indexV2.js') }}"></script>
+    <script src="{{ asset('js/material/indexStore.js') }}"></script>
 
 @endsection

@@ -903,12 +903,12 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 @can('list_material')
-                                {{--<li class="nav-item">
-                                    <a href="{{route('material.index')}}" class="nav-link @yield('activeListMaterial')">
+                                <li class="nav-item">
+                                    <a href="{{route('material.index.store')}}" class="nav-link @yield('activeListMaterialStore')">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Listar materiales</p>
+                                        <p>Listar materiales Tienda</p>
                                     </a>
-                                </li>--}}
+                                </li>
                                 <li class="nav-item">
                                     <a href="{{route('material.indexV2')}}" class="nav-link @yield('activeListMaterial')">
                                         <i class="far fa-circle nav-icon"></i>

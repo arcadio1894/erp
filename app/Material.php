@@ -9,7 +9,7 @@ class Material extends Model
 {
     use SoftDeletes;
 
-    protected $appends = ['full_description'];
+    protected $appends = ['full_description', 'stock_store'];
 
     protected $fillable = [
         'code',
@@ -184,6 +184,12 @@ class Material extends Model
     public function unpackedParents()
     {
         return $this->hasMany(MaterialUnpack::class, 'child_product_id');
+    }
+
+    public function getStockStoreAttribute()
+    {
+        $storeMaterial = StoreMaterial::where('material_id', $this->id)->sum('stock_current');
+        return $storeMaterial;
     }
 
     protected $dates = ['deleted_at'];

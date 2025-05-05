@@ -7,79 +7,50 @@ use Illuminate\Http\Request;
 
 class StoreMaterialController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        //
+        $materials = StoreMaterial::with(['material', 'locations', 'vencimientos'])->get();
+        return response()->json($materials);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $storeMaterial = StoreMaterial::create($request->only([
+            'material_id', 'full_name', 'stock_max', 'stock_min',
+            'unit_price', 'enable_status', 'codigo', 'isPack', 'quantityPack', 'store_id'
+        ]));
+
+        if ($request->locations) {
+            foreach ($request->locations as $location) {
+                $storeMaterial->locations()->create(['location' => $location]);
+            }
+        }
+
+        if ($request->vencimientos) {
+            foreach ($request->vencimientos as $v) {
+                $storeMaterial->vencimientos()->create($v);
+            }
+        }
+
+        return response()->json(['success' => true, 'data' => $storeMaterial]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\StoreMaterial  $storeMaterial
-     * @return \Illuminate\Http\Response
-     */
-    public function show(StoreMaterial $storeMaterial)
+    public function update(Request $request, $id)
     {
-        //
+        $storeMaterial = StoreMaterial::findOrFail($id);
+        $storeMaterial->update($request->only([
+            'full_name', 'stock_max', 'stock_min', 'unit_price',
+            'enable_status', 'codigo', 'isPack', 'quantityPack'
+        ]));
+
+        return response()->json(['success' => true, 'data' => $storeMaterial]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\StoreMaterial  $storeMaterial
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(StoreMaterial $storeMaterial)
+    public function destroy($id)
     {
-        //
-    }
+        $storeMaterial = StoreMaterial::findOrFail($id);
+        $storeMaterial->delete();
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\StoreMaterial  $storeMaterial
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, StoreMaterial $storeMaterial)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\StoreMaterial  $storeMaterial
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(StoreMaterial $storeMaterial)
-    {
-        //
+        return response()->json(['success' => true]);
     }
 }

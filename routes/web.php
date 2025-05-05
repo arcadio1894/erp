@@ -476,6 +476,21 @@ Route::middleware('auth')->group(function (){
         Route::get('/listado/materiales/v2', 'MaterialController@indexV2')
             ->name('material.indexV2')
             ->middleware('permission:list_material');
+        Route::get('/enviar/material/a/tienda/{material_id}', 'MaterialController@sendMaterialToStore');
+        Route::post('/traslado/guardar', 'MaterialController@guardarTraslado')->name('traslado.guardar');
+        Route::get('/listado/materiales/tienda', 'MaterialController@indexMaterialStore')
+            ->name('material.index.store')
+            ->middleware('permission:list_material');
+        Route::get('/get/data/material/store/{numberPage}', 'MaterialController@getDataMaterialStore')
+            ->middleware('permission:list_material');
+        Route::get('/fechas/vencimientos/material/{material_id}', 'MaterialController@getFechasVencimiento');
+        Route::post('/eliminar/fechas/vencimientos/material/{id}', 'MaterialController@deleteFechasVencimiento');
+        Route::get('/ubicaciones/ocupadas/{material}', 'MaterialController@ocupadas');
+// Mostrar detalle de ubicación ocupada
+        Route::post('/ubicaciones/obtener-detalle', 'MaterialController@obtenerDetalleUbicacion')->name('ubicaciones.detalle');
+
+// Eliminar ubicación ocupada y devolver stock
+        Route::post('/ubicaciones/eliminar-ocupada', 'MaterialController@eliminarUbicacionOcupada')->name('ubicaciones.eliminar');
 
         //AREAS
         Route::get('areas', 'AreaController@index')->name('area.index')

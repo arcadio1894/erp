@@ -214,6 +214,163 @@ $(document).ready(function () {
             }
         });
     });
+
+    $(document).on('click', '[data-show_vencimiento]', function() {
+        var materialId = $(this).data('material');
+        var description = $(this).data('description');
+
+        $('#modalVencimientosLabel').text('Fechas de vencimiento - ' + description);
+
+        $.ajax({
+            url: '/dashboard/fechas/vencimientos/material/' + materialId,
+            method: 'GET',
+            success: function(response) {
+                var vencimientosHtml = '';
+
+                if(response.length > 0) {
+                    $.each(response, function(index, vencimiento) {
+                        var color = calcularColor(vencimiento.fecha_vencimiento);
+
+                        vencimientosHtml += `
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge badge-${color} p-2 mr-2">&nbsp;</span> 
+                                    ${vencimiento.fecha_vencimiento}
+                                </div>
+                                <button class="btn btn-danger btn-sm eliminar-vencimiento" data-store_material_vencimiento="${vencimiento.id}">
+                                    Eliminar
+                                </button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    vencimientosHtml = '<p class="text-center text-muted">No hay fechas de vencimiento registradas.</p>';
+                }
+
+                $('#vencimientos-content').html(vencimientosHtml);
+                $('#modalVencimientos').modal('show');
+            },
+            error: function() {
+                alert('Error al cargar las fechas de vencimiento.');
+            }
+        });
+    });
+
+    // Eliminar vencimiento
+    $(document).on('click', '.eliminar-vencimiento', function() {
+        var vencimientoId = $(this).data('store_material_vencimiento');
+
+        $.confirm({
+            title: '¿Eliminar fecha?',
+            content: '¿Estás seguro de que deseas eliminar esta fecha de vencimiento?',
+            buttons: {
+                confirmar: {
+                    text: 'Sí, eliminar',
+                    btnClass: 'btn-red',
+                    action: function() {
+                        $.ajax({
+                            url: '/dashboard/eliminar/fechas/vencimientos/material/' + vencimientoId,
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function() {
+                                $.alert({
+                                    title: 'Eliminado',
+                                    content: 'La fecha fue eliminada exitosamente.',
+                                    buttons: {
+                                        ok: {
+                                            action: function() {
+                                                // Refrescamos el modal
+                                                $('[data-show_vencimiento][data-material]').trigger('click');
+                                            }
+                                        }
+                                    }
+                                });
+                            },
+                            error: function() {
+                                $.alert('Error al eliminar la fecha de vencimiento.');
+                            }
+                        });
+                    }
+                },
+                cancelar: {
+                    text: 'Cancelar',
+                    btnClass: 'btn-default'
+                }
+            }
+        });
+    });
+
+    $(document).on('click', '[data-show_location]', function () {
+        const materialId = $(this).data('material');
+
+        // Mostrar el modal si no estaba abierto
+        $('#modalUbicaciones').modal('show');
+
+        // Limpiar todas las posiciones ocupadas primero
+        $('#modalUbicaciones .circle-btn').removeClass('ocupada');
+
+        // Llamada AJAX para obtener posiciones ocupadas
+        $.ajax({
+            url: '/dashboard/ubicaciones/ocupadas/' + materialId,
+            method: 'GET',
+            success: function (response) {
+                response.locations.forEach(function (positionId) {
+                    $(`#modalUbicaciones .circle-btn[data-position-id="${positionId}"]`).addClass('ocupada');
+                });
+            },
+            error: function () {
+                $.alert('Error al obtener las posiciones ocupadas.');
+            }
+        });
+    });
+
+    $(document).on('click', '.circle-btn.ocupada', function(e) {
+        const positionId = $(this).data('position-id');
+
+        $.ajax({
+            url: '/dashboard/ubicaciones/obtener-detalle',
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            data: {
+                position_id: positionId
+            },
+            success: function(response) {
+                // Esperamos:
+                // {
+                //   store_material_id: 12,
+                //   store_material_location_id: 34,
+                //   stock_current: 50,
+                //   material_name: "Arroz 5kg"
+                // }
+
+                $.confirm({
+                    title: 'Ubicación ocupada',
+                    content: `
+                    <p><strong>Producto:</strong> ${response.material_name}</p>
+                    <p><strong>Cantidad en esta ubicación:</strong> ${response.stock_current}</p>
+                    <hr>
+                    <p>¿Deseas eliminar esta ubicación y devolver el stock al almacén general?</p>
+                `,
+                    buttons: {
+                        cancelar: function () {},
+                        eliminar: {
+                            btnClass: 'btn-red',
+                            action: function () {
+                                eliminarUbicacionOcupada(response.store_material_location_id);
+                            }
+                        }
+                    }
+                });
+            },
+            error: function() {
+                $.alert('Error al obtener la información de la ubicación.');
+            }
+        });
+    });
 });
 
 var $formAssignChild;
@@ -234,6 +391,51 @@ var $modalPrecioPercentage;
 var $formPrecioDirecto;
 var $formPrecioPorcentaje;
 
+function eliminarUbicacionOcupada(store_material_location_id) {
+    $.ajax({
+        url: '/dashboard/ubicaciones/eliminar-ocupada',
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        data: {
+            store_material_location_id: store_material_location_id
+        },
+        success: function() {
+            $.alert({
+                title: 'Ubicación eliminada',
+                content: 'La posición fue liberada exitosamente.',
+                buttons: {
+                    ok: {
+                        action: function() {
+                            // Refrescar ubicaciones
+                            $('[data-show_locations][data-material]').trigger('click');
+                            location.reload();
+                        }
+                    }
+                }
+            });
+        },
+        error: function() {
+            $.alert('Error al eliminar la ubicación.');
+        }
+    });
+}
+
+// Función para calcular el color basado en la fecha
+function calcularColor(fechaVencimiento) {
+    var hoy = new Date();
+    var vencimiento = new Date(fechaVencimiento);
+    var diferencia = (vencimiento - hoy) / (1000 * 60 * 60 * 24); // en días
+
+    if(diferencia < 0) {
+        return 'danger'; // rojo
+    } else if(diferencia <= 5) {
+        return 'warning'; // amarillo
+    } else {
+        return 'success'; // verde
+    }
+}
 
 function submitAssignChild() {
     var child_id = $('#material').val();
@@ -949,7 +1151,7 @@ function getDataMaterials($numberPage, $activeColumns) {
     var rotation = $('#rotation').val();
     var isPack = $('#isPack').val();
 
-    $.get('/dashboard/get/data/material/v2/'+$numberPage, {
+    $.get('/dashboard/get/data/material/store/'+$numberPage, {
         description:description,
         code:code,
         category: category,
@@ -1169,10 +1371,10 @@ function renderDataTable(data, activeColumns) {
 
     // Configurar enlaces y botones según los permisos y datos
     if ($.inArray('update_material', $permissions) !== -1) {
-        let url = document.location.origin + '/dashboard/editar/material/' + data.id;
-        clone.querySelector("[data-editar_material]").setAttribute("href", url);
+        let url = document.location.origin + '/dashboard/editar/material/tienda/' + data.id;
+        clone.querySelector("[data-editar_store_material]").setAttribute("href", url);
     } else {
-        let element = clone.querySelector("[data-editar_material]");
+        let element = clone.querySelector("[data-editar_store_material]");
         if (element) {
             element.style.display = 'none';
         }
@@ -1189,37 +1391,11 @@ function renderDataTable(data, activeColumns) {
         }
     }
 
+    clone.querySelector("[data-show_vencimiento]").setAttribute("data-material", data.id);
+    clone.querySelector("[data-show_vencimiento]").setAttribute("data-description", data.descripcion);
 
-    clone.querySelector("[data-precioPorcentaje]").setAttribute("data-material", data.id);
-    clone.querySelector("[data-precioPorcentaje]").setAttribute("data-description", data.descripcion);
-    clone.querySelector("[data-precioDirecto]").setAttribute("data-material", data.id);
-    clone.querySelector("[data-precioDirecto]").setAttribute("data-description", data.descripcion);
-
-
-    let url2 = document.location.origin + '/dashboard/view/material/items/' + data.id;
-    clone.querySelector("[data-ver_items]").setAttribute("href", url2);
-
-    let url3 = document.location.origin + '/dashboard/enviar/material/a/tienda/' + data.id;
-    clone.querySelector("[data-send_store]").setAttribute("href", url3);
-
-    if (data.isPack == 1) {
-        clone.querySelector("[data-assign_child]").setAttribute("data-material", data.id);
-        clone.querySelector("[data-assign_child]").setAttribute("data-description", data.descripcion);
-
-        clone.querySelector("[data-separate]").setAttribute("data-material", data.id);
-        clone.querySelector("[data-separate]").setAttribute("data-description", data.descripcion);
-        clone.querySelector("[data-separate]").setAttribute("data-measure", data.medida);
-        clone.querySelector("[data-separate]").setAttribute("data-quantity", data.stock_actual);
-    } else {
-        let element = clone.querySelector("[data-separate]");
-        let element2 = clone.querySelector("[data-assign_child]");
-        if (element) {
-            element.style.display = 'none';
-        }
-        if (element2) {
-            element2.style.display = 'none';
-        }
-    }
+    clone.querySelector("[data-show_location]").setAttribute("data-material", data.id);
+    clone.querySelector("[data-show_location]").setAttribute("data-description", data.descripcion);
 
     // Agregar la fila clonada al cuerpo de la tabla
     $("#body-table").append(clone);

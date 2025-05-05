@@ -12,6 +12,7 @@ use App\Notification;
 use App\NotificationUser;
 use App\Sale;
 use App\SaleDetail;
+use App\StoreMaterial;
 use App\TipoPago;
 use App\User;
 use App\Worker;
@@ -36,7 +37,13 @@ class PuntoVentaController extends Controller
         $category_id = $request->input('category_id');
         $product_search = $request->input('product_search');
 
+        $materialIds = StoreMaterial::where('enable_status', 1)
+            ->pluck('material_id')
+            ->unique()
+            ->toArray();
+
         $query = Material::where('enable_status', 1)
+            ->whereIn('id', $materialIds)
             ->where('stock_current', '>', 0)
             ->orderBy('id');
 
