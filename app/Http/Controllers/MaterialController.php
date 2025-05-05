@@ -1245,7 +1245,7 @@ class MaterialController extends Controller
 
         $material = Material::find($material_id);
 
-        $warehouse_id = 5; // TODO: HACERLO DINAMICO
+        $warehouse_id = 2; // TODO: HACERLO DINAMICO
 
         $shelves = Shelf::with('levels.containers.positions')
             ->where('warehouse_id', $warehouse_id)->get();
