@@ -164,27 +164,27 @@
 
     <table class="table-operations full-width">
         <tr>
-            <td>OP. EXONERADA</td>
+            <td><b>OP. EXONERADA</b></td>
             <td class="right">S/. {{ number_format($sale->op_exonerada, 2) }}</td>
         </tr>
         <tr>
-            <td>OP. INAFECTA</td>
+            <td><b>OP. INAFECTA</b></td>
             <td class="right">S/. {{ number_format($sale->op_inafecta, 2) }}</td>
         </tr>
         <tr>
-            <td>OP. GRAVADA</td>
+            <td><b>OP. GRAVADA</b></td>
             <td class="right">S/. {{ number_format($sale->op_gravada, 2) }}</td>
         </tr>
         <tr>
-            <td>I.G.V.</td>
+            <td><b>I.G.V.</b></td>
             <td class="right">S/. {{ number_format($sale->igv, 2) }}</td>
         </tr>
         <tr>
-            <td>TOTAL DESCUENTOS</td>
+            <td><b>TOTAL DESCUENTOS</b></td>
             <td class="right">S/. {{ number_format($sale->total_descuentos, 2) }}</td>
         </tr>
         <tr>
-            <td class="total">TOTAL A PAGAR</td>
+            <td class="total"><b>TOTAL A PAGAR</b></td>
             <td class="total right">S/. {{ number_format($sale->importe_total, 2) }}</td>
         </tr>
     </table>
