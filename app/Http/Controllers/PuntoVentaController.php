@@ -6,6 +6,7 @@ use App\Audit;
 use App\CashMovement;
 use App\CashRegister;
 use App\Category;
+use App\DataGeneral;
 use App\Material;
 use App\MaterialDiscountQuantity;
 use App\Notification;
@@ -188,6 +189,7 @@ class PuntoVentaController extends Controller
                 ]);
 
                 // TODO: Actualizar stock
+                // TODO: Actualizar el stock del storeMaterial con la ubicacion que se este enviando
                 $material = Material::find($items[$i]->productId);
                 $material->stock_current = $material->stock_current - $items[$i]->productQuantity;
                 $material->save();
@@ -345,7 +347,16 @@ class PuntoVentaController extends Controller
                 $query->with(['material']);
             }])->first();
 
-        $view = view('exports.salePdf', compact('sale'));
+        $dataName = DataGeneral::where('name', 'empresa')->first();
+        $dataRuc = DataGeneral::where('name', 'ruc')->first();
+        $dataAddress = DataGeneral::where('name', 'address')->first();
+
+        $nameEmpresa = $dataName->valueText;
+        $ruc = $dataRuc->valueText;
+        $address = $dataAddress->valueText;
+
+
+        $view = view('exports.salePdf', compact('sale', 'nameEmpresa', 'ruc', 'address'));
 
         $pdf = PDF::loadHTML($view);
         // Configurar el tamaño de la página a un tamaño personalizado para el ticket

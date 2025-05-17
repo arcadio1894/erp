@@ -75,14 +75,23 @@
            /* margin: 0 auto;*/
             border-collapse: collapse; /* Elimina los espacios entre celdas */
         }
+
+        img {
+            max-width: 100px; /* Ajusta el tamaño del logo según sea necesario */
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
 <div class="ticket">
-    <p class="centered header">MAYORSA S.A.<br>
-        R.U.C.: 20108730294<br>
+    <img src="data:image/png;base64,{{ base64_encode(file_get_contents(public_path('images/logo/logoPequeno.png'))) }}" alt="Logo de Tienda">
+
+    <p class="centered header">{{ $nameEmpresa }}<br>
+        R.U.C.: {{ $ruc }}<br>
         BOLETA DE VENTA ELECTRÓNICA</p>
-    <p class="centered">AV. EL POLO 670, SANTIAGO DE SURCO, LIMA</p>
+    <p class="centered">{{ $address }}</p>
     <p><span class="bold">Fecha Emisión:</span> {{ \Carbon\Carbon::parse($sale->date_sale)->format('d/m/y') }}</p>
     <p><span class="bold">Hora:</span> {{ \Carbon\Carbon::parse($sale->date_sale)->format('H:i') }}</p>
     <p><span class="bold">Serie:</span> {{ $sale->serie }}</p>

@@ -1305,6 +1305,8 @@ class MaterialController extends Controller
                 ]);
             }
 
+            // TODO: Falta disminuir del almacen general
+
             DB::commit();
 
             return response()->json(['message' => 'Traslado guardado correctamente.'], 200);
