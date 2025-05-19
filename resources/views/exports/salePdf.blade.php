@@ -204,12 +204,12 @@
     <div class="line"></div>
     <div class="text-center" >
         <p style="text-align: center">¡Gracias por su compra!</p>
-        <p style="text-align: center">www.fuegoymasa.com</p>
+        <p style="text-align: center">www.edesce.com</p>
     </div>
     <div class="line2"></div>
     <div class="text-center" >
         <p style="text-align: center">¿Ya conoces nuestra web?</p>
-        <p style="text-align: center">En <strong>www.fuegoymasa.com</strong> puedes explorar nuestro menú, descubrir <strong>promociones especiales</strong> y hacer tu pedido de manera fácil y rápida.</p>
+        <p style="text-align: center">En <strong>www.edesce.com</strong> puedes explorar nuestro menú, descubrir <strong>promociones especiales</strong> y hacer tu pedido de manera fácil y rápida.</p>
     </div>
     <div class="line2"></div>
 </div>
