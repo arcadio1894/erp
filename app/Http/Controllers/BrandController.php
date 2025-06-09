@@ -7,6 +7,7 @@ use App\Exampler;
 use App\Http\Requests\DeleteBrandRequest;
 use App\Http\Requests\StoreBrandRequest;
 use App\Http\Requests\UpdateBrandRequest;
+use App\Material;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -39,9 +40,16 @@ class BrandController extends Controller
 
         } catch ( \Throwable $e ) {
             DB::rollBack();
-            return response()->json(['message' => $e->getMessage()], 422);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
         }
-        return response()->json(['message' => 'Marca de material guardado con éxito.'], 200);
+        return response()->json([
+            'message' => 'Marca de material guardado con éxito.',
+            'success' => true,
+            'data' => $brand,
+        ], 200);
     }
 
     public function update(UpdateBrandRequest $request)
@@ -76,6 +84,16 @@ class BrandController extends Controller
 
             $brand = Brand::find($request->get('brand_id'));
 
+            $examplers = $brand->examplers;
+
+            foreach ($examplers as $exampler) {
+                // Poner en null los materiales relacionados antes de eliminar el exampler
+                Material::where('exampler_id', $exampler->id)->update(['exampler_id' => null]);
+
+                // Ahora sí puedes eliminarlo sin error
+                $exampler->delete();
+            }
+
             $brand->delete();
 
             DB::commit();
@@ -102,7 +120,9 @@ class BrandController extends Controller
 
     public function getBrands()
     {
-        $brands = Brand::select('id', 'name', 'comment') -> get();
+        $brands = Brand::select('id', 'name', 'comment')
+            ->orderBy('name', 'asc')
+            ->get();
         return datatables($brands)->toJson();
         //dd(datatables($customers)->toJson());
     }
@@ -118,5 +138,31 @@ class BrandController extends Controller
 
         //dd($array);
         return $array;
+    }
+
+    public function deleteMultiple(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['message' => 'Datos inválidos'], 400);
+        }
+
+        $brands = Brand::whereIn('id', $ids)->get();
+
+        foreach ( $brands as $brand ) {
+            $examplers = $brand->examplers;
+
+            foreach ($examplers as $exampler) {
+                // Poner en null los materiales relacionados antes de eliminar el exampler
+                Material::where('exampler_id', $exampler->id)->update(['exampler_id' => null]);
+
+                // Ahora sí puedes eliminarlo sin error
+                $exampler->delete();
+            }
+
+            $brand->delete();
+        }
+
+        return response()->json(['message' => 'Marcas eliminadas correctamente.']);
     }
 }

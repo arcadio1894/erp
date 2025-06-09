@@ -43,9 +43,16 @@ class CategoryController extends Controller
 
         } catch ( \Throwable $e ) {
             DB::rollBack();
-            return response()->json(['message' => $e->getMessage()], 422);
+            return response()->json(['success' => true, 'message' => $e->getMessage()], 422);
         }
-        return response()->json(['message' => 'Categoría de material guardado con éxito.'], 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Categoría de material guardado con éxito.',
+            'data' => [
+                'id' => $category->id,
+                'description' => $category->name
+            ]
+        ], 200);
     }
 
 
@@ -80,9 +87,12 @@ class CategoryController extends Controller
         DB::beginTransaction();
         try {
 
-            $category = Category::find($request->get('category_id'));
+            $category = Category::with('subcategories')->findOrFail($request->get('category_id'));
 
-            $category->delete();
+            // Eliminar subcategorías primero
+            foreach ($category->subcategories as $subcategory) {
+                $subcategory->delete();
+            }
 
             DB::commit();
 
@@ -115,7 +125,9 @@ class CategoryController extends Controller
 
     public function getCategories()
     {
-        $categories = Category::select('id', 'name', 'description') -> get();
+        $categories = Category::select('id', 'name', 'description')
+            ->orderBy('name', 'asc')
+            ->get();
         return datatables($categories)->toJson();
         //dd(datatables($customers)->toJson());
     }
@@ -131,5 +143,36 @@ class CategoryController extends Controller
 
         //dd($array);
         return $array;
+    }
+
+    public function deleteMultiple(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['message' => 'Datos inválidos'], 400);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $categories = Category::with('subcategories')->whereIn('id', $ids)->get();
+
+            foreach ($categories as $category) {
+                // Eliminar subcategorías
+                foreach ($category->subcategories as $subcategory) {
+                    $subcategory->delete();
+                }
+
+                // Eliminar categoría
+                $category->delete();
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Categorías eliminadas correctamente.']);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
+        }
     }
 }

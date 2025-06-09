@@ -46,6 +46,7 @@
     @can('create_unitMeasure')
     <a href="{{ route('unitmeasure.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nueva Unidad de medida </a>
     @endcan
+    <button id="delete-selected" class="btn btn-danger btn-sm float-right">Eliminar seleccionados</button>
 @endsection
 
 @section('page-breadcrumb')
@@ -67,6 +68,7 @@
         <table class="table table-bordered table-hover" id="dynamic-table">
             <thead>
             <tr>
+                <th><input type="checkbox" id="select-all"></th>
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Acciones</th>
@@ -114,5 +116,5 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/unitmeasure/index.js') }}"></script>
+    <script src="{{ asset('js/unitmeasure/index.js') }}?v={{ time() }}"></script>
 @endsection

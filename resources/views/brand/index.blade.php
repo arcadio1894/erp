@@ -41,11 +41,18 @@
     </style>
 @endsection
 
+@section('page-header')
+    <h1 class="m-0 text-dark">Marcas</h1>
+@endsection
+
+
 @section('page-title')
     <h5 class="card-title">Listado de marcas</h5>
     @can('create_brand')
     <a href="{{ route('brand.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nueva Marca </a>
     @endcan
+    <button id="delete-selected" class="btn btn-danger btn-sm float-right">Eliminar seleccionados</button>
+
 @endsection
 
 @section('page-breadcrumb')
@@ -67,6 +74,7 @@
         <table class="table table-bordered table-hover" id="dynamic-table">
             <thead>
             <tr>
+                <th><input type="checkbox" id="select-all"></th>
                 <th>Nombre</th>
                 <th>Comentario</th>
                 <th>Acciones</th>
@@ -114,5 +122,5 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/brand/index.js') }}"></script>
+    <script src="{{ asset('js/brand/index.js') }}?v={{ time() }}"></script>
 @endsection

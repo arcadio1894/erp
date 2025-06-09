@@ -7,6 +7,7 @@ use App\Exampler;
 use App\Http\Requests\DeleteExamplerRequest;
 use App\Http\Requests\StoreExamplerRequest;
 use App\Http\Requests\UpdateExamplerRequest;
+use App\Material;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -38,12 +39,17 @@ class ExamplerController extends Controller
             ]);
 
             DB::commit();
+            return response()->json([
+                'id' => $exampler->id,
+                'exampler' => $exampler->name,
+                'message' => 'Modelo guardado con éxito.'
+            ], 200);
 
         } catch ( \Throwable $e ) {
             DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 422);
         }
-        return response()->json(['message' => 'Modelo guardado con éxito.'], 200);
+
     }
 
     public function update(UpdateExamplerRequest $request)
@@ -79,6 +85,8 @@ class ExamplerController extends Controller
 
             $exampler = Exampler::find($request->get('exampler_id'));
 
+            Material::where('exampler_id', $exampler->id)->update(['exampler_id' => null]);
+
             $exampler->delete();
 
             DB::commit();
@@ -107,9 +115,31 @@ class ExamplerController extends Controller
 
     public function getExamplers()
     {
-        $examplers = Exampler::with('brand')->get();
+        $examplers = Exampler::with('brand')
+            ->orderBy('name', 'asc')
+            ->get();
         //dd($examplers);
         return datatables($examplers)->toJson();
         //dd(datatables($customers)->toJson());
+    }
+
+    public function deleteMultiple(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['message' => 'Datos inválidos'], 400);
+        }
+
+        $examplers = Exampler::whereIn('id', $ids)->get();
+
+        foreach ($examplers as $exampler) {
+            // Poner en null los materiales relacionados antes de eliminar el exampler
+            Material::where('exampler_id', $exampler->id)->update(['exampler_id' => null]);
+
+            // Ahora sí puedes eliminarlo sin error
+            $exampler->delete();
+        }
+
+        return response()->json(['message' => 'Modelos eliminadas correctamente.']);
     }
 }

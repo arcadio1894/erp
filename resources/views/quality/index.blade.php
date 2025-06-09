@@ -21,7 +21,7 @@
 @endsection
 
 @section('title')
-    Calidades
+    Tallas
 @endsection
 
 @section('styles-plugins')
@@ -41,11 +41,17 @@
     </style>
 @endsection
 
+@section('page-header')
+    <h1 class="m-0 text-dark">Tallas</h1>
+@endsection
+
 @section('page-title')
-    <h5 class="card-title">Listado de calidades</h5>
+    <h5 class="card-title">Listado de Tallas</h5>
     @can('create_quality')
-    <a href="{{ route('quality.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nueva calidad </a>
+    <a href="{{ route('talla.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nueva talla </a>
     @endcan
+    <button id="delete-selected" class="btn btn-danger btn-sm float-right">Eliminar seleccionados</button>
+
 @endsection
 
 @section('page-breadcrumb')
@@ -54,7 +60,7 @@
             <a href="{{ route('dashboard.principal') }}"><i class="fa fa-home"></i> Dashboard</a>
         </li>
         <li class="breadcrumb-item">
-            <a href="{{ route('quality.index') }}"><i class="fa fa-archive"></i> Calidades</a>
+            <a href="{{ route('talla.index') }}"><i class="fa fa-archive"></i> Tallas</a>
         </li>
         <li class="breadcrumb-item"><i class="fa fa-plus-circle"></i> Listado</li>
     </ol>
@@ -67,6 +73,7 @@
         <table class="table table-bordered table-hover" id="dynamic-table">
             <thead>
             <tr>
+                <th><input type="checkbox" id="select-all"></th>
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Acciones</th>
@@ -114,5 +121,5 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/quality/index.js') }}"></script>
+    <script src="{{ asset('js/quality/index.js') }}?v={{ time() }}"></script>
 @endsection

@@ -104,9 +104,22 @@ class TypescrapController extends Controller
 
     public function getTypeScraps()
     {
-        $typescraps = Typescrap::select('id', 'name', 'length', 'width') -> get();
+        $typescraps = Typescrap::select('id', 'name', 'length', 'width')
+            ->orderBy('name', 'asc')->get();
         return datatables($typescraps)->toJson();
         //dd(datatables($customers)->toJson());
+    }
+
+    public function deleteMultiple(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['message' => 'Datos inválidos'], 400);
+        }
+
+        Typescrap::whereIn('id', $ids)->delete();
+
+        return response()->json(['message' => 'Tipos de Retacería eliminadas correctamente.']);
     }
 
 }

@@ -166,6 +166,7 @@ Route::middleware('auth')->group(function (){
             ->middleware('permission:destroy_materialType');
         Route::get('/get/types/{subcategory_id}', 'MaterialTypeController@getTypesBySubCategory')
             ->middleware('permission:destroy_materialType');
+        Route::post('/materialtype/delete-multiple', 'MaterialTypeController@deleteMultiple');
 
         //SUB TYPE
         Route::get('/all/subtypes', 'SubtypeController@getSubTypes')
@@ -189,6 +190,8 @@ Route::middleware('auth')->group(function (){
             ->name('subtype.destroy')
             ->middleware('permission:destroy_subType');
         Route::get('/get/subtypes/{type_id}', 'SubtypeController@getSubTypesByType');
+        Route::post('/subtype/delete-multiple', 'SubtypeController@deleteMultiple');
+
 
         //CATEGORY
         Route::get('/all/categories', 'CategoryController@getCategories')
@@ -212,6 +215,8 @@ Route::middleware('auth')->group(function (){
             ->name('category.destroy')
             ->middleware('permission:destroy_category');
         Route::get('/get/subcategories/{category_id}', 'CategoryController@getSubcategoryByCategory');
+        Route::post('/category/delete-multiple', 'CategoryController@deleteMultiple');
+
 
         //SUBCATEGORY
         Route::get('/all/subcategories', 'SubcategoryController@getSubcategories')
@@ -234,6 +239,8 @@ Route::middleware('auth')->group(function (){
         Route::post('subcategory/destroy', 'SubcategoryController@destroy')
             ->name('subcategory.destroy')
             ->middleware('permission:destroy_subcategory');
+        Route::post('/subcategory/delete-multiple', 'SubcategoryController@deleteMultiple');
+
 
         //CATEGORY INVOICES
         Route::get('/all/categories/invoices', 'CategoryInvoiceController@getCategories')
@@ -278,6 +285,8 @@ Route::middleware('auth')->group(function (){
         Route::post('exampler/destroy', 'ExamplerController@destroy')
             ->name('exampler.destroy')
             ->middleware('permission:destroy_exampler');
+        Route::post('/exampler/delete-multiple', 'ExamplerController@deleteMultiple');
+
 
         //BRAND
         Route::get('/all/brands', 'BrandController@getBrands')
@@ -301,6 +310,7 @@ Route::middleware('auth')->group(function (){
             ->name('brand.destroy')
             ->middleware('permission:destroy_brand');
         Route::get('/get/exampler/{brand_id}', 'BrandController@getJsonBrands');
+        Route::post('/brand/delete-multiple', 'BrandController@deleteMultiple');
 
         //CEDULA
         Route::get('/all/warrants', 'WarrantController@getWarrants')
@@ -367,6 +377,8 @@ Route::middleware('auth')->group(function (){
         Route::post('typescrap/destroy', 'TypescrapController@destroy')
             ->name('typescrap.destroy')
             ->middleware('permission:destroy_typeScrap');
+        Route::post('/typescrap/delete-multiple', 'TypescrapController@deleteMultiple');
+
 
         //UNITMEASURE
         Route::get('/all/unitmeasure', 'UnitMeasureController@getUnitMeasure')
@@ -389,6 +401,54 @@ Route::middleware('auth')->group(function (){
         Route::post('unitmeasure/destroy', 'UnitMeasureController@destroy')
             ->name('unitmeasure.destroy')
             ->middleware('permission:destroy_unitMeasure');
+        Route::post('/unitmeasure/delete-multiple', 'UnitMeasureController@deleteMultiple');
+
+
+        //GENEROS
+        Route::get('/all/generos', 'GeneroController@getGeneros')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::get('generos', 'GeneroController@index')
+            ->name('genero.index')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::get('crear/genero', 'GeneroController@create')
+            ->name('genero.create')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::post('genero/store', 'GeneroController@store')
+            ->name('genero.store')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::get('/editar/genero/{id}', 'GeneroController@edit')
+            ->name('genero.edit')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::post('genero/update', 'GeneroController@update')
+            ->name('genero.update')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::post('genero/destroy', 'GeneroController@destroy')
+            ->name('genero.destroy')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::post('/genero/delete-multiple', 'GeneroController@deleteMultiple');
+
+        //TALLAS
+        Route::get('/all/tallas', 'TallaController@getTallas')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::get('tallas', 'TallaController@index')
+            ->name('talla.index')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::get('crear/talla', 'TallaController@create')
+            ->name('talla.create')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::post('talla/store', 'TallaController@store')
+            ->name('talla.store')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::get('/editar/talla/{id}', 'TallaController@edit')
+            ->name('talla.edit')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::post('talla/update', 'TallaController@update')
+            ->name('talla.update')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::post('talla/destroy', 'TallaController@destroy')
+            ->name('talla.destroy')
+            /*->middleware('permission:list_unitMeasure')*/;
+        Route::post('/talla/delete-multiple', 'TallaController@deleteMultiple');
 
         //ROL
         Route::get('roles', 'RoleController@index')

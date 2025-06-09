@@ -50,6 +50,7 @@
     @can('create_typeScrap')
     <a href="{{ route('typescrap.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nuevo Tipo de Retacería </a>
     @endcan
+    <button id="delete-selected" class="btn btn-danger btn-sm float-right">Eliminar seleccionados</button>
 @endsection
 
 @section('page-breadcrumb')
@@ -68,6 +69,7 @@
         <table class="table table-bordered table-hover" id="dynamic-table">
             <thead>
             <tr>
+                <th><input type="checkbox" id="select-all"></th>
                 <th>Nombre</th>
                 <th>Largo</th>
                 <th>Ancho</th>
@@ -116,5 +118,5 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/typescrap/index.js') }}"></script>
+    <script src="{{ asset('js/typescrap/index.js') }}?v={{ time() }}"></script>
 @endsection

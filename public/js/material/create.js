@@ -20,7 +20,7 @@ $(document).ready(function () {
     $selectSubtype = $('#subtype');
 
     $selectCategory.change(function () {
-        $selectSubCategory.empty();
+        $selectSubCategory.empty().trigger('change');
         $('#feature-body').css("display","none");
         $selectType.val('0');
         $selectType.trigger('change');
@@ -31,6 +31,14 @@ $(document).ready(function () {
         $('#quality').val('0');
         $('#quality').trigger('change');
         var category =  $selectCategory.val();
+        $('#categoria_id_hidden').val(category);
+        if (!category) {
+            $btnNewSubCategoria.hide(); // Ocultar si no hay marca seleccionada
+            return;
+        }
+
+        $btnNewSubCategoria.show();
+
         $.get( "/dashboard/get/subcategories/"+category, function( data ) {
             for ( var i=0; i<data.length; i++ )
             {
@@ -44,18 +52,56 @@ $(document).ready(function () {
     });
 
     $selectBrand.change(function () {
-        $selectExampler.empty();
-        var brand =  $selectBrand.val();
-        $.get( "/dashboard/get/exampler/"+brand, function( data ) {
-            for ( var i=0; i<data.length; i++ )
-            {
+        var brandId = $(this).val();
+        $selectExampler.empty().trigger('change');
+        $('#brand_id_hidden').val(brandId); // Marca que se usará en el modal
+
+        if (!brandId) {
+            $btnNewExampler.hide(); // Ocultar si no hay marca seleccionada
+            return;
+        }
+
+        $btnNewExampler.show(); // Mostrar si hay marca
+
+        // Obtener modelos de la marca
+        $.get("/dashboard/get/exampler/" + brandId, function (data) {
+            $.each(data, function (i, item) {
                 $selectExampler.append($("<option>", {
-                    value: data[i].id,
-                    text: data[i].exampler
+                    value: item.id,
+                    text: item.exampler
                 }));
-            }
+            });
         });
 
+    });
+
+    // Guardar nuevo modelo
+    $(document).on('click', '#btn-saveExampler' , saveExampler);
+
+    // Prevenir abrir el modal si no hay marca seleccionada
+    $('#modalExampler').on('show.bs.modal', function () {
+        if (!$('#brand_id_hidden').val()) {
+            alert('Primero seleccione una marca');
+            $('#modalExampler').modal('hide');
+        }
+    });
+
+    $('#btn-newExampler').on('click', function () {
+        const selectedBrandId = $('#brand').val();
+
+        if (selectedBrandId) {
+            // Asignar marca al input hidden del formulario
+            $('#brand_id_hidden').val(selectedBrandId);
+
+            // Mostrar el modal
+            $('#modalExampler').modal('show');
+        } else {
+            $.alert({
+                title: 'Aviso',
+                content: 'Debe seleccionar una marca antes de agregar un modelo.',
+                type: 'orange'
+            });
+        }
     });
 
     /*$selectSubCategory.change(function () {
@@ -167,6 +213,44 @@ $(document).ready(function () {
     $('#inputPack').val('');
     $('#inputPack').prop('disabled', true);
 
+    $('#btnSaveUnitMeasure').on('click', saveUnitMeasure);
+
+    $('#btn-saveBrand').on('click', saveBrand);
+
+    $('#btnSaveGenero').on('click', saveGenero);
+
+    $('#btnSaveTalla').on('click', saveTalla);
+
+    $('#btnSaveCategoria').on('click', saveCategoria);
+
+    $('#btn-newSubCategoria').on('click', function () {
+        const selectedCategoriaId = $('#category').val();
+
+        if (selectedCategoriaId) {
+            // Asignar marca al input hidden del formulario
+            $('#category_id_hidden').val(selectedCategoriaId);
+
+            // Mostrar el modal
+            $('#modalSubCategoria').modal('show');
+        } else {
+            $.alert({
+                title: 'Aviso',
+                content: 'Debe seleccionar una marca antes de agregar una subcategoría.',
+                type: 'orange'
+            });
+        }
+    });
+
+    // Guardar nuevo modelo
+    $(document).on('click', '#btn-saveSubCategoria' , saveSubCategoria);
+
+    // Prevenir abrir el modal si no hay marca seleccionada
+    $('#modalSubCategoria').on('show.bs.modal', function () {
+        if (!$('#categoria_id_hidden').val()) {
+            alert('Primero seleccione una categoría');
+            $('#modalSubCategoria').modal('hide');
+        }
+    });
 });
 
 var $formCreate;
@@ -179,6 +263,370 @@ var $selectType;
 var $selectSubtype;
 let $caracteres = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 let $longitud = 20;
+let $btnNewExampler = $('#btn-newExampler');
+let $btnNewSubCategoria = $('#btn-newSubCategoria');
+
+function saveSubCategoria() {
+    let $form = $('#formCreateSubCategoria');
+    let url = $form.data('url');
+    let formData = $form.serialize();
+
+    $.post(url, formData, function (response) {
+        if (response && response.id) {
+            $('#modalSubCategoria').modal('hide');
+            $selectSubCategory.append($('<option>', {
+                value: response.id,
+                text: response.subcategory,
+                selected: true
+            })).trigger('change');
+
+            $.alert({
+                title: 'Éxito',
+                content: 'Subcategoría guardada correctamente.',
+                type: 'green'
+            });
+        }
+    }).fail(function (xhr) {
+        let message = 'Error al guardar subcategoría.';
+
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+            message = xhr.responseJSON.message;
+        }
+
+        $.alert({
+            title: 'Error',
+            content: message,
+            type: 'red'
+        });
+    });
+}
+
+function saveCategoria() {
+    let $form = $('#formCreateCategoria');
+    let url = $form.data('url');
+    let data = $form.serialize();
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: data,
+        success: function(response) {
+            if (response.success) {
+                // Agregar la nueva opción al select
+                $('#category').append(
+                    `<option value="${response.data.id}" selected>${response.data.description}</option>`
+                ).trigger('change');
+
+                // Cerrar el modal
+                $('#modalCategoria').modal('hide');
+
+                // Resetear formulario
+                $form[0].reset();
+
+                // Mostrar mensaje de éxito
+                $.dialog({
+                    title: '¡Éxito!',
+                    content: 'Categoría creada correctamente.',
+                    type: 'green',
+                    boxWidth: '400px',
+                    useBootstrap: false
+                });
+
+            } else {
+                $.alert({
+                    title: 'Error',
+                    content: response.message || 'No se pudo crear la talla.',
+                    type: 'red',
+                    boxWidth: '400px',
+                    useBootstrap: false
+                });
+            }
+        },
+        error: function(xhr) {
+            let errors = xhr.responseJSON.errors;
+            let message = '';
+            $.each(errors, function(key, value) {
+                message += `<div>• ${value[0]}</div>`;
+            });
+
+            $.alert({
+                title: 'Errores de validación',
+                content: message,
+                type: 'orange',
+                boxWidth: '400px',
+                useBootstrap: false
+            });
+        }
+    });
+}
+
+function saveTalla() {
+    let $form = $('#formCreateTalla');
+    let url = $form.data('url');
+    let data = $form.serialize();
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: data,
+        success: function(response) {
+            if (response.success) {
+                // Agregar la nueva opción al select
+                $('#talla').append(
+                    `<option value="${response.data.id}" selected>${response.data.description}</option>`
+                ).trigger('change');
+
+                // Cerrar el modal
+                $('#modalTalla').modal('hide');
+
+                // Resetear formulario
+                $form[0].reset();
+
+                // Mostrar mensaje de éxito
+                $.dialog({
+                    title: '¡Éxito!',
+                    content: 'Talla creado correctamente.',
+                    type: 'green',
+                    boxWidth: '400px',
+                    useBootstrap: false
+                });
+
+            } else {
+                $.alert({
+                    title: 'Error',
+                    content: response.message || 'No se pudo crear la talla.',
+                    type: 'red',
+                    boxWidth: '400px',
+                    useBootstrap: false
+                });
+            }
+        },
+        error: function(xhr) {
+            let errors = xhr.responseJSON.errors;
+            let message = '';
+            $.each(errors, function(key, value) {
+                message += `<div>• ${value[0]}</div>`;
+            });
+
+            $.alert({
+                title: 'Errores de validación',
+                content: message,
+                type: 'orange',
+                boxWidth: '400px',
+                useBootstrap: false
+            });
+        }
+    });
+}
+
+function saveGenero() {
+    let $form = $('#formCreateGenero');
+    let url = $form.data('url');
+    let data = $form.serialize();
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: data,
+        success: function(response) {
+            if (response.success) {
+                // Agregar la nueva opción al select
+                $('#genero').append(
+                    `<option value="${response.data.id}" selected>${response.data.description}</option>`
+                ).trigger('change');
+
+                // Cerrar el modal
+                $('#modalGenero').modal('hide');
+
+                // Resetear formulario
+                $form[0].reset();
+
+                // Mostrar mensaje de éxito
+                $.dialog({
+                    title: '¡Éxito!',
+                    content: 'Género creado correctamente.',
+                    type: 'green',
+                    boxWidth: '400px',
+                    useBootstrap: false
+                });
+
+            } else {
+                $.alert({
+                    title: 'Error',
+                    content: response.message || 'No se pudo crear el género.',
+                    type: 'red',
+                    boxWidth: '400px',
+                    useBootstrap: false
+                });
+            }
+        },
+        error: function(xhr) {
+            let errors = xhr.responseJSON.errors;
+            let message = '';
+            $.each(errors, function(key, value) {
+                message += `<div>• ${value[0]}</div>`;
+            });
+
+            $.alert({
+                title: 'Errores de validación',
+                content: message,
+                type: 'orange',
+                boxWidth: '400px',
+                useBootstrap: false
+            });
+        }
+    });
+}
+
+function saveExampler() {
+    let $form = $('#formCreateExampler');
+    let url = $form.data('url');
+    let formData = $form.serialize();
+
+    $.post(url, formData, function (response) {
+        if (response && response.id) {
+            $('#modalExampler').modal('hide');
+            $selectExampler.append($('<option>', {
+                value: response.id,
+                text: response.exampler,
+                selected: true
+            })).trigger('change');
+
+            $.alert({
+                title: 'Éxito',
+                content: 'Modelo guardado correctamente.',
+                type: 'green'
+            });
+        }
+    }).fail(function (xhr) {
+        let message = 'Error al guardar modelo.';
+
+        if (xhr.responseJSON && xhr.responseJSON.message) {
+            message = xhr.responseJSON.message;
+        }
+
+        $.alert({
+            title: 'Error',
+            content: message,
+            type: 'red'
+        });
+    });
+}
+
+function saveUnitMeasure() {
+    let $form = $('#formCreateUnitMeasure');
+    let url = $form.data('url');
+    let data = $form.serialize();
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: data,
+        success: function(response) {
+            if (response.success) {
+                // Agregar la nueva opción al select
+                $('#unit_measure').append(
+                    `<option value="${response.data.id}" selected>${response.data.description}</option>`
+                ).trigger('change');
+
+                // Cerrar el modal
+                $('#modalUnitMeasure').modal('hide');
+
+                // Resetear formulario
+                $form[0].reset();
+
+                // Mostrar mensaje de éxito
+                $.dialog({
+                    title: '¡Éxito!',
+                    content: 'Unidad de medida creada correctamente.',
+                    type: 'green',
+                    boxWidth: '400px',
+                    useBootstrap: false
+                });
+
+            } else {
+                $.alert({
+                    title: 'Error',
+                    content: response.message || 'No se pudo crear la unidad de medida.',
+                    type: 'red',
+                    boxWidth: '400px',
+                    useBootstrap: false
+                });
+            }
+        },
+        error: function(xhr) {
+            let errors = xhr.responseJSON.errors;
+            let message = '';
+            $.each(errors, function(key, value) {
+                message += `<div>• ${value[0]}</div>`;
+            });
+
+            $.alert({
+                title: 'Errores de validación',
+                content: message,
+                type: 'orange',
+                boxWidth: '400px',
+                useBootstrap: false
+            });
+        }
+    });
+}
+
+function saveBrand() {
+    let $form = $('#formCreateBrand');
+    let url = $form.data('url');
+    let data = $form.serialize();
+
+    $.ajax({
+        url: url,
+        type: 'POST',
+        data: data,
+        success: function(response) {
+            if (response.success) {
+                // Añadir nueva marca al select
+                $('#brand').append(
+                    `<option value="${response.data.id}" selected>${response.data.name}</option>`
+                ).trigger('change');
+
+                // Cerrar modal y limpiar
+                $('#modalBrand').modal('hide');
+                $form[0].reset();
+
+                // Mostrar éxito
+                $.dialog({
+                    title: '¡Éxito!',
+                    content: 'Marca creada correctamente.',
+                    type: 'green',
+                    boxWidth: '400px',
+                    useBootstrap: false
+                });
+            } else {
+                $.alert({
+                    title: 'Error',
+                    content: response.message || 'No se pudo crear la marca.',
+                    type: 'red',
+                    boxWidth: '400px',
+                    useBootstrap: false
+                });
+            }
+        },
+        error: function(xhr) {
+            let errors = xhr.responseJSON.errors;
+            let message = '';
+            $.each(errors, function(key, value) {
+                message += `<div>• ${value[0]}</div>`;
+            });
+
+            $.alert({
+                title: 'Errores de validación',
+                content: message,
+                type: 'orange',
+                boxWidth: '400px',
+                useBootstrap: false
+            });
+        }
+    });
+}
 
 function checkInputPack() {
     if ($('#checkboxPack').is(':checked')) {
@@ -283,6 +731,11 @@ function storeMaterial() {
     // Obtener la URL
     var createUrl = $formCreate.data('url');
     var form = new FormData($('#formCreate')[0]);
+
+    if (uploadedImage) {
+        form.append('image', uploadedImage);
+    }
+
     $.ajax({
         url: createUrl,
         method: 'POST',

@@ -361,7 +361,7 @@ function payNow() {
 }
 
 function mostrarVuelto() {
-    $("#monto_total").val($fin_total_importe);
+    $("#monto_total").val(parseFloat($fin_total_importe).toFixed(2));
     $modalVuelto.modal('show');
 }
 
@@ -403,7 +403,9 @@ function guardarVenta() {
     var form = new FormData(formulario);
     var tipo_pago = $('input[name="tipo_pago"]:checked').val();
 
-    form.append('items', items);
+    var tipo_pago_text = $('input[name="tipo_pago"]:checked').siblings('label').text().trim();
+
+    /*form.append('items', items);
     form.append('total_exonerada', $fin_total_exonerada);
     form.append('total_igv', $fin_total_igv);
     form.append('total_gravada', $fin_total_gravada);
@@ -497,6 +499,78 @@ function guardarVenta() {
             $("#btn-pay").attr("disabled", false);
 
         },
+    });*/
+    // Confirmación con jQuery Confirm
+    $.confirm({
+        title: 'Confirmar pago',
+        content: '¿Está seguro de realizar el pago usando <strong>' + tipo_pago_text + '</strong>?',
+        type: 'blue',
+        buttons: {
+            confirmar: {
+                text: 'Sí, confirmar',
+                btnClass: 'btn-primary',
+                action: function () {
+                    // Proceder con el envío del formulario
+                    var createUrl = $formCreate.data('url');
+                    var items = JSON.stringify($items);
+                    var formulario = $('#formCreate')[0];
+                    var form = new FormData(formulario);
+
+                    form.append('items', items);
+                    form.append('total_exonerada', $fin_total_exonerada);
+                    form.append('total_igv', $fin_total_igv);
+                    form.append('total_gravada', $fin_total_gravada);
+                    form.append('total_descuentos', $fin_total_descuentos);
+                    form.append('total_importe', $fin_total_importe);
+                    form.append('total_vuelto', $fin_vuelto);
+                    form.append('type_vuelto', $type_vuelto);
+                    form.append('tipo_pago', tipo_pago);
+
+                    $.ajax({
+                        url: createUrl,
+                        method: 'POST',
+                        data: form,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            console.log(data);
+                            toastr.success(data.message, 'Éxito', {
+                                "closeButton": true,
+                                "progressBar": true,
+                                "positionClass": "toast-top-right",
+                                "timeOut": "2000"
+                            });
+                            setTimeout(function () {
+                                $("#btn-pay").attr("disabled", false);
+                                $modeEdit = 0;
+                                $sale_id = data.sale_id;
+
+                                $("#btn-pay").hide();
+                                $("#btn-newSale").show();
+                                $("#btn-printDocument").show();
+                                $("#btn-printDocument").attr("href", data.url_print);
+                            }, 2000);
+                        },
+                        error: function (data) {
+                            if (data.responseJSON.message && !data.responseJSON.errors) {
+                                toastr.error(data.responseJSON.message, 'Error');
+                            }
+                            for (var property in data.responseJSON.errors) {
+                                toastr.error(data.responseJSON.errors[property], 'Error');
+                            }
+                            $("#btn-pay").attr("disabled", false);
+                        }
+                    });
+                }
+            },
+            cancelar: {
+                text: 'Cancelar',
+                btnClass: 'btn-secondary',
+                action: function () {
+                    $("#btn-pay").attr("disabled", false);
+                }
+            }
+        }
     });
 }
 

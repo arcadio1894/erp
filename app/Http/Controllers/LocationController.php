@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DataGeneral;
 use App\Item;
 use App\Location;
 use App\Material;
@@ -57,14 +58,24 @@ class LocationController extends Controller
 
     public function getJsonLocations()
     {
+        $data = DataGeneral::where('name', 'idWarehouseTienda')->first();
+        $excludedWarehouseId = $data->valueNumber;
         $array = [];
-        $locations = Location::with(['area', 'warehouse', 'shelf', 'level', 'container', 'position'])->get();
-        foreach ( $locations as $location )
-        {
-            $l = 'AR:'.$location->area->name.'|AL:'.$location->warehouse->name.'|AN:'.$location->shelf->name.'|NIV:'.$location->level->name.'|CON:'.$location->container->name.'|POS:'.$location->position->name;
-            array_push($array, ['id'=> $location->id, 'location' => $l]);
+        $locations = Location::with(['area', 'warehouse', 'shelf', 'level', 'container', 'position'])
+            ->whereHas('warehouse', function ($query) use ($excludedWarehouseId) {
+                $query->where('id', '!=', $excludedWarehouseId);
+            })
+            ->where('default', true)
+            ->get();
+
+        foreach ($locations as $location) {
+            $l = 'AR:' . $location->area->name . '|AL:' . $location->warehouse->name . '|AN:' . $location->shelf->name . '|NIV:' . $location->level->name . '|CON:' . $location->container->name . '|POS:' . $location->position->name;
+            $array[] = [
+                'id' => $location->id,
+                'location' => $l
+            ];
         }
-        //dd($array);
+
         return $array;
     }
 

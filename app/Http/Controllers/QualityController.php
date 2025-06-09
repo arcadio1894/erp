@@ -101,7 +101,9 @@ class QualityController extends Controller
 
     public function getQualities()
     {
-        $qualities = Quality::select('id', 'name', 'description') -> get();
+        $qualities = Quality::select('id', 'name', 'description')
+            ->orderBy('name', 'asc')
+            ->get();
         return datatables($qualities)->toJson();
         //dd(datatables($customers)->toJson());
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreSubcategoryRequest extends FormRequest
 {
@@ -24,9 +25,18 @@ class StoreSubcategoryRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:255',
-            'category_id' => 'required|exists:categories,id'
+            'category_id' => 'required|exists:categories,id',
+            'subcategories' => 'required|array|min:1',
+            'subcategories.*.name' => [
+                'required',
+                'string',
+                'max:255',
+                'distinct',
+                Rule::unique('subcategories', 'name')->where(function ($query) {
+                    return $query->where('category_id', $this->category_id);
+                }),
+            ],
+            'subcategories.*.description' => 'nullable|string|max:255',
         ];
     }
 
@@ -36,21 +46,26 @@ class StoreSubcategoryRequest extends FormRequest
             'category_id.required' => 'El :attribute es obligatorio.',
             'category_id.exists' => 'El :attribute no existe en las marcas registradas.',
 
-            'name.required' => 'El :attribute es obligatoria.',
-            'name.string' => 'El :attribute debe contener caracteres válidos.',
-            'name.max' => 'El :attribute debe contener máximo 255 caracteres.',
+            'subcategories.required' => 'Debe agregar al menos una subcategoría.',
+            'subcategories.array' => 'El campo subcategorías no tiene un formato válido.',
 
-            'description.string' => 'La :attribute debe contener caracteres válidos.',
-            'description.max' => 'La :attribute es demasiado largo.',
+            'subcategories.*.name.required' => 'El nombre de la subcategoría es obligatorio.',
+            'subcategories.*.name.string' => 'El nombre de la subcategoría debe contener caracteres válidos.',
+            'subcategories.*.name.max' => 'El nombre de la subcategoría debe contener máximo 255 caracteres.',
+            'subcategories.*.name.distinct' => 'Hay nombres de subcategorías duplicados en el formulario.',
+            'subcategories.*.name.unique' => 'Ya existe una subcategoría con ese nombre en esta categoría.',
+
+            'subcategories.*.description.string' => 'La descripción de la subcategoría debe contener caracteres válidos.',
+            'subcategories.*.description.max' => 'La descripción de la subcategoría es demasiado larga.',
         ];
     }
 
     public function attributes()
     {
         return [
-            'category_id' => 'id de la categoría de material',
-            'name' => 'nombre del modelo de material',
-            'description' => 'descripción del modelo de material',
+            'category_id' => 'categoría',
+            'subcategories.*.name' => 'nombre de la subcategoría',
+            'subcategories.*.description' => 'descripción de la subcategoría',
         ];
     }
 }

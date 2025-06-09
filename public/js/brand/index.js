@@ -6,8 +6,16 @@ $(document).ready(function () {
             url: "/dashboard/all/brands",
             dataSrc: 'data'
         },
+
         bAutoWidth: false,
         "aoColumns": [
+            {
+                data: null,
+                orderable: false,
+                render: function (data, type, row) {
+                    return `<input type="checkbox" class="row-checkbox" value="${row.id}">`;
+                }
+            },
             { data: 'name' },
             { data: 'comment' },
             { data: null,
@@ -174,8 +182,116 @@ $(document).ready(function () {
     $formDelete.on('submit', destroyBrand);
     $modalDelete = $('#modalDelete');
     $(document).on('click', '[data-delete]', openModalDelete);
+
+    // Maneja selección individual
+    $(document).on('change', '.row-checkbox', function () {
+        let id = $(this).val();
+        if ($(this).is(':checked')) {
+            selectedIds.add(id);
+        } else {
+            selectedIds.delete(id);
+        }
+    });
+
+    // Si tienes un checkbox para seleccionar todo en la página actual
+    $(document).on('change', '#select-all', function () {
+        let isChecked = $(this).is(':checked');
+        $('.row-checkbox').each(function () {
+            let id = $(this).val();
+            $(this).prop('checked', isChecked);
+
+            if (isChecked) {
+                selectedIds.add(id);
+            } else {
+                selectedIds.delete(id);
+            }
+        });
+    });
+
+    /*$('#select-all').on('click', function () {
+        let rows = $('#dynamic-table').DataTable().rows({ search: 'applied' }).nodes();
+        $('input[type="checkbox"].row-checkbox', rows).prop('checked', this.checked);
+    });*/
+    $('#select-all').on('click', function () {
+        let table = $('#dynamic-table').DataTable();
+        let rows = table.rows({ search: 'applied' }).nodes();
+        let isChecked = this.checked;
+
+        $('input[type="checkbox"].row-checkbox', rows).each(function () {
+            let id = $(this).val();
+            $(this).prop('checked', isChecked);
+
+            if (isChecked) {
+                selectedIds.add(id);
+            } else {
+                selectedIds.delete(id);
+            }
+        });
+    });
+
+    $('#delete-selected').on('click', function () {
+        /*let ids = [];
+        $('.row-checkbox:checked').each(function () {
+            ids.push($(this).val());
+        });*/
+        let ids = Array.from(selectedIds);
+
+        if (ids.length === 0) {
+            $.alert({
+                title: 'Atención',
+                content: 'No hay elementos seleccionados.',
+                type: 'orange',
+                typeAnimated: true
+            });
+            return;
+        }
+        //console.log(ids);
+        $.confirm({
+            title: '¿Confirmar eliminación?',
+            content: '¿Estás seguro que deseas eliminar los elementos seleccionados?',
+            type: 'red',
+            buttons: {
+                confirmar: {
+                    text: 'Sí, eliminar',
+                    btnClass: 'btn-red',
+                    action: function () {
+                        $.ajax({
+                            url: '/dashboard/brand/delete-multiple',
+                            type: 'POST',
+                            data: {
+                                ids: ids,
+                                _token: $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function (response) {
+                                $.alert({
+                                    title: 'Éxito',
+                                    content: response.message,
+                                    type: 'green',
+                                    typeAnimated: true
+                                });
+                                $('#dynamic-table').DataTable().ajax.reload();
+                            },
+                            error: function (xhr) {
+                                $.alert({
+                                    title: 'Error',
+                                    content: 'Error al eliminar elementos.',
+                                    type: 'red',
+                                    typeAnimated: true
+                                });
+                            }
+                        });
+                    }
+                },
+                cancelar: {
+                    text: 'Cancelar',
+                    action: function () { }
+                }
+            }
+        });
+    });
 });
 
+let selectedIds = new Set();
 var $formDelete;
 var $modalDelete;
 var $permissions;

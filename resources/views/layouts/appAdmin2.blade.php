@@ -342,12 +342,12 @@
                                 </li>
                             {{--@endcan
                             @can('list_user')--}}
-                                <li class="nav-item">
+                                {{--<li class="nav-item">
                                     <a href="#" class="nav-link @yield('activePromotionsDiscount')">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Por descuento</p>
                                     </a>
-                                </li>
+                                </li>--}}
 
                             {{--@endcan--}}
                         </ul>
@@ -759,7 +759,7 @@
                                     <ul class="nav nav-treeview">
                                         @can('list_warrant')
                                         <li class="nav-item">
-                                            <a href="{{ route('warrant.index') }}" class="nav-link @yield('activeListWarrant')">
+                                            <a href="{{ route('genero.index') }}" class="nav-link @yield('activeListWarrant')">
                                                 <i class="far fa-dot-circle nav-icon text-warning"></i>
                                                 <p>Listar géneros</p>
                                             </a>
@@ -767,7 +767,7 @@
                                         @endcan
                                         @can('create_warrant')
                                         <li class="nav-item">
-                                            <a href="{{ route('warrant.create') }}" class="nav-link @yield('activeCreateWarrant')">
+                                            <a href="{{ route('genero.create') }}" class="nav-link @yield('activeCreateWarrant')">
                                                 <i class="far fa-dot-circle nav-icon text-warning"></i>
                                                 <p>Crear géneros</p>
                                             </a>
@@ -789,7 +789,7 @@
                                     <ul class="nav nav-treeview">
                                         @can('list_quality')
                                         <li class="nav-item">
-                                            <a href="{{ route('quality.index') }}" class="nav-link @yield('activeListQuality')">
+                                            <a href="{{ route('talla.index') }}" class="nav-link @yield('activeListQuality')">
                                                 <i class="far fa-dot-circle nav-icon text-warning"></i>
                                                 <p>Listar tallas</p>
                                             </a>
@@ -797,7 +797,7 @@
                                         @endcan
                                         @can('create_quality')
                                         <li class="nav-item">
-                                            <a href="{{ route('quality.create') }}" class="nav-link @yield('activeCreateQuality')">
+                                            <a href="{{ route('talla.create') }}" class="nav-link @yield('activeCreateQuality')">
                                                 <i class="far fa-dot-circle nav-icon text-warning"></i>
                                                 <p>Crear Tallas</p>
                                             </a>
@@ -912,7 +912,7 @@
                                 <li class="nav-item">
                                     <a href="{{route('material.indexV2')}}" class="nav-link @yield('activeListMaterial')">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Listar materiales</p>
+                                        <p>Listar materiales Almacen</p>
                                     </a>
                                 </li>
                                 @endcan

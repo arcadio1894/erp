@@ -46,6 +46,8 @@
     @can('create_materialType')
     <a href="{{ route('materialtype.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nuevo Tipo de Material </a>
     @endcan
+    <button id="delete-selected" class="btn btn-danger btn-sm float-right">Eliminar seleccionados</button>
+
 @endsection
 
 @section('content')
@@ -55,6 +57,7 @@
         <table class="table table-bordered table-hover" id="dynamic-table">
             <thead>
             <tr>
+                <th><input type="checkbox" id="select-all"></th>
                 <th>Tipo</th>
                 <th>Subcategoría</th>
                 <th>Descripción</th>
@@ -104,5 +107,5 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/materialtype/index.js') }}"></script>
+    <script src="{{ asset('js/materialtype/index.js') }}?v={{ time() }}"></script>
 @endsection

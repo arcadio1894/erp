@@ -217,7 +217,17 @@ class EntryController extends Controller
         $fecha = Carbon::createFromFormat('d/m/Y', $request->get('date_invoice'));
         $fechaFormato = $fecha->format('Y-m-d');
         //$response = $this->getTipoDeCambio($fechaFormato);
-        $tipoCambioSunat = $this->obtenerTipoCambio($fechaFormato);
+
+        $precioCompra = null;
+        $precioVenta = null;
+
+        $tipoMoneda = ($request->has('currency_invoice')) ? 'USD':'PEN';
+        if ( $tipoMoneda == 'USD' ) {
+            $tipoCambioSunat = $this->obtenerTipoCambio($fechaFormato);
+            $precioCompra = (float) $tipoCambioSunat->precioCompra;
+            $precioVenta = (float) $tipoCambioSunat->precioVenta;
+        }
+
         //dd($tipoCambioSunat);
 
         //$tipoCambioSunat = json_decode($response);
@@ -250,8 +260,8 @@ class EntryController extends Controller
                 'finance' => false,
                 /*'currency_compra' => (float) $tipoCambioSunat->compra,
                 'currency_venta' => (float) $tipoCambioSunat->venta,*/
-                'currency_compra' => (float) $tipoCambioSunat->precioCompra,
-                'currency_venta' => (float) $tipoCambioSunat->precioVenta,
+                'currency_compra' => $precioCompra,
+                'currency_venta' => $precioVenta,
                 'observation' => $request->get('observation'),
             ]);
 

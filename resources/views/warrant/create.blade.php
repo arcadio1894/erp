@@ -21,7 +21,7 @@
 @endsection
 
 @section('title')
-    Cédulas
+    Géneros
 @endsection
 
 @section('styles-plugins')
@@ -46,8 +46,8 @@
 @endsection
 
 @section('page-title')
-    <h5 class="card-title">Crear nueva cédula</h5>
-    <a href="{{ route('warrant.index') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-arrow-left font-20"></i> Listado de cédulas </a>
+    <h5 class="card-title">Crear nueva género</h5>
+    <a href="{{ route('warrant.index') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-arrow-left font-20"></i> Listado de géneros </a>
 @endsection
 
 @section('page-breadcrumb')
@@ -56,20 +56,20 @@
             <a href="{{ route('dashboard.principal') }}"><i class="fa fa-home"></i> Dashboard</a>
         </li>
         <li class="breadcrumb-item">
-            <a href="{{ route('warrant.index') }}"><i class="fa fa-archive"></i> Cédulas</a>
+            <a href="{{ route('warrant.index') }}"><i class="fa fa-archive"></i> Géneros</a>
         </li>
         <li class="breadcrumb-item"><i class="fa fa-plus-circle"></i> Nuevo</li>
     </ol>
 @endsection
 
 @section('content')
-    <form id="formCreate" class="form-horizontal" data-url="{{ route('warrant.store') }}" enctype="multipart/form-data">
+    <form id="formCreate" class="form-horizontal" data-url="{{ route('genero.store') }}" enctype="multipart/form-data">
         @csrf
         <div class="form-group row">
             <div class="col-md-6">
-                <label for="inputEmail3" class="col-12 col-form-label">Cédula <span class="right badge badge-danger">(*)</span></label>
+                <label for="inputEmail3" class="col-12 col-form-label">Género <span class="right badge badge-danger">(*)</span></label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" onkeyup="mayus(this);" name="name" placeholder="Ejm: Cédula">
+                    <input type="text" class="form-control" onkeyup="mayus(this);" name="name" placeholder="Ejm: Género">
                 </div>
             </div>
 

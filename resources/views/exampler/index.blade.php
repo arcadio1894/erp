@@ -46,6 +46,8 @@
     @can('create_exampler')
     <a href="{{ route('exampler.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nuevo modelo </a>
     @endcan
+    <button id="delete-selected" class="btn btn-danger btn-sm float-right">Eliminar seleccionados</button>
+
 @endsection
 
 @section('page-breadcrumb')
@@ -67,6 +69,7 @@
         <table class="table table-bordered table-hover" id="dynamic-table">
             <thead>
             <tr>
+                <th><input type="checkbox" id="select-all"></th>
                 <th>Modelo</th>
                 <th>Marca</th>
                 <th>Comentario</th>
@@ -115,5 +118,5 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/exampler/index.js') }}"></script>
+    <script src="{{ asset('js/exampler/index.js') }}?v={{ time() }}"></script>
 @endsection

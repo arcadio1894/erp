@@ -147,7 +147,7 @@
                             </div>
                             <div class="col-md-12 mb-2">
                                 <label>Precio Unitario<span class="right badge badge-danger">(*)</span></label>
-                                <input type="number" value="{{ $material->list_price }}" data-priceUnitSend name="description" class="form-control" readonly>
+                                <input type="number" value="{{ $material->price_final }}" data-priceUnitSend name="description" class="form-control" readonly>
 
                             </div>
                             <div class="col-md-12">

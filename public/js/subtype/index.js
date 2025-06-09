@@ -8,6 +8,13 @@ $(document).ready(function () {
         },
         bAutoWidth: false,
         "aoColumns": [
+            {
+                data: null,
+                orderable: false,
+                render: function (data, type, row) {
+                    return `<input type="checkbox" class="row-checkbox" value="${row.id}">`;
+                }
+            },
             { data: 'name' },
             { data: 'material_type.name' },
             { data: 'description' },
@@ -175,6 +182,71 @@ $(document).ready(function () {
     $formDelete.on('submit', destroySubtype);
     $modalDelete = $('#modalDelete');
     $(document).on('click', '[data-delete]', openModalDelete);
+
+    $('#select-all').on('click', function () {
+        let rows = $('#dynamic-table').DataTable().rows({ search: 'applied' }).nodes();
+        $('input[type="checkbox"].row-checkbox', rows).prop('checked', this.checked);
+    });
+
+    $('#delete-selected').on('click', function () {
+        let ids = [];
+        $('.row-checkbox:checked').each(function () {
+            ids.push($(this).val());
+        });
+
+        if (ids.length === 0) {
+            $.alert({
+                title: 'Atención',
+                content: 'No hay elementos seleccionados.',
+                type: 'orange',
+                typeAnimated: true
+            });
+            return;
+        }
+
+        $.confirm({
+            title: '¿Confirmar eliminación?',
+            content: '¿Estás seguro que deseas eliminar los elementos seleccionados?',
+            type: 'red',
+            buttons: {
+                confirmar: {
+                    text: 'Sí, eliminar',
+                    btnClass: 'btn-red',
+                    action: function () {
+                        $.ajax({
+                            url: '/dashboard/subtype/delete-multiple',
+                            type: 'POST',
+                            data: {
+                                ids: ids,
+                                _token: $('meta[name="csrf-token"]').attr('content')
+                            },
+                            success: function (response) {
+                                $.alert({
+                                    title: 'Éxito',
+                                    content: response.message,
+                                    type: 'green',
+                                    typeAnimated: true
+                                });
+                                $('#dynamic-table').DataTable().ajax.reload();
+                            },
+                            error: function (xhr) {
+                                $.alert({
+                                    title: 'Error',
+                                    content: 'Error al eliminar elementos.',
+                                    type: 'red',
+                                    typeAnimated: true
+                                });
+                            }
+                        });
+                    }
+                },
+                cancelar: {
+                    text: 'Cancelar',
+                    action: function () { }
+                }
+            }
+        });
+    });
 });
 
 var $formDelete;

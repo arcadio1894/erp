@@ -21,7 +21,7 @@
 @endsection
 
 @section('title')
-    Calidades
+    Tallas
 @endsection
 
 @section('styles-plugins')
@@ -42,11 +42,11 @@
 @endsection
 
 @section('page-header')
-    <h1 class="page-title">Calidades</h1>
+    <h1 class="page-title">Tallas</h1>
 @endsection
 
 @section('page-title')
-    <h5 class="card-title">Editar calidad {{$quality->name}}</h5>
+    <h5 class="card-title">Editar talla {{$quality->name}}</h5>
 @endsection
 
 @section('page-breadcrumb')
@@ -55,22 +55,22 @@
             <a href="{{ route('dashboard.principal') }}"><i class="fa fa-home"></i> Dashboard</a>
         </li>
         <li class="breadcrumb-item">
-            <a href="{{ route('quality.index') }}"><i class="fa fa-archive"></i> Calidades</a>
+            <a href="{{ route('talla.index') }}"><i class="fa fa-archive"></i> Tallas</a>
         </li>
         <li class="breadcrumb-item"><i class="fa fa-plus-circle"></i> Editar</li>
     </ol>
 @endsection
 
 @section('content')
-    <form id="formEdit" class="form-horizontal" data-url="{{ route('quality.update') }}" enctype="multipart/form-data">
+    <form id="formEdit" class="form-horizontal" data-url="{{ route('talla.update') }}" enctype="multipart/form-data">
         @csrf
         <input type="hidden" class="form-control" name="quality_id" value="{{$quality->id}}">
 
         <div class="form-group row">
             <div class="col-md-6">
-                <label for="inputEmail3" class="col-12 col-form-label">Calidad <span class="right badge badge-danger">(*)</span></label>
+                <label for="inputEmail3" class="col-12 col-form-label">Talla <span class="right badge badge-danger">(*)</span></label>
                 <div class="col-sm-10">
-                    <input type="text" class="form-control" onkeyup="mayus(this);" name="name" placeholder="Ejm: Calidad" value="{{$quality->name}}">
+                    <input type="text" class="form-control" onkeyup="mayus(this);" name="name" placeholder="Ejm: Talla" value="{{$quality->name}}">
                 </div>
             </div>
 

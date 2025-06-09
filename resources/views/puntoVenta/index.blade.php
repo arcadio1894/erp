@@ -513,7 +513,7 @@
                                 <select id="category_id" class="form-control select2" name="category_id" data-states style="width: 100%;">
                                     <option></option>
                                     @foreach( $categories as $category )
-                                        <option value="{{ $category->id }}">{{ $category->description }}</option>
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
                                     @endforeach
                                 </select>
                             </div>

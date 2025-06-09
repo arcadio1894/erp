@@ -54,7 +54,16 @@ $(document).ready(function () {
                     //return '<img src="'+document.location.origin+ '/images/material/'+item.image+'" alt="'+item.name+'" width="50px" height="50px">'
                 }
             },
-            { data: 'category.name' },
+            { data: null,
+                title: 'Categoría',
+                wrap: true,
+                "render": function (item)
+                {
+                    if ( item.category === null )
+                        return '<p>Ninguno</p>';
+                    return '<p>'+ item.category.name +'</p>';
+                }
+            },
             { data: null,
                 title: 'Subcategoría',
                 wrap: true,

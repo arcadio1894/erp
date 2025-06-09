@@ -105,9 +105,14 @@ class SubtypeController extends Controller
 
     public function getSubTypes()
     {
-        $subtypes = Subtype::with('materialType')->get();
+        $subtypes = Subtype::select('subtypes.*')
+            ->join('material_types', 'subtypes.material_type_id', '=', 'material_types.id')
+            ->orderBy('material_types.name', 'asc')  // Ordena por el nombre del tipo de material
+            ->orderBy('subtypes.name', 'asc')        // Luego por el nombre del subtipo
+            ->with('materialType')                   // Incluye la relación
+            ->get();
+
         return datatables($subtypes)->toJson();
-        //dd(datatables($customers)->toJson());
     }
 
     public function getSubTypesByType($id)
@@ -121,5 +126,17 @@ class SubtypeController extends Controller
 
         //dd($array);
         return $array;
+    }
+
+    public function deleteMultiple(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['message' => 'Datos inválidos'], 400);
+        }
+
+        Subtype::whereIn('id', $ids)->delete();
+
+        return response()->json(['message' => 'SubTipos eliminados correctamente.']);
     }
 }

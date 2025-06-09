@@ -67,34 +67,36 @@
         @csrf
         <div class="form-group row">
             <div class="col-md-6">
-                <label for="inputEmail3" class="col-12 col-form-label">Subcategoría <span class="right badge badge-danger">(*)</span></label>
-                <div class="col-sm-10">
-                    <input type="text" class="form-control" onkeyup="mayus(this);" name="name" placeholder="Ejm: Subcategoría">
-                </div>
+                <label class="col-form-label">Seleccione Categoría <span class="right badge badge-danger">(*)</span></label>
+                <select id="category_id" name="category_id" class="form-control select2" style="width: 100%;">
+                    <option></option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
             </div>
+        </div>
 
-            <div class="col-md-6">
-                <label for="category_id" class="col-12 col-form-label">Seleccione Categoría <span class="right badge badge-danger">(*)</span></label>
-                <div class="col-sm-10">
-                    <select id="category_id" name="category_id" class="form-control select2" style="width: 100%;">
-                        <option></option>
-                        @foreach( $categories as $category )
-                            <option value="{{ $category->id }}">{{ $category->name }}</option>
-                        @endforeach
-                    </select>
+        <div id="subcategory-container">
+            <div class="form-group row subcategory-group">
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="subcategories[0][name]" placeholder="Nombre Subcategoría" onkeyup="mayus(this);">
                 </div>
-            </div>
-
-            <div class="col-md-6">
-                <label for="inputEmail3" class="col-12 col-form-label">Descripción</label>
-                <div class="col-sm-10">
-                     <input type="text" class="form-control" onkeyup="mayus(this);" name="description" placeholder="Ejm: Descripción">
+                <div class="col-md-5">
+                    <input type="text" class="form-control" name="subcategories[0][description]" placeholder="Descripción" onkeyup="mayus(this);">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-danger remove-subcategory">X</button>
                 </div>
             </div>
         </div>
 
+        <div class="form-group text-center">
+            <button type="button" id="add-subcategory" class="btn btn-outline-primary mb-2">Agregar otra subcategoría</button>
+        </div>
+
         <div class="text-center">
-            <button type="submit" class="btn btn-outline-success">Guardar</button>
+            <button type="button" id="btn-submit" class="btn btn-outline-success">Guardar</button>
             <button type="reset" class="btn btn-outline-secondary">Cancelar</button>
         </div>
         <!-- /.card-footer -->

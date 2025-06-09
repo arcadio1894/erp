@@ -8,7 +8,7 @@
     active
 @endsection
 
-@section('activeListMaterial')
+@section('activeListMaterialStore')
     active
 @endsection
 
@@ -157,11 +157,11 @@
 @endsection
 
 @section('page-header')
-    <h1 class="page-title">Materiales</h1>
+    <h1 class="page-title">Materiales en Tienda</h1>
 @endsection
 
 @section('page-title')
-    <h5 class="card-title">Listado de materiales</h5>
+    <h5 class="card-title">Listado de materiales en Tienda</h5>
     @can('create_material')
         <a href="{{ route('material.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nuevo material </a>
     @endcan

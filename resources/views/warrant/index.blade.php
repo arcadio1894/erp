@@ -21,7 +21,7 @@
 @endsection
 
 @section('title')
-    Cédulas
+    Genero
 @endsection
 
 @section('styles-plugins')
@@ -42,10 +42,12 @@
 @endsection
 
 @section('page-title')
-    <h5 class="card-title">Listado de cédulas</h5>
+    <h5 class="card-title">Listado de Géneros</h5>
     @can('create_warrant')
-    <a href="{{ route('warrant.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nueva cédula </a>
+    <a href="{{ route('genero.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nuevo género </a>
     @endcan
+    <button id="delete-selected" class="btn btn-danger btn-sm float-right">Eliminar seleccionados</button>
+
 @endsection
 
 @section('page-breadcrumb')
@@ -54,7 +56,7 @@
             <a href="{{ route('dashboard.principal') }}"><i class="fa fa-home"></i> Dashboard</a>
         </li>
         <li class="breadcrumb-item">
-            <a href="{{ route('warrant.index') }}"><i class="fa fa-key"></i> Cédulas</a>
+            <a href="{{ route('genero.index') }}"><i class="fa fa-key"></i> Géneros</a>
         </li>
         <li class="breadcrumb-item"><i class="fa fa-plus-circle"></i> Listado</li>
     </ol>
@@ -67,6 +69,7 @@
         <table class="table table-bordered table-hover" id="dynamic-table">
             <thead>
             <tr>
+                <th><input type="checkbox" id="select-all"></th>
                 <th>Nombre</th>
                 <th>Descripción</th>
                 <th>Acciones</th>
@@ -85,7 +88,7 @@
                     <h4 class="modal-title">Confirmar eliminación</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
-                <form id="formDelete" data-url="{{ route('warrant.destroy') }}">
+                <form id="formDelete" data-url="{{ route('genero.destroy') }}">
                     @csrf
                     <div class="modal-body">
                         <input type="hidden" id="warrant_id" name="warrant_id">
@@ -114,5 +117,5 @@
 @endsection
 
 @section('scripts')
-    <script src="{{ asset('js/warrant/index.js') }}"></script>
+    <script src="{{ asset('js/warrant/index.js') }}?v={{ time() }}"></script>
 @endsection

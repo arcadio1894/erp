@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Brand;
 use App\Category;
 use App\CategoryInvoice;
+use App\DataGeneral;
 use App\DiscountQuantity;
 use App\Exampler;
 use App\Genero;
@@ -35,6 +36,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Intervention\Image\Facades\Image;
 
 class MaterialController extends Controller
 {
@@ -57,15 +59,15 @@ class MaterialController extends Controller
 
     public function create()
     {
-        $categories = Category::all();
-        $brands = Brand::all();
-        $warrants = Warrant::all();
-        $qualities = Quality::all();
-        $typescraps = Typescrap::all();
-        $unitMeasures = UnitMeasure::all();
-        $generos = Genero::all();
-        $tallas = Talla::all();
-        $tipoVentas = TipoVenta::all();
+        $categories = Category::orderBy('name', 'asc')->get();
+        $brands = Brand::orderBy('name', 'asc')->get();
+        $warrants = Warrant::orderBy('name', 'asc')->get();
+        $qualities = Quality::orderBy('name', 'asc')->get();
+        $typescraps = Typescrap::orderBy('name', 'asc')->get();
+        $unitMeasures = UnitMeasure::orderBy('name', 'asc')->get();
+        $generos = Genero::orderBy('name', 'asc')->get();
+        $tallas = Talla::orderBy('name', 'asc')->get();
+        $tipoVentas = TipoVenta::orderBy('description', 'asc')->get();
         $discountQuantities = DiscountQuantity::all();
         return view('material.create', compact('discountQuantities', 'tipoVentas','tallas','generos', 'categories', 'warrants', 'brands', 'qualities', 'typescraps', 'unitMeasures'));
     }
@@ -112,15 +114,18 @@ class MaterialController extends Controller
             $material->save();
 
             // TODO: Tratamiento de un archivo de forma tradicional
-            if (!$request->file('image')) {
-                $material->image = 'no_image.png';
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $filename = $material->id . '.' . $image->getClientOriginalExtension();
+                $path = public_path('images/material/' . $filename);
+
+                // Guardar sin modificar tamaño
+                Image::make($image)->save($path);
+
+                $material->image = $filename;
                 $material->save();
             } else {
-                $path = public_path().'/images/material/';
-                $extension = $request->file('image')->getClientOriginalExtension();
-                $filename = $material->id . '.' . $extension;
-                $request->file('image')->move($path, $filename);
-                $material->image = $filename;
+                $material->image = 'no_image.png';
                 $material->save();
             }
 
@@ -440,7 +445,7 @@ class MaterialController extends Controller
                 "stock_min" => $material->stock_min,
                 "stock_actual" => $material->stock_current,
                 "prioridad" => $priority,
-                "precio_unitario" => $material->unit_price,
+                "precio_unitario" => $material->price_final,
                 "categoria" => ($material->category == null) ? '': $material->category->name,
                 "sub_categoria" => ($material->subcategory == null) ? '': $material->subcategory->name,
                 "tipo" => ($material->materialType == null) ? '': $material->materialType->name,
@@ -578,7 +583,7 @@ class MaterialController extends Controller
                 'stock_min'=>$material->stock_min,
                 'quantity_items'=>$material->quantity_items,
                 'stock_current'=>$mat['quantity'],
-                'unit_price'=>$material->unit_price,
+                'unit_price'=>$material->price_final,
                 'image'=>$material->image,
                 'category' => ($material->category_id == null) ? '': $material->category->name,
                 'subcategory' => ($material->subcategory_id == null) ? '': $material->subcategory->name,
@@ -604,7 +609,7 @@ class MaterialController extends Controller
                 'stock_min'=>$material->stock_min,
                 'quantity_items'=>$material->quantity_items,
                 'stock_current'=>$material->quantity_items,
-                'unit_price'=>$material->unit_price,
+                'unit_price'=>$material->price_final,
                 'image'=>$material->image,
                 'category' => ($material->category_id == null) ? '': $material->category->name,
                 'subcategory' => ($material->subcategory_id == null) ? '': $material->subcategory->name,
@@ -659,7 +664,7 @@ class MaterialController extends Controller
                 'stock_max' => $material->stock_max,
                 'stock_min'=>$material->stock_min,
                 'stock_current'=>$material->stock_current,
-                'unit_price'=>$material->unit_price,
+                'unit_price'=>$material->price_final,
                 'image'=>$material->image,
                 'category' => ($material->category_id == null) ? '': $material->category->name,
                 'subcategory' => ($material->subcategory_id == null) ? '': $material->subcategory->name,
@@ -711,7 +716,7 @@ class MaterialController extends Controller
                 'material' => $material->full_name,
                 'unit' => $material->unitMeasure->name,
                 'code' => $material->code,
-                'price'=>$material->unit_price,
+                'price'=>$material->price_final,
                 'typescrap'=>$material->typescrap_id,
                 'full_typescrap'=>$material->typeScrap,
                 'stock_current'=>$material->stock_current,
@@ -735,7 +740,7 @@ class MaterialController extends Controller
         $array = [];
         foreach ( $materials as $material )
         {
-            array_push($array, ['id'=> $material->id, 'material' => $material->full_description, 'unit' => $material->unitMeasure->name, 'code' => $material->code, 'price'=>$material->unit_price, 'typescrap'=>$material->typescrap_id, 'full_typescrap'=>$material->typeScrap, 'stock_current'=>$material->stock_current]);
+            array_push($array, ['id'=> $material->id, 'material' => $material->full_description, 'unit' => $material->unitMeasure->name, 'code' => $material->code, 'price'=>$material->price_final, 'typescrap'=>$material->typescrap_id, 'full_typescrap'=>$material->typeScrap, 'stock_current'=>$material->stock_current]);
         }
 
         //dd($materials);
@@ -767,7 +772,7 @@ class MaterialController extends Controller
         $array = [];
         foreach ( $materials as $material )
         {
-            array_push($array, ['id'=> $material->id, 'material' => $material->full_name, 'unit' => $material->unitMeasure->name, 'code' => $material->code, 'price' => $material->list_price]);
+            array_push($array, ['id'=> $material->id, 'material' => $material->full_name, 'unit' => $material->unitMeasure->name, 'code' => $material->code, 'price' => $material->price_final]);
         }
 
         //dd($materials);
@@ -904,9 +909,23 @@ class MaterialController extends Controller
 
     public function getAllMaterialsDisable()
     {
-        $materials = Material::with('category:id,name', 'materialType:id,name','unitMeasure:id,name','subcategory:id,name','subType:id,name','exampler:id,name','brand:id,name','warrant:id,name','quality:id,name','typeScrap:id,name')
+        $materials = Material::with(
+            'category:id,name',
+            'materialType:id,name',
+            'unitMeasure:id,name',
+            'subcategory:id,name',
+            'subType:id,name',
+            'exampler:id,name',
+            'brand:id,name',
+            'warrant:id,name',
+            'quality:id,name',
+            'typeScrap:id,name'
+        )
             ->where('enable_status', 0)
-            ->where('category_id', '<>', 8)
+            ->where(function ($q) {
+                $q->where('category_id', '<>', 8)
+                    ->orWhereNull('category_id');
+            })
             ->get();
         //->get(['id', 'code', 'measure', 'stock_max', 'stock_min', 'stock_current', 'priority', 'unit_price', 'image', 'description'])->toArray();
 
@@ -1066,7 +1085,7 @@ class MaterialController extends Controller
                 "stock_min" => $material->stock_min,
                 "stock_actual" => $material->stock_current,
                 "prioridad" => $priority,
-                "precio_unitario" => $material->unit_price,
+                "precio_unitario" => $material->price_final,
                 "categoria" => ($material->category == null) ? '': $material->category->name,
                 "sub_categoria" => ($material->subcategory == null) ? '': $material->subcategory->name,
                 "tipo" => ($material->materialType == null) ? '': $material->materialType->name,
@@ -1245,7 +1264,9 @@ class MaterialController extends Controller
 
         $material = Material::find($material_id);
 
-        $warehouse_id = 2; // TODO: HACERLO DINAMICO
+        $data = DataGeneral::where('name', 'idWarehouseTienda')->first();
+
+        $warehouse_id = $data->valueNumber; // TODO: HACERLO DINAMICO
 
         $shelves = Shelf::with('levels.containers.positions')
             ->where('warehouse_id', $warehouse_id)->get();
@@ -1355,7 +1376,9 @@ class MaterialController extends Controller
             ]);
         }
 
-        $warehouse_id = 2; // TODO: HACERLO DINAMICO
+        $data = DataGeneral::where('name', 'idWarehouseTienda')->first();
+
+        $warehouse_id = $data->valueNumber; // TODO: HACERLO DINAMICO
 
         $shelves = Shelf::with('levels.containers.positions')
             ->where('warehouse_id', $warehouse_id)->get();
@@ -1499,7 +1522,7 @@ class MaterialController extends Controller
                 "stock_min" => $material->stock_min,
                 "stock_actual" => $material->stock_store,
                 "prioridad" => $priority,
-                "precio_unitario" => $material->unit_price,
+                "precio_unitario" => $material->price_final,
                 "categoria" => ($material->category == null) ? '': $material->category->name,
                 "sub_categoria" => ($material->subcategory == null) ? '': $material->subcategory->name,
                 "tipo" => ($material->materialType == null) ? '': $material->materialType->name,

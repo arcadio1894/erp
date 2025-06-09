@@ -14,7 +14,7 @@ class UnitMeasureController extends Controller
 {
     public function index()
     {
-        $unitMeasures = UnitMeasure::all();
+        $unitMeasures = UnitMeasure::orderBy('name', 'asc')->get();
         //$permissions = Permission::all();
         $user = Auth::user();
         $permissions = $user->getPermissionsViaRoles()->pluck('name')->toArray();
@@ -29,7 +29,7 @@ class UnitMeasureController extends Controller
         DB::beginTransaction();
         try {
 
-            $brand = UnitMeasure::create([
+            $unit = UnitMeasure::create([
                 'name' => $request->get('name'),
                 'description' => $request->get('description'),
             ]);
@@ -38,9 +38,19 @@ class UnitMeasureController extends Controller
 
         } catch ( \Throwable $e ) {
             DB::rollBack();
-            return response()->json(['message' => $e->getMessage()], 422);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
         }
-        return response()->json(['message' => 'Unidad de medida guardado con éxito.'], 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Unidad de medida guardado con éxito.',
+            'data' => [
+                'id' => $unit->id,
+                'description' => $unit->name
+            ]
+        ], 200);
     }
 
     public function update(UpdateUnitMeasureRequest $request)
@@ -101,9 +111,23 @@ class UnitMeasureController extends Controller
 
     public function getUnitMeasure()
     {
-        $unitMeasures = UnitMeasure::select('id', 'name', 'description') -> get();
+        $unitMeasures = UnitMeasure::select('id', 'name', 'description')
+            ->orderBy('name', 'asc')
+            ->get();
         return datatables($unitMeasures)->toJson();
-        //dd(datatables($customers)->toJson());
+
+    }
+
+    public function deleteMultiple(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['message' => 'Datos inválidos'], 400);
+        }
+
+        UnitMeasure::whereIn('id', $ids)->delete();
+
+        return response()->json(['message' => 'Unidades eliminadas correctamente.']);
     }
 
 }

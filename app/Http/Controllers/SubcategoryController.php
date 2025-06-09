@@ -29,20 +29,28 @@ class SubcategoryController extends Controller
 
         DB::beginTransaction();
         try {
+            $created = [];
 
-            Subcategory::create([
-                'name' => $request->get('name'),
-                'description' => $request->get('description'),
-                'category_id' => $request->get('category_id'),
-            ]);
+            foreach ($validated['subcategories'] as $sub) {
+                $subcategory = Subcategory::create([
+                    'name' => $sub['name'],
+                    'description' => $sub['description'] ?? null,
+                    'category_id' => $validated['category_id'],
+                ]);
+                $created[] = $subcategory;
+            }
 
             DB::commit();
 
-        } catch ( \Throwable $e ) {
+            return response()->json([
+                'message' => 'Subcategorías guardadas con éxito.',
+                'data' => $created
+            ], 200);
+
+        } catch (\Throwable $e) {
             DB::rollBack();
             return response()->json(['message' => $e->getMessage()], 422);
         }
-        return response()->json(['message' => 'Subcategoría guardada con éxito.'], 200);
     }
 
     public function update(UpdateSubcategoryRequest $request)
@@ -106,9 +114,25 @@ class SubcategoryController extends Controller
 
     public function getSubcategories()
     {
-        $subcategories = Subcategory::with('category')->get();
-        //dd($examplers);
+        $subcategories = Subcategory::select('subcategories.*')
+            ->join('categories', 'subcategories.category_id', '=', 'categories.id')
+            ->orderBy('categories.name', 'asc')
+            ->orderBy('subcategories.name', 'asc')
+            ->with('category')
+            ->get();
+
         return datatables($subcategories)->toJson();
-        //dd(datatables($customers)->toJson());
+    }
+
+    public function deleteMultiple(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['message' => 'Datos inválidos'], 400);
+        }
+
+        Subcategory::whereIn('id', $ids)->delete();
+
+        return response()->json(['message' => 'Unidades eliminadas correctamente.']);
     }
 }

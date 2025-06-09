@@ -106,7 +106,9 @@ class MaterialTypeController extends Controller
 
     public function getMaterialTypes()
     {
-        $materialtypes = MaterialType::with('subcategory')->get();
+        $materialtypes = MaterialType::with('subcategory')
+            ->orderBy('name', 'asc')
+            ->get();
         return datatables($materialtypes)->toJson();
         //dd(datatables($customers)->toJson());
     }
@@ -122,6 +124,37 @@ class MaterialTypeController extends Controller
 
         //dd($array);
         return $array;
+    }
+
+    public function deleteMultiple(Request $request)
+    {
+        $ids = $request->input('ids');
+        if (!$ids || !is_array($ids)) {
+            return response()->json(['message' => 'Datos inválidos'], 400);
+        }
+
+        DB::beginTransaction();
+
+        try {
+            $materialTypes = MaterialType::with('subtypes')->whereIn('id', $ids)->get();
+
+            foreach ($materialTypes as $materialType) {
+                // Eliminar subcategorías
+                foreach ($materialType->subtypes as $subtype) {
+                    $subtype->delete();
+                }
+
+                // Eliminar categoría
+                $materialType->delete();
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Tipos de material eliminados correctamente.']);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
+        }
     }
     
 }
