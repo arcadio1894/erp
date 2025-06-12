@@ -1214,7 +1214,7 @@ class OrderPurchaseController extends Controller
         $precioCompra = null;
         $precioVenta = null;
 
-        $tipoMoneda = ($request->has('currency_order')) ? 'PEN':'USD';
+        $tipoMoneda = ($request->has('currency_order')) ? 'USD':'PEN';
         if ( $tipoMoneda == 'USD' ) {
             $tipoCambioSunat = $this->obtenerTipoCambio($fechaFormato);
             $precioCompra = (float) $tipoCambioSunat->precioCompra;

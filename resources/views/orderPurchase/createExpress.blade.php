@@ -132,7 +132,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="btn-currency"> Moneda <span class="right badge badge-danger">(*)</span></label> <br>
-                                    <input id="btn-currency" type="checkbox" name="currency_order" data-bootstrap-switch data-off-color="primary" data-on-text="SOLES" data-off-text="DOLARES" data-on-color="success">
+                                    <input id="btn-currency" type="checkbox" name="currency_order" data-bootstrap-switch data-off-color="primary" data-on-text="SOLES" data-off-text="DOLARES" data-on-color="success" checked>
                                 </div>
                                 {{--<div class="form-group">
                                     <label for="quote_id">Cotización </label>
