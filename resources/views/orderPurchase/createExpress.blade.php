@@ -301,15 +301,15 @@
                     <table class="table">
                         <tr>
                             <th style="width:50%">Subtotal: </th>
-                            <td class="input-group"><span class="moneda">USD</span> <input type="number" min="0" step="0.01" id="subtotal" data-subtotal class="form-control form-control-sm"> </td>
+                            <td class="input-group"><span class="moneda">PEN</span> <input type="number" min="0" step="0.01" id="subtotal" data-subtotal class="form-control form-control-sm"> </td>
                         </tr>
                         <tr>
                             <th>Igv: </th>
-                            <td class="input-group"><span class="moneda">USD</span> <input type="number" min="0" step="0.01" id="taxes" data-taxes class="form-control form-control-sm"></td>
+                            <td class="input-group"><span class="moneda">PEN</span> <input type="number" min="0" step="0.01" id="taxes" data-taxes class="form-control form-control-sm"></td>
                         </tr>
                         <tr>
                             <th>Total: </th>
-                            <td class="input-group"><span class="moneda">USD</span> <input type="number" min="0" step="0.01" id="total" data-totalfinal class="form-control form-control-sm"> </td>
+                            <td class="input-group"><span class="moneda">PEN</span> <input type="number" min="0" step="0.01" id="total" data-totalfinal class="form-control form-control-sm"> </td>
                         </tr>
                     </table>
                 </div>
