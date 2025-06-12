@@ -518,7 +518,7 @@
                                     <input type="number" id="material_priceBase" step="0.01" name="material_priceBase" class="form-control" required min="0">
                                 </div>
                             </div>
-                            <div class="col-md-3">
+                            {{--<div class="col-md-3">
                                 <div class="form-group">
                                     <label for="material_priceList">Precio Minimo: <span class="right badge badge-danger">(*)</span></label>
                                     <input type="number" id="material_priceMin" step="0.01" name="material_priceMin" class="form-control" required min="0">
@@ -529,7 +529,7 @@
                                     <label for="material_priceList">Precio Máximo: <span class="right badge badge-danger">(*)</span></label>
                                     <input type="number" id="material_priceMax" step="0.01" name="material_priceMax" class="form-control" required min="0">
                                 </div>
-                            </div>
+                            </div>--}}
                             <div class="col-md-3">
                                 <div class="form-group">
                                     <label for="material_priceList">Precio Tienda: <span class="right badge badge-danger">(*)</span></label>

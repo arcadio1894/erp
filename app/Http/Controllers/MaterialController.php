@@ -1243,8 +1243,8 @@ class MaterialController extends Controller
         try {
             $material_id = $request->get('material_id');
             $price_list = $request->get('material_priceList');
-            $price_min = $request->get('material_priceMin');
-            $price_max = $request->get('material_priceMax');
+            /*$price_min = $request->get('material_priceMin');
+            $price_max = $request->get('material_priceMax');*/
             $price_base = $request->get('material_priceBase');
 
             $material = Material::find($material_id);
@@ -1254,8 +1254,8 @@ class MaterialController extends Controller
                 $material->percentage_price = null;
                 $material->list_price = $price_list;
                 $material->unit_price = $price_base;
-                $material->min_price = $price_min;
-                $material->max_price = $price_max;
+                /*$material->min_price = $price_min;
+                $material->max_price = $price_max;*/
                 $material->save();
             }
 
