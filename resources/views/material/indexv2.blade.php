@@ -515,7 +515,7 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="material_priceList">Precio Base: <span class="right badge badge-danger">(*)</span></label>
-                                    <input type="number" id="material_priceBase" step="0.01" name="material_priceBase" class="form-control" required min="0">
+                                    <input type="number" id="material_priceBase" step="0.01" name="material_priceBase" class="form-control" required min="0" readonly>
                                 </div>
                             </div>
                             {{--<div class="col-md-3">
