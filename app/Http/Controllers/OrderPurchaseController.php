@@ -1211,7 +1211,15 @@ class OrderPurchaseController extends Controller
         $fechaFormato = $fecha->format('Y-m-d');
         //$response = $this->getTipoDeCambio($fechaFormato);
 
-        $tipoCambioSunat = $this->obtenerTipoCambio($fechaFormato);
+        $precioCompra = null;
+        $precioVenta = null;
+
+        $tipoMoneda = ($request->has('currency_order')) ? 'PEN':'USD';
+        if ( $tipoMoneda == 'USD' ) {
+            $tipoCambioSunat = $this->obtenerTipoCambio($fechaFormato);
+            $precioCompra = (float) $tipoCambioSunat->precioCompra;
+            $precioVenta = (float) $tipoCambioSunat->precioVenta;
+        }
 
         DB::beginTransaction();
         try {
@@ -1230,8 +1238,8 @@ class OrderPurchaseController extends Controller
                 'approved_by' => ($request->has('approved_by')) ? $request->get('approved_by') : null,
                 'payment_condition' => ($request->has('purchase_condition')) ? $request->get('purchase_condition') : '',
                 'currency_order' => ($request->has('currency_order')) ? 'PEN':'USD',
-                'currency_compra' => $tipoCambioSunat->precioCompra,
-                'currency_venta' => $tipoCambioSunat->precioVenta,
+                'currency_compra' => $precioCompra,
+                'currency_venta' => $precioVenta,
                 'observation' => $request->get('observation'),
                 'igv' => $request->get('taxes_send'),
                 'total' => $request->get('total_send'),
@@ -1993,7 +2001,15 @@ class OrderPurchaseController extends Controller
         $fechaFormato = $fecha->format('Y-m-d');
         //$response = $this->getTipoDeCambio($fechaFormato);
 
-        $tipoCambioSunat = $this->obtenerTipoCambio($fechaFormato);
+        $precioCompra = null;
+        $precioVenta = null;
+
+        $tipoMoneda = ($request->has('currency_order')) ? 'USD':'PEN';
+        if ( $tipoMoneda == 'USD' ) {
+            $tipoCambioSunat = $this->obtenerTipoCambio($fechaFormato);
+            $precioCompra = (float) $tipoCambioSunat->precioCompra;
+            $precioVenta = (float) $tipoCambioSunat->precioVenta;
+        }
 
         DB::beginTransaction();
         try {
@@ -2012,8 +2028,8 @@ class OrderPurchaseController extends Controller
                 'approved_by' => ($request->has('approved_by')) ? $request->get('approved_by') : null,
                 'payment_condition' => ($request->has('purchase_condition')) ? $request->get('purchase_condition') : '',
                 'currency_order' => ($request->has('currency_order')) ? 'PEN':'USD',
-                'currency_compra' => $tipoCambioSunat->precioCompra,
-                'currency_venta' => $tipoCambioSunat->precioVenta,
+                'currency_compra' => $precioCompra,
+                'currency_venta' => $precioVenta,
                 'observation' => $request->get('observation'),
                 'igv' => $request->get('taxes_send'),
                 'total' => $request->get('total_send'),
