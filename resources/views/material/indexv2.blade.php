@@ -499,7 +499,7 @@
     </template>
 
     <div id="modalPrecioDirecto" class="modal fade" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Gestión de Precios</h4>
