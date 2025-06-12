@@ -512,7 +512,7 @@
                         <p>¿Está seguro de configurar estos precios?</p>
                         <p id="descriptionMaterialPrice"></p>
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="material_priceList">Precio Base: <span class="right badge badge-danger">(*)</span></label>
                                     <input type="number" id="material_priceBase" step="0.01" name="material_priceBase" class="form-control" required min="0">
@@ -530,7 +530,7 @@
                                     <input type="number" id="material_priceMax" step="0.01" name="material_priceMax" class="form-control" required min="0">
                                 </div>
                             </div>--}}
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="material_priceList">Precio Tienda: <span class="right badge badge-danger">(*)</span></label>
                                     <input type="number" id="material_priceList" step="0.01" name="material_priceList" class="form-control" required min="0">
