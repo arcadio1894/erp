@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateGeneroRequest extends FormRequest
 {
@@ -25,7 +26,13 @@ class UpdateGeneroRequest extends FormRequest
     {
         return [
             'warrant_id' => 'required|exists:warrants,id',
-            'name' => 'required|string|max:255',
+            /*'name' => 'required|string|max:255',*/
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('warrants', 'name')->ignore($this->get('warrant_id')),
+            ],
             'description' => 'nullable|string|max:255',
         ];
     }
@@ -39,6 +46,7 @@ class UpdateGeneroRequest extends FormRequest
             'name.required' => 'El :attribute es obligatoria.',
             'name.string' => 'El :attribute debe contener caracteres válidos.',
             'name.max' => 'El :attribute debe contener máximo 255 caracteres.',
+            'name.unique' => 'Ya existe un :attribute en la base de datos.',
 
             'description.string' => 'La :attribute debe contener caracteres válidos.',
             'description.max' => 'La :attribute es demasiado largo.',

@@ -406,7 +406,7 @@
             <th data-column="stock_min" data-stock_min>Stock Min</th>
             <th data-column="stock_actual" data-stock_actual>Stock Actual</th>
             <th data-column="prioridad" data-prioridad>Prioridad</th>
-            <th data-column="precio_unitario" data-precio_unitario>Precio Unitario</th>
+            <th data-column="precio_unitario" data-precio_unitario>Precio TIenda</th>
             <th data-column="categoria" data-categoria>Categoría</th>
             <th data-column="sub_categoria" data-sub_categoria>SubCategoría</th>
             <th data-column="tipo" data-tipo>Tipo</th>
@@ -480,8 +480,9 @@
                 <a data-editar_material href="{{--'+document.location.origin+ '/dashboard/editar/material/'+item.id+'--}}" class="btn btn-outline-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Editar"><i class="fa fa-pen"></i> </a>
                 <button data-deshabilitar data-delete="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" data-measure="{{--'+item.measure+'--}}" class="btn btn-outline-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Deshabilitar"><i class="fas fa-bell-slash"></i> </button>
                 <a data-ver_items href="{{--'+document.location.origin+ '/dashboard/view/material/items/'+item.id+'--}}" class="btn btn-outline-info btn-sm" data-toggle="tooltip" data-placement="top" title="Ver items"><i class="fa fa-eye"></i> </a>
-                <button data-precioPorcentaje data-material="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" class="btn btn-outline-primary btn-sm" data-toggle="tooltip" data-placement="top" title="Precio Lista Porcentaje"><i class="fas fa-percent"></i> </button>
-                <button data-precioDirecto data-material="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" class="btn btn-outline-success btn-sm" data-toggle="tooltip" data-placement="top" title="Precio Lista Directo"><i class="fas fa-tag"></i> </button>
+                {{--<button data-precioPorcentaje data-material="--}}{{--'+item.id+'--}}{{--" data-description="--}}{{--'+item.full_description+'--}}{{--" class="btn btn-outline-primary btn-sm" data-toggle="tooltip" data-placement="top" title="Precio Lista Porcentaje"><i class="fas fa-percent"></i> </button>
+                --}}
+                <button data-precioDirecto data-material="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" class="btn btn-outline-success btn-sm" data-toggle="tooltip" data-placement="top" title="Gestionar precios"><i class="fas fa-tag"></i> </button>
                 <button data-separate data-material="" data-quantity data-description="" data-measure="" class="btn btn-outline-primary btn-sm" data-toggle="tooltip" data-placement="top" title="Separar Paquete"><i class="far fa-object-ungroup"></i></button>
                 <button data-assign_child data-material="" data-description="" class="btn btn-outline-success btn-sm" data-toggle="tooltip" data-placement="top" title="Asignar Hijos"><i class="fas fa-boxes"></i></button>
 
@@ -498,22 +499,45 @@
     </template>
 
     <div id="modalPrecioDirecto" class="modal fade" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Confirmar precio directo</h4>
+                    <h4 class="modal-title">Gestión de Precios</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                 </div>
-                <form id="formPrecioDirecto" data-url="{{ route('material.set.price.directo') }}">
+                <form id="formPrecioDirecto" data-url="{{ route('material.manage.price') }}">
                     @csrf
                     <div class="modal-body">
                         <input type="hidden" id="material_id" name="material_id">
-                        <p>¿Está seguro de colocar el precio directamente?</p>
-                        <p id="descriptionDelete"></p>
-                        <div class="form-group">
-                            <label for="material_priceList">Precio Directo: <span class="right badge badge-danger">(*)</span></label>
-                            <input type="number" id="material_priceList" step="0.01" name="material_priceList" class="form-control" required min="0">
+                        <p>¿Está seguro de configurar estos precios?</p>
+                        <p id="descriptionMaterialPrice"></p>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="material_priceList">Precio Base: <span class="right badge badge-danger">(*)</span></label>
+                                    <input type="number" id="material_priceBase" step="0.01" name="material_priceBase" class="form-control" required min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="material_priceList">Precio Minimo: <span class="right badge badge-danger">(*)</span></label>
+                                    <input type="number" id="material_priceMin" step="0.01" name="material_priceMin" class="form-control" required min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="material_priceList">Precio Máximo: <span class="right badge badge-danger">(*)</span></label>
+                                    <input type="number" id="material_priceMax" step="0.01" name="material_priceMax" class="form-control" required min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label for="material_priceList">Precio Tienda: <span class="right badge badge-danger">(*)</span></label>
+                                    <input type="number" id="material_priceList" step="0.01" name="material_priceList" class="form-control" required min="0">
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
@@ -795,6 +819,6 @@
 
         })
     </script>
-    <script src="{{ asset('js/material/indexV2.js') }}"></script>
+    <script src="{{ asset('js/material/indexV2.js') }}?v={{ time() }}"></script>
 
 @endsection

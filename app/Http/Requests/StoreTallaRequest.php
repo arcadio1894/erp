@@ -24,7 +24,8 @@ class StoreTallaRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:255',
+            /*'name' => 'required|string|max:255',*/
+            'name' => 'required|string|max:255|unique:qualities,name',
             'description' => 'nullable|string|max:255',
         ];
     }
@@ -35,6 +36,7 @@ class StoreTallaRequest extends FormRequest
             'name.required' => 'El :attribute es obligatoria.',
             'name.string' => 'El :attribute debe contener caracteres válidos.',
             'name.max' => 'El :attribute debe contener máximo 255 caracteres.',
+            'name.unique' => 'Ya existe un :attribute en la base de datos.',
 
             'description.string' => 'La :attribute debe contener caracteres válidos.',
             'description.max' => 'La :attribute es demasiado largo.',

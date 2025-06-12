@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateSubcategoryRequest extends FormRequest
 {
@@ -25,7 +26,14 @@ class UpdateSubcategoryRequest extends FormRequest
     {
         return [
             'subcategory_id' => 'required|exists:subcategories,id',
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('subcategories', 'name')->where(function ($query) {
+                    return $query->where('category_id', $this->category_id);
+                }),
+            ],
             'description' => 'nullable|string|max:255',
             'category_id' => 'required|exists:categories,id'
         ];
@@ -43,6 +51,7 @@ class UpdateSubcategoryRequest extends FormRequest
             'name.required' => 'El :attribute es obligatoria.',
             'name.string' => 'El :attribute debe contener caracteres válidos.',
             'name.max' => 'El :attribute debe contener máximo 255 caracteres.',
+            'name.unique' => 'Ya existe una subcategoría con ese nombre en esta categoría.',
 
             'description.string' => 'La :attribute debe contener caracteres válidos.',
             'description.max' => 'La :attribute es demasiado largo.',

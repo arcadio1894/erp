@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTypeScrapRequest extends FormRequest
 {
@@ -25,7 +26,12 @@ class UpdateTypeScrapRequest extends FormRequest
     {
         return [
             'typeScrap_id' => 'required|exists:typescraps,id',
-            'name' => 'required|string|max:255',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('typescraps', 'name')->ignore($this->get('typeScrap_id')),
+            ],
             'width' => 'required|numeric|between:0,99999.99',
             'length' => 'required|numeric|between:0,99999.99',
         ];
@@ -40,6 +46,7 @@ class UpdateTypeScrapRequest extends FormRequest
             'name.required' => 'El :attribute es obligatoria.',
             'name.string' => 'El :attribute debe contener caracteres válidos.',
             'name.max' => 'El :attribute debe contener máximo 255 caracteres.',
+            'name.unique' => 'Ya existe un :attribute en la base de datos.',
 
             'width.required' => 'El :attribute es obligatorio.',
             'width.numeric' => 'El :attribute debe ser un número.',

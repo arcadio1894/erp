@@ -45,6 +45,8 @@ class Material extends Model
         'codigo',
         'type_tax_id',
         'list_price',
+        'max_price',
+        'min_price',
         'isPack',
         'quantityPack',
         'stock_unPack',

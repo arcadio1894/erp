@@ -24,7 +24,8 @@ class StoreMaterialTypeRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:255',
+            /*'name' => 'required|string|max:255',*/
+            'name' => 'required|string|max:255|unique:material_types,name',
             'description' => 'nullable|string|max:255',
             'subcategory_id' => 'required|exists:subcategories,id',
 
@@ -37,6 +38,7 @@ class StoreMaterialTypeRequest extends FormRequest
             'name.required' => 'El :attribute es obligatoria.',
             'name.string' => 'El :attribute debe contener caracteres válidos.',
             'name.max' => 'El :attribute debe contener máximo 255 caracteres.',
+            'name.unique' => 'Ya existe un :attribute en la base de datos.',
 
             'description.string' => 'El :attribute debe contener caracteres válidos.',
             'description.max' => 'El :attribute debe contener máximo 255 caracteres.',

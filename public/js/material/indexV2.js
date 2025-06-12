@@ -143,16 +143,16 @@ $(document).ready(function () {
     });
 
     $(document).on('click', '[data-precioDirecto]', openModalPrecioDirecto);
-    $(document).on('click', '[data-precioPorcentaje]', openModalPrecioPorcentaje);
+   /* $(document).on('click', '[data-precioPorcentaje]', openModalPrecioPorcentaje);*/
 
     $modalPrecioDirecto = $('#modalPrecioDirecto');
-    $modalPrecioPercentage = $('#modalPrecioPercentage');
+    /*$modalPrecioPercentage = $('#modalPrecioPercentage');*/
 
     $formPrecioDirecto = $('#formPrecioDirecto');
-    $formPrecioPorcentaje = $('#formPrecioPorcentaje');
+    /*$formPrecioPorcentaje = $('#formPrecioPorcentaje');*/
 
     $('#btn-submit_priceList').on('click', setPriceList);
-    $('#btn-submit_pricePercentage').on('click', setPricePercentage);
+    /*$('#btn-submit_pricePercentage').on('click', setPricePercentage);*/
 
 
     $(document).on('click', '[data-separate]', openModalSeparate);
@@ -571,12 +571,23 @@ function setPriceList() {
 
 function openModalPrecioDirecto() {
     var material_id = $(this).data('material');
+    var material_name = $(this).data('description');
 
     var priceList = 0;
+    var priceBase = 0;
+    var priceMin = 0;
+    var priceMax = 0;
 
     $.get('/dashboard/get/price/list/material/'+material_id, function(data) {
         priceList = data.priceList;
-        $modalPrecioDirecto.find('[id=material_priceList]').val(priceList);
+        priceBase = data.priceBase;
+        priceMin = data.priceMin;
+        priceMax = data.priceMax;
+        $modalPrecioDirecto.find('[id=material_priceBase]').val(parseFloat(priceBase).toFixed(2));
+        $modalPrecioDirecto.find('[id=material_priceMin]').val(parseFloat(priceMin).toFixed(2));
+        $modalPrecioDirecto.find('[id=material_priceMax]').val(parseFloat(priceMax).toFixed(2));
+        $modalPrecioDirecto.find('[id=material_priceList]').val(parseFloat(priceList).toFixed(2));
+
 
     }).fail(function(jqXHR, textStatus, errorThrown) {
         // Función de error, se ejecuta cuando la solicitud GET falla
@@ -632,6 +643,7 @@ function openModalPrecioDirecto() {
         });
 
     $modalPrecioDirecto.find('[id=material_id]').val(material_id);
+    $modalPrecioDirecto.find('[id=descriptionMaterialPrice]').html(material_name);
 
     $modalPrecioDirecto.modal('show');
 }
@@ -1190,8 +1202,8 @@ function renderDataTable(data, activeColumns) {
     }
 
 
-    clone.querySelector("[data-precioPorcentaje]").setAttribute("data-material", data.id);
-    clone.querySelector("[data-precioPorcentaje]").setAttribute("data-description", data.descripcion);
+    /*clone.querySelector("[data-precioPorcentaje]").setAttribute("data-material", data.id);
+    clone.querySelector("[data-precioPorcentaje]").setAttribute("data-description", data.descripcion);*/
     clone.querySelector("[data-precioDirecto]").setAttribute("data-material", data.id);
     clone.querySelector("[data-precioDirecto]").setAttribute("data-description", data.descripcion);
 

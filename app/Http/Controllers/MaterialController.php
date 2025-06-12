@@ -1191,7 +1191,12 @@ class MaterialController extends Controller
         {
             return response()->json(['message' => "No existe el material"], 422);
         } else {
-            return response()->json(['priceList' => ($material->list_price == null) ? 0 : $material->list_price], 200);
+            return response()->json([
+                'priceList' => ($material->list_price == null) ? 0 : $material->list_price,
+                'priceBase' => ($material->unit_price == null) ? 0 : $material->unit_price,
+                'priceMin' => ($material->min_price == null) ? 0 : $material->min_price,
+                'priceMax' => ($material->max_price == null) ? 0 : $material->max_price,
+            ], 200);
         }
     }
 
@@ -1221,6 +1226,44 @@ class MaterialController extends Controller
                 $material->percentage_price = null;
                 $material->list_price = $price;
                 $material->save();
+            }
+
+            DB::commit();
+
+        } catch ( \Throwable $e ) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+        return response()->json(['message' => 'Cambio de precio de lista con éxito.'], 200);
+    }
+
+    public function managePriceMaterial(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $material_id = $request->get('material_id');
+            $price_list = $request->get('material_priceList');
+            $price_min = $request->get('material_priceMin');
+            $price_max = $request->get('material_priceMax');
+            $price_base = $request->get('material_priceBase');
+
+            $material = Material::find($material_id);
+
+            if ( isset($material) )
+            {
+                $material->percentage_price = null;
+                $material->list_price = $price_list;
+                $material->unit_price = $price_base;
+                $material->min_price = $price_min;
+                $material->max_price = $price_max;
+                $material->save();
+            }
+
+            // Cambiar el precio en tienda
+            $storeMaterials = StoreMaterial::where('material_id', $material_id)->get();
+            foreach ( $storeMaterials as $storeMaterial ) {
+                $storeMaterial->unit_price = $price_list;
+                $storeMaterial->save();
             }
 
             DB::commit();

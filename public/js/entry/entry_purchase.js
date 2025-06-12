@@ -121,7 +121,7 @@ $(document).ready(function () {
         console.log($material.tipo_venta_id);
         if ( $material.tipo_venta_id === null )
         {
-
+            $("#almacen").typeahead('val',$locations[0]).trigger('change');
         } else {
             switch($material.tipo_venta_id) {
                 case 1:
@@ -135,7 +135,7 @@ $(document).ready(function () {
                         $('#date_vence').prop('readonly', false);
                         $('#date_vence').prop('disabled', false);
                     }
-
+                    $("#almacen").typeahead('val',$locations[0]).trigger('change');
                     $('#almacen').prop('readonly', false);
                     $('#almacen').prop('disabled', false);
                     $('#btn-grouped2').bootstrapSwitch('state', false, true);
@@ -152,6 +152,7 @@ $(document).ready(function () {
                         $('#date_vence').prop('readonly', false);
                         $('#date_vence').prop('disabled', false);
                     }
+                    $("#almacen").typeahead('val',$locations[0]).trigger('change');
                     $('#almacen').prop('readonly', false);
                     $('#almacen').prop('disabled', false);
                     $('#btn-grouped2').bootstrapSwitch('state', false, true);
@@ -164,6 +165,7 @@ $(document).ready(function () {
                     $('#almacen').prop('readonly', true);
                     $('#almacen').prop('disabled', true);
                     $('#btn-grouped2').bootstrapSwitch('disabled', false);
+                    $("#almacen").typeahead('val',$locations[0]).trigger('change');
                     break;
 
             }

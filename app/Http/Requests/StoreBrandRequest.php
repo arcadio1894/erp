@@ -24,7 +24,8 @@ class StoreBrandRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:255',
+            /*'name' => 'required|string|max:255',*/
+            'name' => 'required|string|max:255|unique:brands,name',
             'comment' => 'nullable|string|max:255',
         ];
     }
@@ -35,6 +36,7 @@ class StoreBrandRequest extends FormRequest
             'name.required' => 'El :attribute es obligatoria.',
             'name.string' => 'El :attribute debe contener caracteres válidos.',
             'name.max' => 'El :attribute debe contener máximo 255 caracteres.',
+            'name.unique' => 'Ya existe un :attribute en la base de datos.',
 
             'comment.string' => 'La :attribute debe contener caracteres válidos.',
             'comment.max' => 'La :attribute es demasiado largo.',

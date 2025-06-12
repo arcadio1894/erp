@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateBrandRequest extends FormRequest
 {
@@ -25,7 +26,13 @@ class UpdateBrandRequest extends FormRequest
     {
         return [
             'brand_id' => 'required|exists:brands,id',
-            'name' => 'required|string|max:255',
+            /*'name' => 'required|string|max:255',*/
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('brands', 'name')->ignore($this->get('brand_id')),
+            ],
             'comment' => 'nullable|string|max:255',
         ];
     }
@@ -39,6 +46,7 @@ class UpdateBrandRequest extends FormRequest
             'name.required' => 'El :attribute es obligatoria.',
             'name.string' => 'El :attribute debe contener caracteres válidos.',
             'name.max' => 'El :attribute debe contener máximo 255 caracteres.',
+            'name.unique' => 'Ya existe un :attribute en la base de datos.',
 
             'comment.string' => 'La :attribute debe contener caracteres válidos.',
             'comment.max' => 'La :attribute es demasiado largo.',

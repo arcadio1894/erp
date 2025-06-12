@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateSubtypeRequest extends FormRequest
 {
@@ -25,7 +26,13 @@ class UpdateSubtypeRequest extends FormRequest
     {
         return [
             'subtype_id' => 'required|exists:subtypes,id',
-            'name' => 'required|string|max:255',
+            /*'name' => 'required|string|max:255',*/
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('subtypes', 'name')->ignore($this->get('subtype_id')),
+            ],
             'description' => 'nullable|string|max:255',
             'material_type_id' => 'required|exists:material_types,id',
         ];
@@ -41,6 +48,7 @@ class UpdateSubtypeRequest extends FormRequest
             'name.required' => 'El :attribute es obligatoria.',
             'name.string' => 'El :attribute debe contener caracteres válidos.',
             'name.max' => 'El :attribute debe contener máximo 255 caracteres.',
+            'name.unique' => 'Ya existe un :attribute en la base de datos.',
 
             'description.string' => 'El :attribute debe contener caracteres válidos.',
             'description.max' => 'El :attribute debe contener máximo 255 caracteres.',

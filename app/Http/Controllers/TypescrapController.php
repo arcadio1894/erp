@@ -66,7 +66,7 @@ class TypescrapController extends Controller
             return response()->json(['message' => $e->getMessage()], 422);
         }
 
-        return response()->json(['message' => 'Tipo de retacería modificada con éxito.','url'=>route('typeScrap.index')], 200);
+        return response()->json(['message' => 'Tipo de retacería modificada con éxito.','url'=>route('typescrap.index')], 200);
     }
 
     public function destroy(DeleteTypeScrapRequest $request)

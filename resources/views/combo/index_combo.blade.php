@@ -4,11 +4,11 @@
     menu-open
 @endsection
 
-@section('activeMaterial')
+@section('activePromotions')
     active
 @endsection
 
-@section('listComboMaterial')
+@section('activePromotionsCombo')
     active
 @endsection
 

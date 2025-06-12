@@ -2788,6 +2788,9 @@ Route::middleware('auth')->group(function (){
         Route::post('/set/price/porcentaje/material', 'MaterialController@setPricePorcentajeMaterial')
             ->name('material.set.price.porcentaje');
 
+        Route::post('/manage/price/material', 'MaterialController@managePriceMaterial')
+            ->name('material.manage.price');
+
         // TODO: Ganancia Diaria
         Route::get('/get/data/ganancias/V2/{numberPage}', 'GananciaDiariaController@getDataGanancias');
         Route::get('/get/data/ganancia/details/V2/{numberPage}', 'GananciaDiariaController@getDataGananciaDetails');
