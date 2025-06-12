@@ -1325,7 +1325,7 @@ class MaterialController extends Controller
             'position_id'   => 'required|integer|exists:positions,id',
             'quantity'      => 'required|numeric|min:1',
             'unit_price'    => 'required|numeric|min:0.01',
-            'fechas'        => 'required|array|min:1',
+            'fechas'        => 'nullable|array',
             'fechas.*'      => 'date|after_or_equal:today',
         ]);
 
@@ -1362,7 +1362,7 @@ class MaterialController extends Controller
             ]);
 
             // 5. Crear fechas de vencimiento
-            foreach ($request->fechas as $fecha) {
+            foreach ($request->input('fechas', []) as $fecha) {
                 StoreMaterialVencimiento::create([
                     'store_material_id'  => $storeMaterial->id,
                     'fecha_vencimiento'  => $fecha,

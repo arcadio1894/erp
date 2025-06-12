@@ -98,7 +98,7 @@ $(document).ready(function() {
             }
         });
 
-        if (fechas.length === 0) {
+        /*if (fechas.length === 0) {
             $.alert({
                 title: 'Error',
                 content: 'Debes agregar al menos una fecha de vencimiento.',
@@ -106,7 +106,7 @@ $(document).ready(function() {
             });
             $("#sendDataBtn").attr("disabled", false);
             return;
-        }
+        }*/
 
         // Enviar por AJAX
         $.ajax({
