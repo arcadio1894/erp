@@ -1222,8 +1222,8 @@
                 <div class="card-footer bg-transparent">
                     <div class="row">
                         <div class="col-4 text-center">
-                            <input type="text" id="knobTotalSale" class="knob text-white" data-readonly="true" value="0" data-width="60" data-height="60" data-fgColor="#39CCCC">
-                            <div class="text-white">Total</div>
+                            {{--<input type="text" id="knobTotalSale"  class="knob text-white" data-readonly="true" value="0" data-width="60" data-height="60" data-fgColor="#39CCCC">
+                            --}}<div class="text-white">Total</div>
                             <span id="quantityKnobTotalSale">0</span>
                         </div>
                     </div>

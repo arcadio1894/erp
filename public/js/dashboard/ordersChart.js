@@ -159,12 +159,12 @@ $(document).ready(function () {
     });
 
     function updateKnobsSale(data) {
-        $('#knobWhatsappSale').val(data.whatsapp_percentage).trigger('change');
-        $('#knobWebSale').val(data.web_percentage).trigger('change');
-        $('#knobTotalSale').val(data.total_percentage).trigger('change');
+        //$('#knobWhatsappSale').val(data.whatsapp_percentage).trigger('change');
+        //$('#knobWebSale').val(data.web_percentage).trigger('change');
+        //$('#knobTotalSale').val(data.total_percentage).trigger('change');
 
-        $('#quantityKnobWhatsappSale').text('S/. '+data.total_whatsapp);
-        $('#quantityKnobWebSale').text('S/. '+data.total_web);
+        //$('#quantityKnobWhatsappSale').text('S/. '+data.total_whatsapp);
+        //$('#quantityKnobWebSale').text('S/. '+data.total_web);
         $('#quantityKnobTotalSale').text('S/. '+data.total);
     }
 
