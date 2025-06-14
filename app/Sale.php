@@ -45,4 +45,9 @@ class Sale extends Model
     {
         return Carbon::parse($this->date_sale)->isoFormat('DD/MM/YYYY [a las] h:mm A');
     }
+
+    public function cashMovements()
+    {
+        return $this->hasMany(CashMovement::class, 'sale_id');
+    }
 }

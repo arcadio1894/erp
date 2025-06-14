@@ -11,7 +11,34 @@
     <link rel="stylesheet" href="{{ asset('admin/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.standalone.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/plugins/select2/css/select2.min.css') }}">
     <link rel="stylesheet" href="{{ asset('admin/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+    <style>
+        .totales {
+            background-color: #D9E1F2; /* Color de fondo para la primera fila */
+        }
+        .titleHeader {
+            background-color: #4472C4;
+            color: #ffffff;
+        }
+        .titleTotal {
+            background-color: #FFC000;
+            font-weight: bold;
+        }
+        .totalWorker {
+            background-color: #FFF2CC;
+        }
+        .celdas {
+            background-color: #D9D9D9;
+        }
+        .letraTabla {
+            font-family: "Calibri", Arial, sans-serif; /* Utiliza Calibri si está instalado, de lo contrario, usa Arial o una fuente sans-serif similar */
+            font-size: 13px; /* Tamaño de fuente 11 */
+        }
+        .letraTablaGrande {
+            font-family: "Calibri", Arial, sans-serif; /* Utiliza Calibri si está instalado, de lo contrario, usa Arial o una fuente sans-serif similar */
+            font-size: 16px; /* Tamaño de fuente 11 */
+        }
 
+    </style>
 @endsection
 
 @section('page-header')
@@ -1167,6 +1194,172 @@
         </div>
     </div>--}}
 
+    <div class="row">
+        <div class="col-md-6">
+
+            <div class="card bg-gradient-info">
+                <div class="card-header border-0">
+                    <h3 class="card-title">
+                        <i class="fas fa-th mr-1"></i>
+                        Grafico de ventas
+                    </h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-primary btn-sm filter-btn-sale" data-filter="daily">Diario</button>
+                        <button type="button" class="btn btn-secondary btn-sm filter-btn-sale" data-filter="weekly">Semanal</button>
+                        <button type="button" class="btn btn-warning btn-sm filter-btn-sale" data-filter="monthly">Mensual</button>
+                        <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#dateRangeModalSale">
+                            Por Fechas
+                        </button>
+                        <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas class="chart" id="sale-chart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer bg-transparent">
+                    <div class="row">
+                        <div class="col-4 text-center">
+                            <input type="text" id="knobTotalSale" class="knob text-white" data-readonly="true" value="0" data-width="60" data-height="60" data-fgColor="#39CCCC">
+                            <div class="text-white">Total</div>
+                            <span id="quantityKnobTotalSale">0</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-footer -->
+            </div>
+            <!-- /.card -->
+        </div>
+
+
+        <div class="col-md-6">
+
+            <div class="card bg-gradient-info">
+                <div class="card-header border-0">
+                    <h3 class="card-title">
+                        <i class="fas fa-th mr-1"></i>
+                        Grafico de Ingresos VS Egresos
+                    </h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-primary btn-sm filter-btn-utilidad" data-filter="daily">Diario</button>
+                        <button type="button" class="btn btn-secondary btn-sm filter-btn-utilidad" data-filter="weekly">Semanal</button>
+                        <button type="button" class="btn btn-warning btn-sm filter-btn-utilidad" data-filter="monthly">Mensual</button>
+                        <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#dateRangeModalUtilidad">
+                            Por Fechas
+                        </button>
+                        <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <canvas class="chart" id="utilidad-chart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer bg-transparent">
+                    <div class="row">
+                        <div class="col-4 text-center">
+                            <div class="text-white">Ingresos</div>
+                            <span id="quantityKnobIngresos">0</span>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="text-white">Egresos</div>
+                            <span id="quantityKnobEgresos">0</span>
+                        </div>
+                        <div class="col-4 text-center">
+                            <div class="text-white">Utilidad</div>
+                            <span id="quantityKnobUtilidad">0</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-footer -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-info">
+                <div class="card-header border-0">
+                    <h3 class="card-title">
+                        <i class="fas fa-th mr-1"></i>
+                        Grafico de RRHH
+                    </h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn bg-info btn-sm" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="year">Seleccione un año <span class="right badge badge-danger">(*)</span></label>
+                                <select id="year" name="year" class="form-control select2" style="width: 100%;">
+                                    <option></option>
+                                    @foreach( $years as $year )
+                                        <option value="{{ $year->year }}" {{ ($year->year == $currentYear) ? 'selected':'' }}>{{ $year->year }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3" id="sandbox-container">
+                            <label for="weekStart">Seleccione un mes <span class="right badge badge-danger">(*)</span></label>
+
+                            <select id="month" name="month" class="form-control select2" style="width: 100%;">
+                                <option></option>
+                                @foreach( $months as $month )
+                                    <option value="{{ $month->month}}" {{ ($month->month == $currentMonth) ? 'selected':'' }}>{{ $month->month_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="col-md-3">
+                            <label for="btn-outputs">&nbsp;</label><br>
+                            <button type="button" id="btn-pays" class="btn  btn-outline-success btn-block"> Buscar</button>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="card card-navy">
+                            <div class="card-header">
+                                <h3 class="card-title" id="titleCard2"><strong>RESUMEN SUELDOS MENSUALES</strong></h3>
+
+                                <div class="card-tools">
+
+                                    <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
+                                        <i class="fas fa-minus"></i></button>
+                                </div>
+                            </div>
+                            <div class="card-body" >
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="table-responsive" id="tablaContainer3" >
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-8">
+                                        <canvas id="lineChart"></canvas>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- /.card -->
+        </div>
+
+
+
+    </div>
+    <br>
     <template id="previous-page">
         <li class="page-item previous">
             <a href="#" class="page-link" data-item>
@@ -1278,11 +1471,73 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="dateRangeModalSale" role="dialog" aria-labelledby="dateRangeModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dateRangeModalLabel">Seleccionar Rango de Fechas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="dateRangeForm">
+                        <div class="form-group">
+                            <label for="start_date">Fecha Inicio</label>
+                            <input type="date" class="form-control" id="start_date_sale">
+                        </div>
+                        <div class="form-group">
+                            <label for="end_date">Fecha Fin</label>
+                            <input type="date" class="form-control" id="end_date_sale">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary filter-btn-sale" data-filter="date_range" data-dismiss="modal">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="dateRangeModalUtilidad" role="dialog" aria-labelledby="dateRangeModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="dateRangeModalLabel">Seleccionar Rango de Fechas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="dateRangeForm">
+                        <div class="form-group">
+                            <label for="start_date">Fecha Inicio</label>
+                            <input type="date" class="form-control" id="start_date_utilidad">
+                        </div>
+                        <div class="form-group">
+                            <label for="end_date">Fecha Fin</label>
+                            <input type="date" class="form-control" id="end_date_utilidad">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary filter-btn-utilidad" data-filter="date_range" data-dismiss="modal">Aplicar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('scripts')
     <!-- Select2 -->
     <script src="{{ asset('admin/plugins/select2/js/select2.full.min.js') }}"></script>
+
+    <!-- jQuery Knob Chart -->
+    <script src="{{ asset('admin/plugins/jquery-knob/jquery.knob.min.js') }}"></script>
 
     <script src="{{ asset('admin/plugins/moment/moment.min.js') }}"></script>
     <script src="{{ asset('admin/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js') }}"></script>
@@ -1290,7 +1545,8 @@
     <script src="{{ asset('admin/plugins/jquery_loading/loadingoverlay.min.js')}}"></script>
 
     <script src="{{ asset('admin/plugins/chart.js/Chart.min.js') }}"></script>
-    <script src="{{ asset('js/report/reportAmount.js') }}"></script>
+    <script src="{{ asset('js/report/reportAmount.js') }}?v={{ time() }}"></script>
+    <script src="{{ asset('js/dashboard/ordersChart.js')}}?v={{ time() }}"></script>
     {{--<script src="{{ asset('js/report/viewReport.js') }}"></script>--}}
     {{--<script src="{{ asset('js/report/charts.js') }}"></script>--}}
     <script>
@@ -1300,6 +1556,15 @@
                 placeholder: "Selecione un almacén",
             });
             $('#typeEntry').select2({
+                placeholder: "Selecione Tipo",
+                allowClear: true
+            });
+
+            $('#month').select2({
+                placeholder: "Selecione Tipo",
+                allowClear: true
+            });
+            $('#year').select2({
                 placeholder: "Selecione Tipo",
                 allowClear: true
             });

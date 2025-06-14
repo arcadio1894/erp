@@ -2804,6 +2804,9 @@ Route::middleware('auth')->group(function (){
         Route::post('/material-unpack/store', 'MaterialUnpackController@store');
         Route::get('/material-unpack/{id}/child-materials', 'MaterialUnpackController@getChildMaterials');
 
+        Route::get('/sales/chart-data-sale', 'GraphsController@getChartDataSale');
+        Route::get('/sales/chart-data-utilidad', 'GraphsController@getChartDataCashFlow');
+
         // TODO: Faces
         Route::get('/faces', [\App\Http\Controllers\FaceController::class, 'index'])->name('faces.index');
         Route::post('/faces', [\App\Http\Controllers\FaceController::class, 'store'])->name('faces.store');

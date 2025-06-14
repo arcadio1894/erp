@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DataGeneral;
 use App\DateDimension;
 use App\PaySlip;
 use App\Projection;
@@ -119,14 +120,27 @@ class PersonalPaymentController extends Controller
 
         unset($element);
         //dump($semanas);
+
+        $dataCurrency = DataGeneral::where('name', 'type_current')->first();
+        $currency = $dataCurrency->valueText;
+
         foreach ($semanas as &$element) {
             $firstDayWeek = $element['firstDayWeek'];
             //dump($firstDayWeek);
             //dd($tiposCambios);
             // Obtener la tasa de cambio para el día correspondiente utilizando tu función getExchange()
-            $rate = $this->getExchange($firstDayWeek, $tiposCambios); // Reemplaza getExchange() con el nombre de tu propia función
-            $element['cambioCompra'] = (isset($rate)) ? (float)$rate->precioCompra:1;
-            $element['cambioVenta'] = (isset($rate)) ? (float)$rate->precioVenta:1;
+
+            if ( $currency == 'usd' )
+            {
+                $rate = $this->getExchange($firstDayWeek, $tiposCambios);
+                $element['cambioCompra'] = (isset($rate)) ? (float)$rate->precioCompra:1;
+                $element['cambioVenta'] = (isset($rate)) ? (float)$rate->precioVenta:1;
+            } elseif ( $currency == 'pen' ) {
+                $element['cambioCompra'] = 1;
+                $element['cambioVenta'] = 1;
+            }
+            //$rate = $this->getExchange($firstDayWeek, $tiposCambios); // Reemplaza getExchange() con el nombre de tu propia función
+            /**/
         }
 
         unset($element);

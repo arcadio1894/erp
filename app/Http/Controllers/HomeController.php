@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\ContactName;
 use App\Customer;
+use App\DateDimension;
 use App\Entry;
 use App\Location;
 use App\Material;
@@ -11,6 +12,7 @@ use App\Output;
 use App\Supplier;
 use App\Warehouse;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class HomeController extends Controller
 {
@@ -60,6 +62,21 @@ class HomeController extends Controller
             $l = 'AR:'.$location->area->name.'|AL:'.$location->warehouse->name.'|AN:'.$location->shelf->name.'|NIV:'.$location->level->name.'|CON:'.$location->container->name.'|POS:'.$location->position->name;
             array_push($locations, ['id'=> $location->id, 'location' => $l]);
         }
+
+        Carbon::setLocale(config('app.locale'));
+
+        $fechaActual = Carbon::now('America/Lima');
+
+        $currentYear = $fechaActual->year;
+        $currentMonth = $fechaActual->month;
+
+        $years = DateDimension::distinct()->get(['year']);
+
+        $months = DateDimension::distinct()
+            ->where('year', $currentYear)
+            ->orderBy('month')
+            ->get(['month', 'month_name']);
+
         return view('dashboard.dashboard',
             compact('customerCount',
                 'contactNameCount',
@@ -69,6 +86,10 @@ class HomeController extends Controller
                 'invoiceCount',
                 'outputCount',
                 'locations',
-                'almacenes'));
+                'almacenes',
+                'years',
+                'months',
+                'currentYear',
+                'currentMonth'));
     }
 }
