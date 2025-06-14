@@ -182,7 +182,7 @@ $(document).ready(function () {
             data: { filter, start_date: startDate, end_date: endDate },
             success: function (response) {
                 updateChartUtilidad(response);
-                updateKnobsUtilidad(response)
+                updateKnobsUtilidad(response);
             },
             error: function () {
                 alert('Error al obtener los datos del gráfico.');
@@ -292,9 +292,9 @@ $(document).ready(function () {
 
     // Manejo de botones de filtro
     $(".filter-btn-utilidad").click(function () {
-        selectedFilter = $(this).data("filter");
+        selectedFilterUtilidad = $(this).data("filter");
 
-        if (selectedFilter === "date_range") {
+        if (selectedFilterUtilidad === "date_range") {
             let startDate = $("#start_date_utilidad").val();
             let endDate = $("#end_date_utilidad").val();
 
@@ -303,9 +303,9 @@ $(document).ready(function () {
                 return;
             }
 
-            fetchChartDataUtilidad(selectedFilter, startDate, endDate);
+            fetchChartDataUtilidad(selectedFilterUtilidad, startDate, endDate);
         } else {
-            fetchChartDataUtilidad(selectedFilter);
+            fetchChartDataUtilidad(selectedFilterUtilidad);
         }
     });
 
