@@ -349,7 +349,8 @@ class PersonalPaymentController extends Controller
             'projection_week_dollars' => $projection_week_dollars,
             'sueldosMensuales' => $sueldosMensuales,
             'sueldosMensualTotal' => $sumaTotal,
-            'sueldosMensualPromedio' => $promedioTotal
+            'sueldosMensualPromedio' => $promedioTotal,
+            'currency' => $currency
         ]);
 
     }

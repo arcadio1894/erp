@@ -340,6 +340,7 @@ function reportPersonalPayment() {
         var proyectadoSoles = response.projection_soles; // Valor proyectado en soles
         var proyectadoSemanalDolares = response.projection_week_dollars; // Valor proyectado en dólares
         var proyectadoSemanalSoles = response.projection_week_soles; // Valor proyectado en soles
+        var currency = response.currency;
 
         console.log(data);
         console.log(parseFloat(proyectadoDolares).toFixed(2));
@@ -370,14 +371,22 @@ function reportPersonalPayment() {
 
         // Agregar la primera fila con los montos en la moneda original
         var primeraFila3 = $("<tr>").addClass("totales");
-        primeraFila3.append($("<td>").addClass("text-right").text("TOTAL EN SOLES"));
+        if ( currency == 'usd' ) {
+            primeraFila3.append($("<td>").addClass("text-right").text("TOTAL EN DOLARES"));
+        } else {
+            primeraFila3.append($("<td>").addClass("text-right").text("TOTAL EN SOLES"));
+        }
 
         primeraFila3.append($("<td>").addClass("titleTotal").addClass("text-right").text(parseFloat(response.sueldosMensualTotal).toFixed(2)));
         tabla3.append(primeraFila3);
 
         // Agregar la segunda fila con los montos en dólares
         var segundaFila3 = $("<tr>").addClass("totales");
-        segundaFila3.append($("<td>").addClass("text-right").text("PROMEDIO EN SOLES"));
+        if ( currency == 'usd' ) {
+            segundaFila3.append($("<td>").addClass("text-right").text("PROMEDIO EN DOLARES"));
+        } else {
+            segundaFila3.append($("<td>").addClass("text-right").text("PROMEDIO EN SOLES"));
+        }
 
         segundaFila3.append($("<td>").addClass("titleTotal").addClass("text-right").text(parseFloat(response.sueldosMensualPromedio).toFixed(2)));
         tabla3.append(segundaFila3);
