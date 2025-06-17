@@ -1112,7 +1112,7 @@ class AssistanceController extends Controller
                                 //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 //dump('Horas Trabajadas: '. $hoursNeto);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -1141,7 +1141,7 @@ class AssistanceController extends Controller
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             // Pregunta si es sabado
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -1164,7 +1164,7 @@ class AssistanceController extends Controller
                                 // TODO: Detectamos horas extras
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
                                 //if ( $workingDay->id == $wD->id ) $fecha->isSunday()
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = round( (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount , 2);
                                 } else {
@@ -1187,7 +1187,7 @@ class AssistanceController extends Controller
                                 //dump('Entre porqe no detectamos horas extras');
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
                                 //if ( $workingDay->id == $wD->id )
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = (Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                 } else {
@@ -1240,7 +1240,7 @@ class AssistanceController extends Controller
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -1267,7 +1267,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -1303,7 +1303,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -1320,7 +1320,7 @@ class AssistanceController extends Controller
                                 if ( $assistance_detail->hour_out_new> $workingDay->time_fin ){
                                     // TODO: Detectamos horas extras
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -1332,7 +1332,7 @@ class AssistanceController extends Controller
                                     $hours100 = $hoursExtrasTotals;
                                 } else {
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -1566,7 +1566,7 @@ class AssistanceController extends Controller
                                 //dump('Horas Trabajadas: '. $hoursWorked);
                                 //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -1595,7 +1595,7 @@ class AssistanceController extends Controller
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             //dump('Horas Trabajadas: ' . $hoursWorked);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -1617,7 +1617,7 @@ class AssistanceController extends Controller
                                 //dump('Entre porqe detectamos horas extras');
                                 // TODO: Detectamos horas extras
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = round( (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount , 2);
                                 } else {
@@ -1639,7 +1639,7 @@ class AssistanceController extends Controller
                             } else {
                                 //dump('Entre porqe no detectamos horas extras');
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id ) {
+                                if ($wD && $workingDay->id == $wD->id) {
                                     $hoursOrdinary = (Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                 } else {
                                     $hoursOrdinary = (Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry)) - $time_break - $assistance_detail->hours_discount ;
@@ -1691,7 +1691,7 @@ class AssistanceController extends Controller
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -1718,7 +1718,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -1754,7 +1754,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -1771,7 +1771,7 @@ class AssistanceController extends Controller
                                 if ( $assistance_detail->hour_out_new> $workingDay->time_fin ){
                                     // TODO: Detectamos horas extras
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -1783,7 +1783,7 @@ class AssistanceController extends Controller
                                     $hours100 = $hoursExtrasTotals;
                                 } else {
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -2015,7 +2015,7 @@ class AssistanceController extends Controller
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             //dump('Horas Trabajadas: ' . $hoursWorked);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -2037,7 +2037,7 @@ class AssistanceController extends Controller
                                 //dump('Entre porqe detectamos horas extras');
                                 // TODO: Detectamos horas extras
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = round( (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount , 2);
                                 } else {
@@ -2059,7 +2059,7 @@ class AssistanceController extends Controller
                             } else {
                                 //dump('Entre porqe no detectamos horas extras');
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id ) {
+                                if ($wD && $workingDay->id == $wD->id) {
                                     $hoursOrdinary = (Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                 } else {
                                     $hoursOrdinary = (Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry)) - $time_break - $assistance_detail->hours_discount ;
@@ -2111,7 +2111,7 @@ class AssistanceController extends Controller
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -2138,7 +2138,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -2173,7 +2173,7 @@ class AssistanceController extends Controller
                             } elseif ( $assistance_detail->status == 'H' ) {
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -2191,7 +2191,7 @@ class AssistanceController extends Controller
                                 if ( $assistance_detail->hour_out_new> $workingDay->time_fin ){
                                     // TODO: Detectamos horas extras
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -2203,7 +2203,7 @@ class AssistanceController extends Controller
                                     $hours100 = $hoursExtrasTotals;
                                 } else {
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -2387,7 +2387,7 @@ class AssistanceController extends Controller
                                 //dump('Horas Trabajadas: '. $hoursWorked);
                                 //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -2414,7 +2414,7 @@ class AssistanceController extends Controller
                             // TODO: Sin H-ESP
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -2437,7 +2437,7 @@ class AssistanceController extends Controller
                                 //dump($assistance_detail->hour_out_new);
                                 // TODO: Detectamos horas extras
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = round( (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount , 2);
                                 } else {
@@ -2460,7 +2460,7 @@ class AssistanceController extends Controller
                             } else {
                                 //dump('Entre porqe no detectamos horas extras');
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = (Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                 } else {
@@ -2516,7 +2516,7 @@ class AssistanceController extends Controller
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -2542,7 +2542,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -2587,7 +2587,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -2604,7 +2604,7 @@ class AssistanceController extends Controller
                                 if ( $assistance_detail->hour_out_new> $workingDay->time_fin ){
                                     // TODO: Detectamos horas extras
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -2616,7 +2616,7 @@ class AssistanceController extends Controller
                                     $hours100 = $hoursExtrasTotals;
                                 } else {
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -2904,7 +2904,7 @@ class AssistanceController extends Controller
                                 //dump('Horas Trabajadas: '. $hoursWorked);
                                 //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -2931,7 +2931,7 @@ class AssistanceController extends Controller
                             // TODO: Sin H-ESP
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -2953,7 +2953,7 @@ class AssistanceController extends Controller
                                 //dump('Entre porqe detectamos horas extras');
                                 // TODO: Detectamos horas extras
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = round( (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount , 2);
                                 } else {
@@ -2975,7 +2975,7 @@ class AssistanceController extends Controller
                             } else {
                                 //dump('Entre porqe no detectamos horas extras');
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = (Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                 } else {
@@ -3031,7 +3031,7 @@ class AssistanceController extends Controller
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -3057,7 +3057,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -3092,7 +3092,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -3109,7 +3109,7 @@ class AssistanceController extends Controller
                                 if ( $assistance_detail->hour_out_new > $workingDay->time_fin ){
                                     // TODO: Detectamos horas extras
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -3121,7 +3121,7 @@ class AssistanceController extends Controller
                                     $hours100 = $hoursExtrasTotals;
                                 } else {
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -3424,7 +3424,7 @@ class AssistanceController extends Controller
                                 //dump('Horas Trabajadas: '. $hoursWorked);
                                 //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -3451,7 +3451,7 @@ class AssistanceController extends Controller
                             // TODO: Sin H-ESP
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -3473,7 +3473,7 @@ class AssistanceController extends Controller
                                 //dump('Entre porqe detectamos horas extras');
                                 // TODO: Detectamos horas extras
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = round( (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount , 2);
                                 } else {
@@ -3495,7 +3495,7 @@ class AssistanceController extends Controller
                             } else {
                                 //dump('Entre porqe no detectamos horas extras');
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = (Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                 } else {
@@ -3551,7 +3551,7 @@ class AssistanceController extends Controller
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -3577,7 +3577,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -3612,7 +3612,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -3629,7 +3629,7 @@ class AssistanceController extends Controller
                                 if ( $assistance_detail->hour_out_new> $workingDay->time_fin ){
                                     // TODO: Detectamos horas extras
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -3641,7 +3641,7 @@ class AssistanceController extends Controller
                                     $hours100 = $hoursExtrasTotals;
                                 } else {
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -3925,7 +3925,7 @@ class AssistanceController extends Controller
                                 //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 //dump('Horas Trabajadas: '. $hoursNeto);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -3952,7 +3952,7 @@ class AssistanceController extends Controller
                             // TODO: Sin H-ESP
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -3974,7 +3974,7 @@ class AssistanceController extends Controller
                                 //dump('Entre porqe detectamos horas extras');
                                 // TODO: Detectamos horas extras
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = round( (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount , 2);
                                 } else {
@@ -3996,7 +3996,7 @@ class AssistanceController extends Controller
                             } else {
                                 //dump('Entre porqe no detectamos horas extras');
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = (Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                 } else {
@@ -4052,7 +4052,7 @@ class AssistanceController extends Controller
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
+                            if ($wD && $workingDay->id == $wD->id)
                             {
                                 if ( $hoursWorked > 4 )
                                 {
@@ -4078,7 +4078,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -4113,7 +4113,7 @@ class AssistanceController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -4130,7 +4130,7 @@ class AssistanceController extends Controller
                                 if ( $assistance_detail->hour_out_new> $workingDay->time_fin ){
                                     // TODO: Detectamos horas extras
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -4142,7 +4142,7 @@ class AssistanceController extends Controller
                                     $hours100 = $hoursExtrasTotals;
                                 } else {
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {

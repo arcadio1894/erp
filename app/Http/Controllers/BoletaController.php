@@ -929,7 +929,7 @@ class BoletaController extends Controller
                 //dump('Horas Trabajadas: '. $hoursWorked);
                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
                 $workingDay = WorkingDay::find($assistance_detail->working_day_id);
-                if ( $workingDay->id == $wD->id )
+                if ($wD && $workingDay->id == $wD->id)
                 {
                     if ( $hoursWorked > 4 )
                     {
@@ -1049,7 +1049,7 @@ class BoletaController extends Controller
                                 //dump('Horas Trabajadas: '. $hoursWorked);
                                 //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -1076,16 +1076,16 @@ class BoletaController extends Controller
                             // TODO: Sin H-ESP
                             $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                             $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                            if ( $workingDay->id == $wD->id )
-                            {
-                                if ( $hoursWorked > 4 )
-                                {
+
+                            if ($wD && $workingDay->id == $wD->id) {
+                                // Existe $wD y además coincide el ID
+                                if ($hoursWorked > 4) {
                                     $hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 } else {
                                     $hoursTotals = round($hoursWorked - $assistance_detail->hours_discount, 2);
                                 }
-
                             } else {
+                                // No existe $wD o no coincide el ID
                                 $hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                             }
                             //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
@@ -1098,7 +1098,7 @@ class BoletaController extends Controller
                                 //dump('Entre porqe detectamos horas extras');
                                 // TODO: Detectamos horas extras
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = round( (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount , 2);
                                 } else {
@@ -1120,7 +1120,7 @@ class BoletaController extends Controller
                             } else {
                                 //dump('Entre porqe no detectamos horas extras');
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     $hoursOrdinary = (Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                 } else {
@@ -1187,7 +1187,7 @@ class BoletaController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursNeto = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -1215,7 +1215,7 @@ class BoletaController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -1252,7 +1252,7 @@ class BoletaController extends Controller
                                 $hoursWorked = Carbon::parse($assistance_detail->hour_out_new)->floatDiffInHours($assistance_detail->hour_entry);
                                 //$hoursTotals = round($hoursWorked - $assistance_detail->hours_discount - $time_break, 2);
                                 $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                if ( $workingDay->id == $wD->id )
+                                if ($wD && $workingDay->id == $wD->id)
                                 {
                                     if ( $hoursWorked > 4 )
                                     {
@@ -1269,7 +1269,7 @@ class BoletaController extends Controller
                                 if ( $assistance_detail->hour_out_new > $workingDay->time_fin ){
                                     // TODO: Detectamos horas extras
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
@@ -1281,7 +1281,7 @@ class BoletaController extends Controller
                                     $hours100 = $hoursExtrasTotals;
                                 } else {
                                     $wD = WorkingDay::where('enable', true)->skip(2)->take(1)->first();
-                                    if ( $workingDay->id == $wD->id )
+                                    if ($wD && $workingDay->id == $wD->id)
                                     {
                                         $hoursOrdinary = (Carbon::parse($workingDay->time_fin)->floatDiffInHours($assistance_detail->hour_entry)) - $assistance_detail->hours_discount ;
                                     } else {
