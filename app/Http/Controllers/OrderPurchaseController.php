@@ -1211,8 +1211,8 @@ class OrderPurchaseController extends Controller
         $fechaFormato = $fecha->format('Y-m-d');
         //$response = $this->getTipoDeCambio($fechaFormato);
 
-        $precioCompra = null;
-        $precioVenta = null;
+        $precioCompra = 1;
+        $precioVenta = 1;
 
         $tipoMoneda = ($request->has('currency_order')) ? 'PEN':'USD';
         if ( $tipoMoneda == 'USD' ) {
@@ -2001,8 +2001,8 @@ class OrderPurchaseController extends Controller
         $fechaFormato = $fecha->format('Y-m-d');
         //$response = $this->getTipoDeCambio($fechaFormato);
 
-        $precioCompra = null;
-        $precioVenta = null;
+        $precioCompra = 1;
+        $precioVenta = 1;
 
         $tipoMoneda = ($request->has('currency_order')) ? 'PEN':'USD';
         if ( $tipoMoneda == 'USD' ) {
