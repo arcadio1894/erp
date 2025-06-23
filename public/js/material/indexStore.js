@@ -1370,7 +1370,7 @@ function renderDataTable(data, activeColumns) {
     clone.querySelector("[data-rotation]").innerHTML = data.rotation;
 
     // Configurar enlaces y botones según los permisos y datos
-    if ($.inArray('update_material', $permissions) !== -1) {
+    /*if ($.inArray('update_material', $permissions) !== -1) {
         let url = document.location.origin + '/dashboard/editar/material/tienda/' + data.id;
         clone.querySelector("[data-editar_store_material]").setAttribute("href", url);
     } else {
@@ -1378,7 +1378,7 @@ function renderDataTable(data, activeColumns) {
         if (element) {
             element.style.display = 'none';
         }
-    }
+    }*/
 
     if ($.inArray('enable_material', $permissions) !== -1) {
         clone.querySelector("[data-deshabilitar]").setAttribute("data-delete", data.id);

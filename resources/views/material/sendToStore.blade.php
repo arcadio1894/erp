@@ -65,6 +65,19 @@
             border-color: orange !important;
             color: white !important;
         }
+
+        .circle-btn.black {
+            background-color: #000000; /* negro */
+        }
+        .circle-btn.yellow {
+            background-color: #FFD700; /* amarillo */
+        }
+        .circle-btn.green {
+            background-color: #28a745; /* verde */
+        }
+        .circle-btn.gray {
+            background-color: #6c757d; /* plomo/inactivo */
+        }
     </style>
 @endsection
 
@@ -138,6 +151,7 @@
                 </div>
                 <div class="card-body">
                     <input type="hidden" id="material_id" value="{{ $material->id }}">
+                    <input type="hidden" id="material_perecible" value="{{ ($material->perecible == null) ? 'n': $material->perecible }}">
                     <div class="form-group row">
                         <div class="col-md-3">
                             <div class="col-md-12 mb-2">
@@ -179,8 +193,24 @@
                                                     @foreach($level->containers as $container)
                                                         <div class="cell">
                                                             @foreach($container->positions as $position)
+                                                                @php
+                                                                    $isSameMaterial = in_array($position->id, $positionIds);
+                                                                    $isOtherMaterial = in_array($position->id, $positionIdsNotMaterial);
+                                                                @endphp
+
+                                                                @php
+                                                                    if ($isOtherMaterial) {
+                                                                        $colorClass = 'black'; // Posición ocupada con otro material
+                                                                    } elseif ($isSameMaterial) {
+                                                                        $colorClass = 'yellow'; // Posición ocupada con el mismo material
+                                                                    } elseif ($position->status === 'active') {
+                                                                        $colorClass = 'green'; // Vacío, activo
+                                                                    } else {
+                                                                        $colorClass = 'gray'; // Vacío, inactivo
+                                                                    }
+                                                                @endphp
                                                                 <button
-                                                                        class="circle-btn {{ $position->status == 'active' ? 'active' : 'inactive' }}"
+                                                                        class="circle-btn {{ $colorClass }}"
                                                                         data-position-id="{{ $position->id }}"
                                                                         data-position-name="{{ $position->name }}"
                                                                         data-position-status="{{ $position->status }}"

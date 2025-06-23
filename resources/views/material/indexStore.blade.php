@@ -538,8 +538,8 @@
             </td>
             <td data-column="rotation" data-rotation></td>
             <td>
-                <a data-editar_store_material href="{{--'+document.location.origin+ '/dashboard/editar/material/'+item.id+'--}}" class="btn btn-outline-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Editar"><i class="fa fa-pen"></i> </a>
-
+                {{--<a data-editar_store_material href="--}}{{--'+document.location.origin+ '/dashboard/editar/material/'+item.id+'--}}{{--" class="btn btn-outline-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Editar"><i class="fa fa-pen"></i> </a>
+--}}
                 <button data-deshabilitar data-delete="{{--'+item.id+'--}}" data-description="{{--'+item.full_description+'--}}" data-measure="{{--'+item.measure+'--}}" class="btn btn-outline-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Deshabilitar"><i class="fas fa-bell-slash"></i> </button>
 
                 <button data-show_vencimiento data-material="" data-description="" class="btn btn-outline-success btn-sm" data-toggle="tooltip" data-placement="top" title="Ver fechas"><i class="fas fa-boxes"></i></button>

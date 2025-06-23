@@ -275,8 +275,8 @@ function saveSubCategoria() {
         if (response && response.id) {
             $('#modalSubCategoria').modal('hide');
             $selectSubCategory.append($('<option>', {
-                value: response.id,
-                text: response.subcategory,
+                value: response.data[0].id,
+                text: response.data[0].name,
                 selected: true
             })).trigger('change');
 

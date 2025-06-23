@@ -1314,7 +1314,33 @@ class MaterialController extends Controller
         $shelves = Shelf::with('levels.containers.positions')
             ->where('warehouse_id', $warehouse_id)->get();
 
-        return view('material.sendToStore', compact( 'permissions', 'material', 'shelves'));
+        $storeMaterials = StoreMaterial::where('material_id', $material_id)
+            ->where('enable_status', 1)
+            ->pluck('id');
+
+        $locationIds = StoreMaterialLocation::whereIn('store_material_id', $storeMaterials)
+            ->pluck('location_id')
+            ->toArray();
+
+        // TODO: Posiciones de material
+        $positionIds = Location::whereIn('id', $locationIds)
+            ->pluck('position_id')
+            ->toArray();
+
+        $storeMaterialsNotMaterial = StoreMaterial::where('material_id', '!=',$material_id)
+            ->where('enable_status', 1)
+            ->pluck('id');
+
+        $locationIdsNotMaterial = StoreMaterialLocation::whereIn('store_material_id', $storeMaterialsNotMaterial)
+            ->pluck('location_id')
+            ->toArray();
+
+        // TODO: Posiciones donde no hay material
+        $positionIdsNotMaterial = Location::whereIn('id', $locationIdsNotMaterial)
+            ->pluck('position_id')
+            ->toArray();
+
+        return view('material.sendToStore', compact( 'permissions', 'material', 'shelves', 'positionIds', 'positionIdsNotMaterial'));
 
     }
 
@@ -1370,6 +1396,8 @@ class MaterialController extends Controller
             }
 
             // TODO: Falta disminuir del almacen general
+            $material->stock_current = $material->stock_current - $request->quantity;
+            $material->save();
 
             DB::commit();
 

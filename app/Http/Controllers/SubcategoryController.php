@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Category;
 use App\Http\Requests\DeleteSubcategoryRequest;
+use App\Http\Requests\StoreSubcategoryIndividualRequest;
 use App\Http\Requests\StoreSubcategoryRequest;
 use App\Http\Requests\UpdateSubcategoryRequest;
 use App\Subcategory;
@@ -24,6 +25,36 @@ class SubcategoryController extends Controller
     }
 
     public function store(StoreSubcategoryRequest $request)
+    {
+        $validated = $request->validated();
+
+        DB::beginTransaction();
+        try {
+            $created = [];
+
+            foreach ($validated['subcategories'] as $sub) {
+                $subcategory = Subcategory::create([
+                    'name' => $sub['name'],
+                    'description' => $sub['description'] ?? null,
+                    'category_id' => $validated['category_id'],
+                ]);
+                $created[] = $subcategory;
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Subcategorías guardadas con éxito.',
+                'data' => $created
+            ], 200);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function storeIndividual(StoreSubcategoryRequest $request)
     {
         $validated = $request->validated();
 

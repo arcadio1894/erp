@@ -230,6 +230,9 @@ Route::middleware('auth')->group(function (){
         Route::post('subcategory/store', 'SubcategoryController@store')
             ->name('subcategory.store')
             ->middleware('permission:create_subcategory');
+        Route::post('subcategory/store/individual', 'SubcategoryController@storeIndividual')
+            ->name('subcategory.store.individual')
+            ->middleware('permission:create_subcategory');
         Route::get('/editar/subcategoria/{id}', 'SubcategoryController@edit')
             ->name('subcategory.edit')
             ->middleware('permission:update_subcategory');

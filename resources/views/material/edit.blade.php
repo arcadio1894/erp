@@ -88,51 +88,87 @@
                             </div>--}}
                             <div class="col-md-4">
                                 <label for="unit_measure">Unidad de medida <span class="right badge badge-danger">(*)</span></label>
-                                <select id="unit_measure" name="unit_measure" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                    @foreach( $unitMeasures as $unitMeasure )
-                                        <option value="{{ $unitMeasure->id }}" {{ ($unitMeasure->id === $material->unit_measure_id) ? 'selected': ''}}>{{ $unitMeasure->name }}</option>
-                                    @endforeach
-                                </select>
+
+                                <div class="input-group">
+                                    <select id="unit_measure" name="unit_measure" class="form-control select2" style="width: 83%;">
+                                        <option></option>
+                                        @foreach($unitMeasures as $unitMeasure)
+                                            <option value="{{ $unitMeasure->id }}" {{ ($unitMeasure->id === $material->unit_measure_id) ? 'selected': ''}}>{{ $unitMeasure->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalUnitMeasure">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
 
                             </div>
 
                             <div class="col-md-4">
                                 <label for="brand">Marca </label>
-                                <select id="brand" name="brand" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                    @foreach( $brands as $brand )
-                                        <option value="{{ $brand->id }}" {{ ($brand->id === $material->brand_id) ? 'selected':'' }}>{{ $brand->name }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="input-group">
+                                    <select id="brand" name="brand" class="form-control select2" style="width: 83%;">
+                                        <option></option>
+                                        @foreach( $brands as $brand )
+                                            <option value="{{ $brand->id }}" {{ ($brand->id === $material->brand_id) ? 'selected':'' }}>{{ $brand->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalBrand">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="col-md-4">
                                 <label for="exampler">Modelo </label>
-                                <select id="exampler" name="exampler" class="form-control select2" style="width: 100%;">
+                                <div class="input-group">
+                                    <select id="exampler" name="exampler" class="form-control select2" style="width: 83%;">
 
-                                </select>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" id="btn-newExampler" class="btn btn-primary" data-toggle="modal" data-target="#modalExampler" style="display: none;">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
                         <div class="form-group row">
                             <div class="col-md-4">
                                 <label for="genero">Genero </label>
-                                <select id="genero" name="genero" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                    @foreach( $generos as $genero )
-                                        <option value="{{ $genero->id }}" {{ ($genero->id === $material->warrant_id) ? 'selected':'' }}>{{ $genero->description }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="input-group">
+                                    <select id="genero" name="genero" class="form-control select2" style="width: 83%;">
+                                        <option></option>
+                                        @foreach( $generos as $genero )
+                                            <option value="{{ $genero->id }}" {{ ($genero->id === $material->warrant_id) ? 'selected':'' }}>{{ $genero->description }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalGenero">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-4">
                                 <label for="talla">Talla </label>
-                                <select id="talla" name="talla" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                    @foreach( $tallas as $talla )
-                                        <option value="{{ $talla->id }}" {{ ($talla->id === $material->quality_id) ? 'selected':'' }}>{{ $talla->description }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="input-group">
+                                    <select id="talla" name="talla" class="form-control select2" style="width: 83%;">
+                                        <option></option>
+                                        @foreach( $tallas as $talla )
+                                            <option value="{{ $talla->id }}" {{ ($talla->id === $material->quality_id) ? 'selected':'' }}>{{ $talla->description }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalTalla">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-4">
                                 <label for="perecible">Perecible </label>
@@ -147,20 +183,34 @@
                         <div class="form-group row">
                             <div class="col-md-4">
                                 <label for="category">Categorías <span class="right badge badge-danger">(*)</span></label>
-                                <select id="category" name="category" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                    @foreach( $categories as $category )
-                                        <option value="{{ $category->id }}" {{ ($category->id === $material->category_id) ? 'selected': ''}}>{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="input-group">
+                                    <select id="category" name="category" class="form-control select2" style="width: 83%;">
+                                        <option></option>
+                                        @foreach( $categories as $category )
+                                            <option value="{{ $category->id }}" {{ ($category->id === $material->category_id) ? 'selected': ''}}>{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#modalCategoria">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
 
                             </div>
                             <div class="col-md-4">
                                 <label for="subcategory">Subcategorías <span class="right badge badge-danger">(*)</span></label>
-                                <select id="subcategory" name="subcategory" class="form-control select2" style="width: 100%;">
-                                    <option></option>
+                                <div class="input-group">
+                                    <select id="subcategory" name="subcategory" class="form-control select2" style="width: 83%;">
+                                        <option></option>
 
-                                </select>
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" id="btn-newSubCategoria" class="btn btn-primary" data-toggle="modal" data-target="#modalSubCategoria" style="display: none;">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
 
                             </div>
                             <div class="col-md-4">
@@ -339,6 +389,254 @@
         </div>
         <!-- /.card-footer -->
     </form>
+
+    <!-- Modal Crear Unidad de Medida -->
+    <div class="modal fade" id="modalUnitMeasure" tabindex="-1" role="dialog" aria-labelledby="modalUnitMeasureLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalUnitMeasureLabel">Crear Unidad de Medida</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCreateUnitMeasure" data-url="{{ route('unitmeasure.store') }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                <label>Unidad de medida <span class="right badge badge-danger">(*)</span></label>
+                                <input type="text" class="form-control" name="name" onkeyup="mayus(this);" placeholder="Ejm: Unidad de medida">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Descripción</label>
+                                <input type="text" class="form-control" name="description" onkeyup="mayus(this);" placeholder="Ejm: Descripción">
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="button" id="btnSaveUnitMeasure" class="btn btn-outline-success">Guardar</button>
+                            <button type="reset" class="btn btn-outline-secondary">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Marca -->
+    <div class="modal fade" id="modalBrand" tabindex="-1" role="dialog" aria-labelledby="modalBrandLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary py-2">
+                    <h5 class="modal-title" id="modalBrandLabel">Nueva Marca</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCreateBrand" class="form-horizontal" data-url="{{ route('brand.store') }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                <label class="col-12 col-form-label">Marca <span class="right badge badge-danger">(*)</span></label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="name" onkeyup="mayus(this);" placeholder="Ejm: Marca">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="col-12 col-form-label">Comentario</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control" name="comment" onkeyup="mayus(this);" placeholder="Ejm: Descripción">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="button" id="btn-saveBrand" class="btn btn-outline-success">Guardar</button>
+                            <button type="reset" class="btn btn-outline-secondary">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Modelo -->
+    <div class="modal fade" id="modalExampler" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <form id="formCreateExampler" data-url="{{ route('exampler.store') }}">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h5 class="modal-title">Registrar Modelo</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                <label>Modelo <span class="badge badge-danger">(*)</span></label>
+                                <input type="text" class="form-control" name="name" placeholder="Ejm: Modelo" onkeyup="mayus(this);">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Comentario</label>
+                                <input type="text" class="form-control" name="comment" placeholder="Ejm: Descripción" onkeyup="mayus(this);">
+                            </div>
+                        </div>
+                        <input type="hidden" name="brand_id" id="brand_id_hidden">
+                    </div>
+
+                    <div class="modal-footer text-center">
+                        <button type="button" id="btn-saveExampler" class="btn btn-outline-success">Guardar</button>
+                        <button type="reset" class="btn btn-outline-secondary">Cancelar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Crear Genero -->
+    <div class="modal fade" id="modalGenero" tabindex="-1" role="dialog" aria-labelledby="modalGeneroLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalGeneroLabel">Crear Género</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCreateGenero" data-url="{{ route('genero.store') }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                <label>Género <span class="right badge badge-danger">(*)</span></label>
+                                <input type="text" class="form-control" name="name" onkeyup="mayus(this);" placeholder="Ejm: Genero">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Descripción</label>
+                                <input type="text" class="form-control" name="description" onkeyup="mayus(this);" placeholder="Ejm: Descripción">
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="button" id="btnSaveGenero" class="btn btn-outline-success">Guardar</button>
+                            <button type="reset" class="btn btn-outline-secondary">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Talla -->
+    <div class="modal fade" id="modalTalla" tabindex="-1" role="dialog" aria-labelledby="modalTallaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalTallaLabel">Crear Talla</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCreateTalla" data-url="{{ route('talla.store') }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                <label>Talla <span class="right badge badge-danger">(*)</span></label>
+                                <input type="text" class="form-control" name="name" onkeyup="mayus(this);" placeholder="Ejm: Talla">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Descripción</label>
+                                <input type="text" class="form-control" name="description" onkeyup="mayus(this);" placeholder="Ejm: Descripción">
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="button" id="btnSaveTalla" class="btn btn-outline-success">Guardar</button>
+                            <button type="reset" class="btn btn-outline-secondary">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear Categoria -->
+    <div class="modal fade" id="modalCategoria" tabindex="-1" role="dialog" aria-labelledby="modalCategoriaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalCategoriaLabel">Crear Categoría</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="formCreateCategoria" data-url="{{ route('category.store') }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                <label>Categoría <span class="right badge badge-danger">(*)</span></label>
+                                <input type="text" class="form-control" name="name" onkeyup="mayus(this);" placeholder="Ejm: Categoria">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label>Descripción</label>
+                                <input type="text" class="form-control" name="description" onkeyup="mayus(this);" placeholder="Ejm: Descripción">
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="button" id="btnSaveCategoria" class="btn btn-outline-success">Guardar</button>
+                            <button type="reset" class="btn btn-outline-secondary">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Crear SubCategoria -->
+    <div class="modal fade" id="modalSubCategoria" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <form id="formCreateSubCategoria" data-url="{{ route('subcategory.store.individual') }}">
+                @csrf
+                <div class="modal-content">
+                    <div class="modal-header bg-primary">
+                        <h5 class="modal-title">Registrar Subcategoría</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                <label>Subcategoria <span class="badge badge-danger">(*)</span></label>
+                                <input type="text" class="form-control" name="subcategories[0][name]" placeholder="Ejm: Subcategoria" onkeyup="mayus(this);">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Descripción</label>
+                                <input type="text" class="form-control" name="subcategories[0][description]" placeholder="Ejm: Descripción" onkeyup="mayus(this);">
+                            </div>
+                        </div>
+                        <input type="hidden" name="category_id" id="categoria_id_hidden">
+                    </div>
+
+                    <div class="modal-footer text-center">
+                        <button type="button" id="btn-saveSubCategoria" class="btn btn-outline-success">Guardar</button>
+                        <button type="reset" class="btn btn-outline-secondary">Cancelar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
 @endsection
 
 @section('plugins')

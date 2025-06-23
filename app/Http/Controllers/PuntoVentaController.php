@@ -158,6 +158,20 @@ class PuntoVentaController extends Controller
         $worker = Worker::where('user_id', Auth::user()->id)->first();
         DB::beginTransaction();
         try {
+
+            $items = json_decode($request->get('items'));
+
+            // Validar que haya stock suficiente para todos los productos ANTES de crear la venta
+            foreach ($items as $item) {
+                $material = Material::find($item->productId);
+                if (!$material) {
+                    throw new \Exception("Material con ID {$item->productId} no encontrado.");
+                }
+                if ($material->stock_current < $item->productQuantity) {
+                    throw new \Exception("Stock insuficiente para el producto '{$material->description}'. Disponible: {$material->stock_current}, requerido: {$item->productQuantity}");
+                }
+            }
+
             $sale = Sale::create([
                 'date_sale' => Carbon::now(),
                 'serie' => $this->generateRandomString(),
@@ -174,7 +188,7 @@ class PuntoVentaController extends Controller
                 'tipo_pago_id' => $request->get('tipo_pago')
             ]);
 
-            $items = json_decode($request->get('items'));
+            //$items = json_decode($request->get('items'));
 
             for ( $i=0; $i<sizeof($items); $i++ )
             {
@@ -495,10 +509,23 @@ class PuntoVentaController extends Controller
         DB::beginTransaction();
         try {
 
-            $sale = Sale::find($id);
+            $sale = Sale::with('details')->find($id);
 
             if (!$sale) {
                 return response()->json(['message' => 'Orden no encontrada'], 422);
+            }
+
+            if ($sale->state_annulled == 1) {
+                return response()->json(['message' => 'La orden ya ha sido anulada previamente'], 422);
+            }
+
+            // Revertir el stock de cada detalle
+            foreach ($sale->details as $detail) {
+                $material = Material::find($detail->material_id);
+                if ($material) {
+                    $material->stock_current += $detail->quantity;
+                    $material->save();
+                }
             }
 
             $sale->state_annulled = 1;

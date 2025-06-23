@@ -622,7 +622,7 @@
     <!-- Modal Crear SubCategoria -->
     <div class="modal fade" id="modalSubCategoria" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
-            <form id="formCreateSubCategoria" data-url="{{ route('subcategory.store') }}">
+            <form id="formCreateSubCategoria" data-url="{{ route('subcategory.store.individual') }}">
                 @csrf
                 <div class="modal-content">
                     <div class="modal-header bg-primary">
@@ -634,11 +634,11 @@
                         <div class="form-group row">
                             <div class="col-md-6">
                                 <label>Subcategoria <span class="badge badge-danger">(*)</span></label>
-                                <input type="text" class="form-control" name="name" placeholder="Ejm: Subcategoria" onkeyup="mayus(this);">
+                                <input type="text" class="form-control" name="subcategories[0][name]" placeholder="Ejm: Subcategoria" onkeyup="mayus(this);">
                             </div>
                             <div class="col-md-6">
                                 <label>Descripción</label>
-                                <input type="text" class="form-control" name="description" placeholder="Ejm: Descripción" onkeyup="mayus(this);">
+                                <input type="text" class="form-control" name="subcategories[0][description]" placeholder="Ejm: Descripción" onkeyup="mayus(this);">
                             </div>
                         </div>
                         <input type="hidden" name="category_id" id="categoria_id_hidden">

@@ -58,6 +58,8 @@ $(document).ready(function() {
         const quantity = $('[data-quantitySend]').val();
         const unitPrice = $('[data-priceUnitSend]').val();
 
+        let perecible = $('#material_perecible').val();
+
         // Validaciones básicas
         if (!positionId) {
             $.alert({
@@ -98,15 +100,17 @@ $(document).ready(function() {
             }
         });
 
-        /*if (fechas.length === 0) {
+        console.log(fechas.length);
+
+        if ( perecible === 's' && fechas.length === 0) {
             $.alert({
                 title: 'Error',
-                content: 'Debes agregar al menos una fecha de vencimiento.',
+                content: 'Debes agregar al menos una fecha de vencimiento porque el material es perecible.',
                 type: 'red'
             });
             $("#sendDataBtn").attr("disabled", false);
             return;
-        }*/
+        }
 
         // Enviar por AJAX
         $.ajax({
