@@ -50,4 +50,44 @@ class Sale extends Model
     {
         return $this->hasMany(CashMovement::class, 'sale_id');
     }
+
+    public function getDataTotalsAttribute()
+    {
+        $sale = Sale::find($this->id);
+
+        $items = $sale->details->map(function ($item) {
+            $valor_unitario = round($item->price / 1.18, 6);
+            $subtotal = $valor_unitario * $item->quantity; // 20.25
+            $igv = ($item->price * $item->quantity) - $subtotal; // 23.90 - 20.25 = 3.65
+
+            return [
+                "unidad_de_medida" => "NIU",
+                "codigo" => $item->product_id,
+                "descripcion" => $item->product->full_name,
+                "cantidad" => $item->quantity,
+                "valor_unitario" => round($valor_unitario, 6),
+                "precio_unitario" => round($item->price, 6),
+                "subtotal" => round($subtotal, 6), // 34.66
+                "tipo_de_igv" => "1", // gravado
+                "igv" => round($igv, 2), // 6.24
+                "total" => round($item->price*$item->quantity, 6) // 40.90
+            ];
+        })->toArray();
+
+
+        $total_gravada = array_sum(array_column($items, 'subtotal'));
+
+        return [
+                "total_gravada" => number_format($total_gravada - $this->total_descuentos, 2, '.', ''),
+                "total_igv" => number_format(($total_gravada - $this->total_descuentos) * 0.18, 2, '.', ''),
+                "total" => number_format(($total_gravada - $this->total_descuentos) * 1.18, 2, '.', ''),
+                "total_a_pagar" => number_format(($total_gravada - $this->total_descuentos) * 1.18, 2, '.', ''),
+            ] + ($this->total_descuentos > 0 ? [
+                "descuento_global" => number_format($this->total_descuentos, 2, '.', ''),
+                "total_descuento" => number_format($this->total_descuentos, 2, '.', '')
+            ] : []) + [
+                "items" => $items,
+            ];
+
+    }
 }
