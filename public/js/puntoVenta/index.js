@@ -100,6 +100,25 @@ $(document).ready(function () {
 
     $("#btn-notAddProduct").on('click', notAddProduct);
     $("#btn-add_product").on('click', addProduct);
+
+    $('input[name="invoice_type"]').on('change', function() {
+        let tipo = $(this).val();
+
+        if (tipo === 'boleta') {
+            $('#datos_boleta').removeClass('d-none');
+            $('#datos_factura').addClass('d-none');
+        } else if (tipo === 'factura') {
+            $('#datos_factura').removeClass('d-none');
+            $('#datos_boleta').addClass('d-none');
+        } else {
+            // Ninguno seleccionado
+            $('#datos_boleta').addClass('d-none');
+            $('#datos_factura').addClass('d-none');
+
+            // Limpiar inputs
+            $('#datos_boleta input, #datos_factura input').val('');
+        }
+    });
 });
 
 let $items = [];
@@ -397,10 +416,48 @@ function guardarVenta() {
         return;
     }
 
-    var createUrl = $formCreate.data('url');
+    let tipo = $('input[name="invoice_type"]:checked').val();
+
+    if (tipo === 'boleta') {
+        let dni = $('input[name="dni"]').val().trim();
+        if (dni === '' || dni.length !== 8 || isNaN(dni)) {
+            toastr.error('Debe ingresar un DNI válido de 8 dígitos');
+            $("#btn-pay").attr("disabled", false);
+            return;
+        }
+        let name = $('input[id="name"]').val().trim();
+        console.log(name);
+        if (name === '') {
+            toastr.error('Debe ingresar el nombre del cliente.');
+            $("#btn-pay").attr("disabled", false);
+            return;
+        }
+    } else if (tipo === 'factura') {
+        let ruc = $('input[name="ruc"]').val().trim();
+        let razon = $('input[name="razon_social"]').val().trim();
+        let direccion = $('input[name="direccion_fiscal"]').val().trim();
+
+        if (ruc === '' || ruc.length !== 11 || isNaN(ruc)) {
+            toastr.error('Debe ingresar un RUC válido de 11 dígitos');
+            $("#btn-pay").attr("disabled", false);
+            return;
+        }
+        if (razon === '') {
+            toastr.error('Debe ingresar la Razón Social');
+            $("#btn-pay").attr("disabled", false);
+            return;
+        }
+        if (direccion === '') {
+            toastr.error('Debe ingresar la Dirección Fiscal');
+            $("#btn-pay").attr("disabled", false);
+            return;
+        }
+    }
+
+    /*var createUrl = $formCreate.data('url');
     var items = JSON.stringify($items);
     var formulario = $('#formCreate')[0];
-    var form = new FormData(formulario);
+    var form = new FormData(formulario);*/
     var tipo_pago = $('input[name="tipo_pago"]:checked').val();
 
     var tipo_pago_text = $('input[name="tipo_pago"]:checked').siblings('label').text().trim();
@@ -525,6 +582,21 @@ function guardarVenta() {
                     form.append('total_vuelto', $fin_vuelto);
                     form.append('type_vuelto', $type_vuelto);
                     form.append('tipo_pago', tipo_pago);
+
+                    const tipoComprobante = $('input[name="invoice_type"]:checked').val();
+
+                    let data = {};
+
+                    if (tipoComprobante === 'boleta') {
+                        data.name = $('#name').val();
+                        data.dni = $('#dni').val();
+                        data.email = $('#email_invoice_boleta').val();
+                    } else if (tipoComprobante === 'factura') {
+                        data.ruc = $('#ruc').val();
+                        data.razon_social = $('#razon_social').val();
+                        data.direccion_fiscal = $('#direccion_fiscal').val();
+                        data.email = $('#email_invoice_factura').val();
+                    }
 
                     $.ajax({
                         url: createUrl,

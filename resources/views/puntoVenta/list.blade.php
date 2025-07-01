@@ -275,6 +275,10 @@
         <a href="" target="_blank" data-print_recibo data-id="" class="btn btn-outline-dark btn-sm" data-toggle="tooltip" data-placement="top" title="Imprimir boleta"><i class="fas fa-print"></i></a>
         <button data-ver_detalles data-id="" class="btn btn-outline-secondary btn-sm" data-toggle="tooltip" data-placement="top" title="Ver Detalles"><i class="fas fa-list-ol"></i></button>
         <button data-anular data-id="" class="btn btn-outline-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Anular Orden"><i class="fas fa-trash-alt"></i></button>
+
+        <button data-facturador data-id="" class="btn btn-warning btn-sm" data-toggle="tooltip" data-placement="top" title="Generar comprobante">
+            <img src="{{ asset('images/sale/facturacion_electronica.png') }}" alt="Generar" style="width: 16px; height: 16px;">
+        </button>
     </template>
 
     <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsModalLabel" aria-hidden="true">
@@ -305,6 +309,84 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modalFacturador" tabindex="-1" role="dialog" aria-labelledby="modalFacturadorLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="modalFacturadorLabel">Datos del comprobante</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Aquí va el cuerpo dinámico -->
+                    <form id="formFacturador">
+                        <input type="hidden" name="order_id" id="order_id">
+
+                        <div class="form-group">
+                            <label>Tipo de comprobante:</label><br>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="invoice_type" id="radio_boleta" value="boleta">
+                                <label class="form-check-label" for="radio_boleta">Boleta</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="invoice_type" id="radio_factura" value="factura">
+                                <label class="form-check-label" for="radio_factura">Factura</label>
+                            </div>
+                        </div>
+
+                        <!-- Datos boleta -->
+                        <div id="datos_boleta" class="d-none">
+                            <div class="form-group">
+                                <label for="dni">Nombre <span style="color:red;">*</span></label>
+                                <input type="text" name="name" id="name" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="dni">DNI <span style="color:red;">*</span></label>
+                                <input type="text" name="dni" id="dni" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="email_invoice_boleta">Email (Opcional)</label>
+                                <input type="text" name="email_invoice_boleta" id="email_invoice_boleta" class="form-control">
+                            </div>
+                        </div>
+
+                        <!-- Datos factura -->
+                        <div id="datos_factura" class="d-none">
+                            <div class="form-group">
+                                <label for="ruc">RUC <span style="color:red;">*</span></label>
+                                <input type="text" name="ruc" id="ruc" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="razon_social">Razón Social <span style="color:red;">*</span></label>
+                                <input type="text" name="razon_social" id="razon_social" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="direccion_fiscal">Dirección Fiscal <span style="color:red;">*</span></label>
+                                <input type="text" name="direccion_fiscal" id="direccion_fiscal" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="email_invoice_factura">Email (Opcional)</label>
+                                <input type="text" name="email_invoice_factura" id="email_invoice_factura" class="form-control">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button id="btnGuardarDatos" type="button" class="btn btn-secondary">Guardar datos</button>
+                    <button id="btnGenerarComprobante" type="button" class="btn btn-warning">Generar comprobante</button>
+
+                </div>
+                <div id="downloadSection" class="mt-3 text-center d-none">
+                    <a id="btnDescargarPDF" href="#" target="_blank" class="btn btn-success">
+                        Descargar PDF del Comprobante
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('plugins')

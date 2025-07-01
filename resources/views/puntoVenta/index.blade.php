@@ -434,7 +434,91 @@
                                             </div>
                                         @endforeach
                                     </div>
+                                </div>
 
+                                <div class="col-md-12 px-1 py-1">
+                                    <div class="accordion" id="accordionInvoice">
+                                        <!-- Sección del acordeón -->
+                                        <div class="card">
+                                            <div class="card-header p-2" id="headingOneInvoice">
+                                                <p class="mb-0 d-flex justify-content-between">
+                                                    <!-- Título del acordeón -->
+                                                    <span class="d-flex align-items-center">
+                                                        <img src="{{ asset('/images/sale/invoice.png') }}" alt="Cupon" style="width: 30px; height: 30px; margin-right: 10px;">
+                                                        ¿Necesitas Boleta o Factura?
+                                                    </span>
+                                                    <!-- Link de agregar -->
+                                                    <a href="#" class="btn btn-link p-0" data-toggle="collapse" data-target="#collapseOneInvoice" aria-expanded="false" aria-controls="collapseOneInvoice">
+                                                        Solicitar
+                                                    </a>
+                                                </p>
+                                            </div>
+
+                                            <!-- Contenido del acordeón -->
+                                            <div id="collapseOneInvoice" class="collapse" aria-labelledby="headingOne" data-parent="#accordionInvoice">
+                                                <div class="card-body">
+                                                    <!-- Botones radio -->
+                                                    <div class="form-group">
+                                                        <label>Tipo de comprobante:</label><br>
+
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" name="invoice_type" id="radio_none" value="ninguno" checked>
+                                                            <label class="form-check-label" for="radio_none">Sin comprobante</label>
+                                                        </div>
+
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" name="invoice_type" id="radio_boleta" value="boleta">
+                                                            <label class="form-check-label" for="radio_boleta">Boleta</label>
+                                                        </div>
+
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" name="invoice_type" id="radio_factura" value="factura">
+                                                            <label class="form-check-label" for="radio_factura">Factura</label>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Campos para Boleta -->
+                                                    <div id="datos_boleta" class="d-none">
+                                                        <div class="form-group">
+                                                            <label for="dni">Nombre <span style="color:red;">*</span></label>
+                                                            <input type="text" name="name" id="name" class="form-control">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="dni">DNI <span style="color:red;">*</span></label>
+                                                            <input type="text" name="dni" class="form-control" >
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="email_invoice_boleta">Email (Opcional)</label>
+                                                            <input type="text" name="email_invoice_boleta" class="form-control">
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Campos para Factura -->
+                                                    <div id="datos_factura" class="d-none">
+                                                        <div class="form-group">
+                                                            <label for="ruc">RUC <span style="color:red;">*</span></label>
+                                                            <input type="text" name="ruc" class="form-control" >
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="razon_social">Razón Social <span style="color:red;">*</span></label>
+                                                            <input type="text" name="razon_social" class="form-control" >
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="direccion_fiscal">Dirección Fiscal <span style="color:red;">*</span></label>
+                                                            <input type="text" name="direccion_fiscal" class="form-control" >
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="email_invoice_factura">Email (Opcional)</label>
+                                                            <input type="text" name="email_invoice_factura" class="form-control">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12 px-1 py-1">
                                     <button  type="button" id="btn-pay" class="btn btn-success btn-block btn-lg">PAGAR</button>
 
                                     <a href="#" target="_blank" id="btn-printDocument" class="btn btn-primary btn-block btn-lg">IMPRIMIR COMPROBANTE</a>

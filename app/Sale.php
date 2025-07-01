@@ -21,7 +21,23 @@ class Sale extends Model
         'importe_total',
         'vuelto',
         'tipo_pago_id',
-        'state_annulled'
+        'state_annulled',
+
+        'numero',
+        'xml_path',
+        'cdr_path',
+        'pdf_path',
+        'type_document',
+        'sunat_ticket',
+        'sunat_status',
+        'sunat_message',
+        'fecha_emision',
+        'nombre_cliente',
+        'tipo_documento_cliente', // '1' = DNI, '6' = RUC
+        'numero_documento_cliente',
+        'direccion_cliente',
+        'email_cliente',
+        'serie_sunat'
     ];
 
     protected $dates = ['date_sale'];
@@ -62,8 +78,8 @@ class Sale extends Model
 
             return [
                 "unidad_de_medida" => "NIU",
-                "codigo" => $item->product_id,
-                "descripcion" => $item->product->full_name,
+                "codigo" => $item->material_id,
+                "descripcion" => $item->material->full_name,
                 "cantidad" => $item->quantity,
                 "valor_unitario" => round($valor_unitario, 6),
                 "precio_unitario" => round($item->price, 6),

@@ -2734,6 +2734,11 @@ Route::middleware('auth')->group(function (){
         Route::get('/get/data/sales/{page}', 'PuntoVentaController@getSalesAdmin');
         Route::get('/sales/{orderId}/details', 'PuntoVentaController@getOrderDetails');
         Route::post('/anular/order/{order}', 'PuntoVentaController@anularOrder');
+
+        Route::post('/sales/update-invoice-data', 'PuntoVentaController@updateInvoiceData');
+        Route::post('/facturador/generar', 'NubeFactController@generarComprobante')->name('facturador.generar');
+
+
         //get/data/products
 
         // TODO: Rutas Punto de Venta

@@ -172,6 +172,32 @@ class PuntoVentaController extends Controller
                 }
             }
 
+            // TODO: VALIDACIONES DE INVOICE
+            // Determinar tipo de documento SUNAT
+            $type_document = null;
+            $numero_documento_cliente = null;
+            $nombre_cliente = null;
+            $direccion_cliente = null;
+            $tipo_documento_cliente = null;
+            $email_cliente = null;
+
+            // Asignar según el tipo de comprobante
+            if ($request->invoice_type === 'boleta') {
+                $type_document = '03'; // Boleta
+                $numero_documento_cliente = $request->dni;
+                $nombre_cliente = $request->name;
+                $direccion_cliente = $request->address;
+                $tipo_documento_cliente = '1'; // DNI
+                $email_cliente = $request->email_invoice_boleta;
+            } elseif ($request->invoice_type === 'factura') {
+                $type_document = '01'; // Factura
+                $numero_documento_cliente = $request->ruc;
+                $nombre_cliente = $request->razon_social;
+                $direccion_cliente = $request->direccion_fiscal;
+                $tipo_documento_cliente = '6'; // RUC
+                $email_cliente = $request->email_invoice_factura;
+            }
+
             $sale = Sale::create([
                 'date_sale' => Carbon::now(),
                 'serie' => $this->generateRandomString(),
@@ -185,7 +211,25 @@ class PuntoVentaController extends Controller
                 'total_descuentos' => $request->get('total_descuentos'),
                 'importe_total' => $request->get('total_importe'),
                 'vuelto' => $request->get('total_vuelto'),
-                'tipo_pago_id' => $request->get('tipo_pago')
+                'tipo_pago_id' => $request->get('tipo_pago'),
+
+                // Facturación
+                'type_document' => $type_document,
+                'numero_documento_cliente' => $numero_documento_cliente,
+                'tipo_documento_cliente' => $tipo_documento_cliente,
+                'nombre_cliente' => $nombre_cliente,
+                'direccion_cliente' => $direccion_cliente,
+                'email_cliente' => $email_cliente,
+
+                // Los siguientes campos se llenarán más adelante cuando se genere el comprobante con Greenter
+                'serie_sunat' => null,
+                'numero' => null,
+                'sunat_ticket' => null,
+                'sunat_status' => null,
+                'sunat_message' => null,
+                'xml_path' => null,
+                'cdr_path' => null,
+                'fecha_emision' => null,
             ]);
 
             //$items = json_decode($request->get('items'));
@@ -458,13 +502,38 @@ class PuntoVentaController extends Controller
 
         foreach ( $sales as $sale )
         {
+            $tipo_comprobante = null;
+            if ($sale->type_document == '01')
+            {
+                $tipo_comprobante = 'factura';
+            } elseif ( $sale->type_document == '03' ) {
+                $tipo_comprobante = 'boleta';
+            }
+
+            $tipo_documento_cliente = null;
+            if ($sale->tipo_documento_cliente == 1)
+            {
+                $tipo_documento_cliente = 'dni';
+            } elseif ( $sale->tipo_documento_cliente == 6 ) {
+                $tipo_documento_cliente = 'ruc';
+            }
+
+            $totals = $sale->data_totals;
+
             array_push($arraySales, [
                 "id" => $sale->id,
                 "code" => "VENTA - ".$sale->id,
                 "date" => ($sale->date_sale != null) ? $sale->formatted_sale_date : "",
                 "currency" => ($sale->currency == 'PEN') ? 'Soles' : 'Dólares',
-                "total" => $sale->importe_total,
+                //"total" => $sale->importe_total,
+                "total" => number_format($totals['total_a_pagar'], 2, '.', ''),
                 "tipo_pago" => ($sale->tipo_pago_id == null) ? 'Sin método de pago':$sale->tipoPago->description ,
+                "nombre_cliente" => $sale->nombre_cliente,
+                "tipo_documento_cliente" => $tipo_documento_cliente,
+                "numero_documento_cliente" => $sale->numero_documento_cliente,
+                "direccion_cliente" => $sale->direccion_cliente,
+                "email_cliente" => $sale->email_cliente,
+                "tipo_comprobante" => $tipo_comprobante
             ]);
         }
 
@@ -607,5 +676,32 @@ class PuntoVentaController extends Controller
             return response()->json(['message' => $e->getMessage()], 422);
         }
 
+    }
+
+    public function updateInvoiceData(Request $request)
+    {
+        $request->validate([
+            'order_id' => 'required|exists:sales,id',
+            'type_document' => 'required|in:boleta,factura',
+        ]);
+
+        $order = Sale::findOrFail($request->order_id);
+
+        if ($request->type_document === 'boleta') {
+            $order->type_document = '03';
+            $order->numero_documento_cliente = $request->dni;
+            $order->nombre_cliente = $request->name;
+            $order->email_cliente = $request->email;
+        } elseif ($request->type_document === 'factura') {
+            $order->type_document = '01';
+            $order->numero_documento_cliente = $request->ruc;
+            $order->nombre_cliente = $request->razon_social;
+            $order->direccion_cliente = $request->direccion_fiscal;
+            $order->email_cliente = $request->email;
+        }
+
+        $order->save();
+
+        return response()->json(['message' => 'Datos actualizados correctamente.']);
     }
 }
