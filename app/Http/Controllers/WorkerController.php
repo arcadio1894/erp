@@ -324,7 +324,7 @@ class WorkerController extends Controller
             // Creamos al usuario
             $user = User::create([
                 'name' => $request->get('first_name').' '.$request->get('last_name'),
-                'email' => $primeraLetraNombres.$primerApellido.'@sermeind.com.pe',
+                'email' => $primeraLetraNombres.$primerApellido.'@erp.com',
                 'password' => bcrypt('123456789'),
                 'image' => 'no_image.png'
             ]);
@@ -338,7 +338,7 @@ class WorkerController extends Controller
                 'personal_address' => $request->get('personal_address'),
                 'birthplace' => ($request->get('birthplace') != null) ? Carbon::createFromFormat('d/m/Y', $request->get('birthplace')) : null,
                 'phone' => $request->get('phone'),
-                'email' => ($request->get('email') == '' || $request->get('email') == null ) ? $primeraLetraNombres.$primerApellido.'@sermeind.com.pe' : $request->get('email') ,
+                'email' => ($request->get('email') == '' || $request->get('email') == null ) ? $primeraLetraNombres.$primerApellido.'@erp.com' : $request->get('email') ,
                 'level_school' => $request->get('level_school'),
                 'reason_for_termination' => $request->get('reason_for_termination'),
                 'profession' => $request->get('profession'),
@@ -465,7 +465,7 @@ class WorkerController extends Controller
             $worker = Worker::find($id);
 
             $user = User::find($worker->user_id);
-            $user->email = $primeraLetraNombres.$primerApellido.'@sermeind.com.pe';
+            $user->email = $primeraLetraNombres.$primerApellido.'@erp.com';
             $user->save();
             // Modificamos el trabajador
 
@@ -474,7 +474,7 @@ class WorkerController extends Controller
             $worker->personal_address = $request->get('personal_address');
             $worker->birthplace = ($request->get('birthplace') != null) ? Carbon::createFromFormat('d/m/Y', $request->get('birthplace')) : null;
             $worker->phone = $request->get('phone');
-            $worker->email = ($request->get('email') == '' || $request->get('email') == null ) ? $primeraLetraNombres.$primerApellido.'@sermeind.com.pe' : $request->get('email') ;
+            $worker->email = ($request->get('email') == '' || $request->get('email') == null ) ? $primeraLetraNombres.$primerApellido.'@erp.com' : $request->get('email') ;
             $worker->level_school = $request->get('level_school');
             $worker->profession = $request->get('profession');
             $worker->reason_for_termination = $request->get('reason_for_termination');

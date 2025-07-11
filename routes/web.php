@@ -2819,6 +2819,17 @@ Route::middleware('auth')->group(function (){
         Route::get('/faces', [\App\Http\Controllers\FaceController::class, 'index'])->name('faces.index');
         Route::post('/faces', [\App\Http\Controllers\FaceController::class, 'store'])->name('faces.store');
         Route::get('/faces/verify', [\App\Http\Controllers\FaceController::class, 'verify'])->name('faces.verify');
+
+        // TODO: DataGeneral
+        Route::get('datos/generales', 'DataGeneralController@index')->name('dataGeneral.index')
+            ->middleware('permission:list_dataGeneral');
+        Route::get('/get/data/dataGeneral/{numberPage}', 'DataGeneralController@getDataGeneral');
+        Route::post('datos/generales/store', 'DataGeneralController@store')->name('dataGeneral.store')
+            ->middleware('permission:create_dataGeneral');
+        Route::post('datos/generales/update/{id}', 'DataGeneralController@update')->name('dataGeneral.update')
+            ->middleware('permission:update_dataGeneral');
+
+        Route::post('/leer/notificaciones/pop_up', 'NotificationController@readPopupNotifications');
     });
 });
 

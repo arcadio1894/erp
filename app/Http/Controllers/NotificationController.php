@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class NotificationController extends Controller
 {
@@ -40,6 +41,12 @@ class NotificationController extends Controller
             $url_go = $notificationUser->notification->url_go;
             $read = $notificationUser->read;
             $time = $notificationUser->created_at->diffForHumans();
+            $reason = $notificationUser->notification->reason_for_creation;
+
+            $is_popup = false;
+            if (Str::endsWith($reason, '_pop_up')) {
+                $is_popup = true;
+            }
 
             array_push($notifications, [
                 'id_notification' => $id_notification,
@@ -47,7 +54,8 @@ class NotificationController extends Controller
                 'message' => $message,
                 'url_go' => $url_go,
                 'read' => $read,
-                'time' => ucfirst($time)
+                'time' => ucfirst($time),
+                'is_popup' => $is_popup
             ]);
 
         }
@@ -100,5 +108,31 @@ class NotificationController extends Controller
         return response()->json(['message' => 'Notificaciones leídas. Se quitará del listado en 2 días'], 200);
 
 
+    }
+
+    public function readPopupNotifications(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        DB::beginTransaction();
+
+        try {
+            $userId = Auth::id();
+
+            NotificationUser::whereIn('id', $ids)
+                ->where('user_id', $userId)
+                ->where('read', 0)
+                ->update([
+                    'read' => 1,
+                    'date_read' => Carbon::now(),
+                    'date_delete' => Carbon::now()->addDays(2),
+                ]);
+
+            DB::commit();
+            return response()->json(['message' => 'Notificaciones emergentes marcadas como leídas.'], 200);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Error: ' . $e->getMessage()], 422);
+        }
     }
 }

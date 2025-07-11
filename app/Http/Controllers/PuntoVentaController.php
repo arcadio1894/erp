@@ -7,6 +7,8 @@ use App\CashMovement;
 use App\CashRegister;
 use App\Category;
 use App\DataGeneral;
+use App\Mail\StockLowNotificationMail;
+use Illuminate\Support\Facades\Mail;
 use App\Material;
 use App\MaterialDiscountQuantity;
 use App\Notification;
@@ -19,6 +21,7 @@ use App\User;
 use App\Worker;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade as PDF;
@@ -167,7 +170,11 @@ class PuntoVentaController extends Controller
                 if (!$material) {
                     throw new \Exception("Material con ID {$item->productId} no encontrado.");
                 }
-                if ($material->stock_current < $item->productQuantity) {
+
+                $currentQuantityStore = StoreMaterial::where('material_id', $material->id)
+                    ->sum('stock_current');
+
+                if ($currentQuantityStore < $item->productQuantity) {
                     throw new \Exception("Stock insuficiente para el producto '{$material->description}'. Disponible: {$material->stock_current}, requerido: {$item->productQuantity}");
                 }
             }
@@ -251,6 +258,47 @@ class PuntoVentaController extends Controller
                 $material = Material::find($items[$i]->productId);
                 $material->stock_current = $material->stock_current - $items[$i]->productQuantity;
                 $material->save();
+
+                $cantidadVendida = $items[$i]->productQuantity;
+                $storeMaterials = StoreMaterial::where('material_id', $material->id)
+                    ->orderBy('id') // Opcional: para tener un orden consistente
+                    ->get();
+
+                foreach ($storeMaterials as $storeMaterial) {
+                    if ($cantidadVendida <= 0) {
+                        break;
+                    }
+
+                    $stockDisponible = $storeMaterial->stock; // Asumimos que esta columna representa el stock actual
+
+                    if ($stockDisponible >= $cantidadVendida) {
+                        // Descontamos solo lo que queda
+                        $storeMaterial->stock -= $cantidadVendida;
+                        $storeMaterial->save();
+                        $cantidadVendida = 0;
+                    } else {
+                        // Descontamos todo el stock de este storeMaterial
+                        $cantidadVendida -= $stockDisponible;
+                        $storeMaterial->stock = 0;
+                        $storeMaterial->save();
+                    }
+                }
+
+                $storeMaterialFinal = StoreMaterial::where('material_id', $material->id)
+                    ->orderBy('id') // Opcional: para tener un orden consistente
+                    ->sum('stock_current');
+
+                $storeMaterialMinData = DataGeneral::where('name', 'store_material_min')->first();
+
+                $storeMaterialMin = $storeMaterialMinData->valueNumber;
+
+                /*if ($storeMaterialFinal <= $storeMaterialMin)
+                {
+                    // TODO: Crear notificaciones
+                    $this->manageNotifications($material);
+                }*/
+
+                $this->manageNotifications($material);
             }
 
             // Agregar movimientos a la caja
@@ -383,6 +431,86 @@ class PuntoVentaController extends Controller
             'sale_id' => $sale->id,
             'url_print' => route('puntoVenta.print', $sale->id)
         ], 200);
+
+    }
+
+    public function manageNotifications(Material $material)
+    {
+        $dataGeneralTypeNotificationPopUp = DataGeneral::where('name', 'send_notification_store_pop_up')->first();
+        $dataGeneralTypeNotificationCampana = DataGeneral::where('name', 'send_notification_store_campana')->first();
+        $dataGeneralTypeNotificationTelegram = DataGeneral::where('name', 'send_notification_store_email')->first();
+        $dataGeneralTypeNotificationEmail = DataGeneral::where('name', 'send_notification_store_telegram')->first();
+
+        // Texto base
+        $content = 'El producto '.$material->full_name.' está por agotarse.';
+
+        $nameMaterial = $material->full_name;
+
+        // Obtener usuarios con roles específicos (excepto el actual)
+        $users = User::role(['admin', 'principal', 'logistic'])->where('id', '!=', Auth::id())->get();
+
+        if ($dataGeneralTypeNotificationCampana && $dataGeneralTypeNotificationCampana->valueText === 's')
+        {
+            $notification = Notification::create([
+                'content' => $content,
+                'reason_for_creation' => 'check_stock',
+                'user_id' => Auth::id(),
+                'url_go' => route('material.index.store')
+            ]);
+
+            foreach ($users as $user) {
+                foreach ($user->roles as $role) {
+                    NotificationUser::create([
+                        'notification_id' => $notification->id,
+                        'role_id' => $role->id,
+                        'user_id' => $user->id,
+                        'read' => false,
+                        'date_read' => null,
+                        'date_delete' => null
+                    ]);
+                }
+            }
+        }
+
+        if ($dataGeneralTypeNotificationPopUp && $dataGeneralTypeNotificationPopUp->valueText === 's')
+        {
+            $notification = Notification::create([
+                'content' => $content,
+                'reason_for_creation' => 'check_stock_pop_up',
+                'user_id' => Auth::id(),
+                'url_go' => route('material.index.store')
+            ]);
+
+            foreach ($users as $user) {
+                foreach ($user->roles as $role) {
+                    NotificationUser::create([
+                        'notification_id' => $notification->id,
+                        'role_id' => $role->id,
+                        'user_id' => $user->id,
+                        'read' => false,
+                        'date_read' => null,
+                        'date_delete' => null
+                    ]);
+                }
+            }
+        }
+
+        if ($dataGeneralTypeNotificationEmail && $dataGeneralTypeNotificationEmail->valueText === 's')
+        {
+            foreach ($users as $user) {
+                Mail::to($user->email)->queue(new StockLowNotificationMail($nameMaterial));
+            }
+        }
+
+        // Si deseas dejar el código preparado para Telegram:
+        if ($dataGeneralTypeNotificationTelegram && $dataGeneralTypeNotificationTelegram->valueText === 's')
+        {
+            $telegram = new TelegramController();
+
+            // Enviar al canal de procesos
+            $telegram->sendNotification('📦 El producto XYZ está por agotarse.', 'process');
+        }
+
 
     }
 

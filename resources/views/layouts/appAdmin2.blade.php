@@ -398,7 +398,28 @@
                         </ul>
                     </li>
                     @endcan
+                    @can('enable_dataGeneral')
+                    <li class="nav-item has-treeview @yield('openDataGeneral')">
 
+                        <a href="#" class="nav-link @yield('activeDataGeneral')">
+                            <i class="nav-icon fas fa-cogs"></i>
+                            <p>
+                                Datos de Configuración
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            @can('list_dataGeneral')
+                                <li class="nav-item">
+                                    <a href="{{ route('dataGeneral.index') }}" class="nav-link @yield('activeListDataGeneral')">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Datos Generales</p>
+                                    </a>
+                                </li>
+                            @endcan
+                        </ul>
+                    </li>
+                    @endcan
                     @canany('list_customer', 'list_contactName', 'list_supplier')
                     <li class="nav-header">MANTENEDORES</li>
                     @endcanany

@@ -17,50 +17,105 @@ $(document).ready(function () {
         type: 'GET',
         dataType: 'json',
         success: function (data) {
-            console.log(data.notifications);
             var quantity_notifications_unread = 0;
-            for( var i = 0; i<data.notifications.length; i++ )
-            {
-                //console.log(data.notifications[i]);
-                if ( data.notifications[i].read == 0 )
-                {
-                    //console.log(data.notifications[i].read);
-                    quantity_notifications_unread = quantity_notifications_unread + 1;
-                    renderTemplateNotificationUnread( data.notifications[i] )
-                }
+            let popupNotifications = [];
 
-            }
-            for( var j = 0; j<data.notifications.length; j++ )
-            {
-                //console.log(data.notifications[i]);
-                if ( data.notifications[j].read == 1 )
-                {
-                    renderTemplateNotificationRead( data.notifications[j] )
-                }
+            // Procesar notificaciones NO LEÍDAS
+            data.notifications.forEach(function(notification) {
+                if (notification.read == 0) {
+                    quantity_notifications_unread++;
+                    renderTemplateNotificationUnread(notification);
 
-            }
-            //console.log(quantity_notifications_unread);
-            if ( quantity_notifications_unread > 0 )
-            {
+                    if (notification.is_popup) {
+                        popupNotifications.push(notification);
+                    }
+                }
+            });
+
+            // Procesar notificaciones LEÍDAS
+            data.notifications.forEach(function(notification) {
+                if (notification.read == 1) {
+                    renderTemplateNotificationRead(notification);
+                }
+            });
+
+            // Mostrar el contador
+            if (quantity_notifications_unread > 0) {
                 $('#total_notifications').show();
                 $('#read-all').show();
                 $('#total_notifications').html(quantity_notifications_unread);
                 $('#quantity_notifications').html(quantity_notifications_unread + ' notificación(es)');
-                //$("#showNotifications").click();
             } else {
                 $('#total_notifications').hide();
                 $('#read-all').hide();
-                $('#quantity_notifications').html(quantity_notifications_unread + ' notificación(es)');
-
+                $('#quantity_notifications').html('0 notificación(es)');
             }
 
+            // Mostrar UNA sola ventana modal con todas las notificaciones tipo pop-up
+            if (popupNotifications.length > 0) {
+                let contentHtml = '<ul style="text-align: left;">';
+
+                popupNotifications.forEach(function(n) {
+                    contentHtml += `<li style="margin-bottom: 10px;">🟢 ${n.message}`;
+                    if (n.url_go) {
+                        contentHtml += `<br><a href="${n.url_go}" target="_blank">Ir al detalle</a>`;
+                    }
+                    contentHtml += '</li>';
+                });
+
+                contentHtml += '</ul>';
+
+                $.confirm({
+                    title: 'Notificaciones importantes',
+                    content: contentHtml,
+                    columnClass: 'medium',
+                    buttons: {
+                        markAsRead: {
+                            text: 'Cerrar y marcar como leído',
+                            btnClass: 'btn-green',
+                            action: function () {
+                                const ids = popupNotifications.map(n => n.id_notification_user);
+                                $.ajax({
+                                    url: '/dashboard/leer/notificaciones/pop_up',
+                                    method: 'POST',
+                                    headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
+                                    data: { ids: ids },
+                                    success: function (data) {
+                                        $.alert(data.message);
+                                        setTimeout(() => location.reload(), 1500);
+                                    },
+                                    error: function () {
+                                        $.alert("Ocurrió un error al marcar las notificaciones.");
+                                    }
+                                });
+                            }
+                        },
+                        close: {
+                            text: 'Solo cerrar',
+                            btnClass: 'btn-default'
+                        }
+                    }
+                });
+            }
         }
     });
-
     $(document).on('click', '[data-read]', readNotification);
     $('#read-all').on('click', readAllNotification);
 
 });
+
+function showNotificationModal(message, url) {
+    $.confirm({
+        title: 'Notificación',
+        content: message + (url ? `<br><br><a href="${url}" class="btn btn-primary">Ir a detalle</a>` : ''),
+        buttons: {
+            ok: {
+                text: 'Aceptar',
+                btnClass: 'btn-blue'
+            }
+        }
+    });
+}
 
 function readAllNotification() {
     $.confirm({

@@ -4,82 +4,199 @@ namespace App\Http\Controllers;
 
 use App\DataGeneral;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class DataGeneralController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    private $defaultVariables = [
+        'typeBoleta',
+        'daysOfWeek',
+        'empresa',
+        'ruc',
+        'horasXDia',
+        'diasMes',
+        'horasSemanales',
+        'tipoDomumento',
+        'daysToExpireMin',
+        'start_rotation_baja',
+        'end_rotation_baja',
+        'start_rotation_media',
+        'end_rotation_media',
+        'start_rotation_alta',
+        'type_current',
+        'address',
+        'idWarehouseTienda',
+        'store_material_min',
+        'send_notification_store_pop_up',
+        'send_notification_store_campana',
+        'send_notification_store_email',
+        'send_notification_store_telegram',
+        'telefono',
+        'telefono2',
+        'telefono3',
+        'telefono4',
+        'telefono5'
+    ];
+
     public function index()
     {
-        //
+        $user = Auth::user();
+        $permissions = $user->getPermissionsViaRoles()->pluck('name')->toArray();
+        return view('dataGeneral.index', compact('permissions'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|unique:data_generals,name',
+            'valueText' => 'nullable|required_without:valueNumber',
+            'valueNumber' => 'nullable|required_without:valueText|numeric',
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            $data = DataGeneral::create([
+                'name' => $request->name,
+                'valueText' => $request->valueText,
+                'valueNumber' => $request->valueNumber,
+                'module' => null,
+                'description' => $request->description,
+            ]);
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'data' => $data]);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al guardar el dato.',
+                'error' => $e->getMessage()
+            ], 422);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\DataGeneral  $dataGeneral
-     * @return \Illuminate\Http\Response
-     */
-    public function show(DataGeneral $dataGeneral)
+
+    public function update(Request $request, $id)
     {
-        //
+        DB::beginTransaction();
+
+        try {
+            $data = DataGeneral::findOrFail($id);
+
+            $request->validate([
+                'name' => 'required|string|unique:data_generals,name,' . $data->id,
+                'valueText' => 'nullable|required_without:valueNumber',
+                'valueNumber' => 'nullable|required_without:valueText|numeric',
+            ]);
+
+            $updateData = [
+                'name' => $request->name,
+                'valueText' => $request->valueText,
+                'valueNumber' => $request->valueNumber,
+                'module' => null,
+                'description' => $request->description,
+            ];
+
+            // Limpieza del campo no usado
+            if ($request->filled('valueText')) {
+                $updateData['valueNumber'] = null;
+            } elseif ($request->filled('valueNumber')) {
+                $updateData['valueText'] = null;
+            }
+
+            $data->update($updateData);
+
+            DB::commit();
+
+            return response()->json(['success' => true, 'data' => $data]);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el dato.',
+                'error' => $e->getMessage()
+            ], 422);
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\DataGeneral  $dataGeneral
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(DataGeneral $dataGeneral)
+    public function getDataGeneral(Request $request, $pageNumber = 1)
     {
-        //
-    }
+        $perPage = 10;
+        $name = $request->input('name');
+        $query = DataGeneral::query()->orderBy('name');
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\DataGeneral  $dataGeneral
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, DataGeneral $dataGeneral)
-    {
-        //
-    }
+        // Puedes agregar filtros opcionales más adelante
+        if ($name != "") {
+            $query->where('name', 'LIKE', '%'.$name.'%');
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\DataGeneral  $dataGeneral
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(DataGeneral $dataGeneral)
-    {
-        //
+        $totalFilteredRecords = $query->count();
+        $totalPages = ceil($totalFilteredRecords / $perPage);
+        $startRecord = ($pageNumber - 1) * $perPage + 1;
+        $endRecord = min($totalFilteredRecords, $pageNumber * $perPage);
+
+        $dataGenerals = $query->skip(($pageNumber - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        // ➕ Verificar si hay nuevas variables no existentes en BD
+        $existingNames = DataGeneral::pluck('name')->toArray();
+        $newCreated = [];
+
+        foreach ($this->defaultVariables as $varName) {
+            if (!in_array($varName, $existingNames)) {
+                DataGeneral::create([
+                    'name' => $varName,
+                    'valueText' => null,
+                    'valueNumber' => null,
+                    'module' => null,
+                    'description' => null
+                ]);
+                $newCreated[] = $varName;
+            }
+        }
+
+        // Si se creó alguna, las recargamos para incluirlas
+        if (count($newCreated) > 0) {
+            $dataGenerals = DataGeneral::orderBy('name')
+                ->skip(($pageNumber - 1) * $perPage)
+                ->take($perPage)
+                ->get();
+        }
+
+        $array = [];
+
+        foreach ( $dataGenerals as $dataGeneral )
+        {
+            array_push($array, [
+                "id" => $dataGeneral->id,
+                "name" => $dataGeneral->name,
+                "valueText" => $dataGeneral->valueText,
+                "valueNumber" => $dataGeneral->valueNumber,
+                "description" => $dataGeneral->description,
+            ]);
+        }
+
+        $pagination = [
+            'currentPage' => (int) $pageNumber,
+            'totalPages' => (int) $totalPages,
+            'startRecord' => $startRecord,
+            'endRecord' => $endRecord,
+            'totalRecords' => $totalFilteredRecords,
+            'totalFilteredRecords' => $totalFilteredRecords,
+        ];
+
+        return [
+            'data' => $array,
+            'pagination' => $pagination,
+            'newlyCreated' => $newCreated, // Esto servirá para el jquery-confirm
+        ];
     }
 }
