@@ -40,7 +40,11 @@ class Quote extends Model
         'date_vb_operations',
         'proforma_id',
         'observations',
-        'state_decimals'
+        'state_decimals',
+        'descuento',
+        'gravada',
+        'igv_total',
+        'total_importe'
     ];
 
     protected $dates = ['date_quote', 'created_at', 'date_vb_finances', 'date_vb_operations', 'date_validate'];

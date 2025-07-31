@@ -350,6 +350,19 @@
                                 </li>--}}
 
                             {{--@endcan--}}
+                            <li class="nav-item">
+                                <a href="{{ route('promotionLimit.index') }}" class="nav-link @yield('activePromotionLimit')">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Por limites</p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="{{ route('promotion.order') }}" class="nav-link @yield('activePromotionLimit')">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Orden de Promociones</p>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
@@ -997,42 +1010,30 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 @can('list_quote')
-                                    {{--<li class="nav-item">
-                                        <a href="{{ route('quote.list.general') }}" class="nav-link @yield('activeGeneralQuote')">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>Listado general</p>
-                                        </a>
-                                    </li>--}}
                                     <li class="nav-item">
-                                        <a href="{{ route('quote.general.indexV2') }}" class="nav-link @yield('activeGeneralQuote')">
+                                        <a href="{{ route('quoteSale.index') }}" class="nav-link @yield('activeGeneralQuote')">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Listado general</p>
                                         </a>
                                     </li>
                                 @endcan
-                                @can('list_quote')
-                                    {{--<li class="nav-item">
-                                        <a href="{{route('quote.index')}}" class="nav-link @yield('activeListQuote')">
-                                            <i class="far fa-circle nav-icon"></i>
-                                            <p>Listar cotizaciones</p>
-                                        </a>
-                                    </li>--}}
+                                {{--@can('list_quote')
                                     <li class="nav-item">
-                                        <a href="{{route('quote.indexV2')}}" class="nav-link @yield('activeListQuote')">
+                                        <a href="{{route('quoteSale.indexV2')}}" class="nav-link @yield('activeListQuote')">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Listar cotizaciones</p>
                                         </a>
                                     </li>
-                                @endcan
+                                @endcan--}}
                                 @can('create_quote')
                                     <li class="nav-item">
-                                        <a href="{{ route('quote.create') }}" class="nav-link @yield('activeCreateQuote')">
+                                        <a href="{{ route('quoteSale.create') }}" class="nav-link @yield('activeCreateQuote')">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Crear cotización</p>
                                         </a>
                                     </li>
                                 @endcan
-                                @can('showRaised_quote')
+                               {{-- @can('showRaised_quote')
                                     <li class="nav-item">
                                         <a href="{{ route('quote.raiseV2') }}" class="nav-link @yield('activeRaiseQuote')">
                                             <i class="far fa-circle nav-icon"></i>
@@ -1079,7 +1080,7 @@
                                             <p>Resumen Cotización</p>
                                         </a>
                                     </li>
-                                @endcan
+                                @endcan--}}
                             </ul>
                         </li>
                     @endcan

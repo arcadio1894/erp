@@ -8,6 +8,7 @@ use App\CashRegister;
 use App\Category;
 use App\DataGeneral;
 use App\Mail\StockLowNotificationMail;
+use App\PorcentageQuote;
 use Illuminate\Support\Facades\Mail;
 use App\Material;
 use App\MaterialDiscountQuantity;
@@ -115,6 +116,10 @@ class PuntoVentaController extends Controller
         //dump("quantity ". $quantity);
         $arrayDiscount = [];
 
+        $dataGeneralIGV = PorcentageQuote::where('name', 'igv')->first();
+        $igvdata = $dataGeneralIGV->value;
+
+        $igv = round((100 + $igvdata)/100 , 2 );
         foreach ( $materialDiscounts as $materialDiscount )
         {
             $cantidad = $materialDiscount->discount->quantity;
@@ -129,8 +134,8 @@ class PuntoVentaController extends Controller
                     "id" => $materialDiscount->id,
                     "percentage" => $materialDiscount->percentage,
                     "haveDiscount" => true,
-                    "valueDiscount" => round(($material->list_price - $material->unit_price)*($materialDiscount->percentage/100), 2),
-                    "stringDiscount" => "<p>Dscto. ".$materialDiscount->discount->description." <strong class='float-right'> ".round(($material->list_price - $material->unit_price)*($materialDiscount->percentage/100), 2)."</strong></p>",
+                    "valueDiscount" => round(($material->list_price/$igv)*($materialDiscount->percentage/100), 2),
+                    "stringDiscount" => "<p>Dscto. ".$materialDiscount->discount->description." <strong class='float-right'> ".round(($material->list_price/$igv)*($materialDiscount->percentage/100), 2)."</strong></p>",
                 ]);
 
                 // Salir del bucle una vez que se ha encontrado el descuento aplicable

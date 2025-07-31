@@ -2830,6 +2830,70 @@ Route::middleware('auth')->group(function (){
             ->middleware('permission:update_dataGeneral');
 
         Route::post('/leer/notificaciones/pop_up', 'NotificationController@readPopupNotifications');
+
+        // TODO: QuoteSale
+        Route::get('cotizaciones/venta', 'QuoteSaleController@index')
+            ->name('quoteSale.index')
+            ->middleware('permission:list_quoteSale');
+        Route::get('cotizaciones/venta/totales', 'QuoteSaleController@indexGeneral')
+            ->name('quoteSale.list.general')
+            ->middleware('permission:list_quoteSale');
+        Route::get('crear/cotizacion/venta', 'QuoteSaleController@create')
+            ->name('quoteSale.create')
+            ->middleware('permission:create_quoteSale');
+        Route::get('/get/quote/sale/materials/totals', 'QuoteSaleController@getMaterialTotals')
+            ->middleware('permission:create_quoteSale');
+        Route::get('/get/quote/sale/materials', 'QuoteSaleController@getMaterials')
+            ->middleware('permission:create_quoteSale');
+        Route::post('store/quote/sale', 'QuoteSaleController@store')
+            ->name('quoteSale.store')
+            ->middleware('permission:create_quoteSale');
+
+        Route::get('editar/cotizacion/venta/{quote}', 'QuoteSaleController@edit')
+            ->name('quoteSale.edit')
+            ->middleware('permission:edit_quoteSale');
+        Route::post('update/quote/sale', 'QuoteSaleController@update')
+            ->name('quoteSale.update')
+            ->middleware('permission:edit_quoteSale');
+        Route::post('/destroy/quote/sale/{quote}', 'QuoteSaleController@destroy')
+            ->name('quoteSale.destroy')
+            ->middleware('permission:destroy_quoteSale');
+        Route::post('/update/equipment/{id_equipment}/quote/sale/{id_quote}', 'QuoteSaleController@updateEquipmentOfQuote')
+            ->name('quoteSale.update.equipment')
+            ->middleware('permission:edit_quoteSale');
+
+
+        // TODO: PromotionLimits
+        Route::get('promociones/por/limite', 'PromotionLimitController@index')
+            ->name('promotionLimit.index')
+            ->middleware('permission:list_promotionLimit');
+        Route::get('crear/promocion/por/limite', 'PromotionLimitController@create')
+            ->name('promotionLimit.create')
+            ->middleware('permission:create_promotionLimit');
+        Route::get('/get/promotion/limits/materials/totals', 'PromotionLimitController@getMaterialTotals')
+            ->middleware('permission:create_promotionLimit');
+        Route::get('/get/promotion/limit/materials', 'PromotionLimitController@getMaterials')
+            ->middleware('permission:create_promotionLimit');
+        Route::post('store/promotion/limit', 'PromotionLimitController@store')
+            ->name('promotionLimit.store')
+            ->middleware('permission:create_promotionLimit');
+        Route::get('/get/data/promotion/limits/{numberPage}', 'PromotionLimitController@getDataPromotions');
+
+        Route::post('/destroy/promotion/limits/{promotion_id}', 'PromotionLimitController@destroy')
+            ->name('promotionLimit.destroy')
+            ->middleware('permission:destroy_promotionLimit');
+
+        Route::get('editar/promocion/limite/{promotion}', 'PromotionLimitController@edit')
+            ->name('promotionLimit.edit')
+            ->middleware('permission:edit_promotionLimit');
+        Route::post('update/promotion/limit', 'PromotionLimitController@update')
+            ->name('promotionLimit.update')
+            ->middleware('permission:edit_promotionLimit');
+
+        Route::get('orden/de/promociones/', 'PromotionLimitController@order')
+            ->name('promotion.order')
+            ->middleware('permission:list_promotionLimit');
+
     });
 });
 

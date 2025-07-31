@@ -12,8 +12,10 @@ class EquipmentConsumable extends Model
         'quantity',
         'price',
         'total',
+        'valor_unitario',
         'availability',
-        'state'
+        'state',
+        'discount'
     ];
 
     public function equipment(){
