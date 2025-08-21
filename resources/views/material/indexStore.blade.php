@@ -216,7 +216,7 @@
                             </select>
                         </div>
 
-                        <div class="col-md-2">
+                        {{--<div class="col-md-2">
                             <label for="material_type">Tipo:</label>
                             <select id="material_type" name="material_type" class="form-control form-control-sm select2" style="width: 100%;">
                                 <option value="">TODOS</option>
@@ -230,7 +230,7 @@
                                 <option value="">TODOS</option>
 
                             </select>
-                        </div>
+                        </div>--}}
                         <div class="col-md-2">
                             <label for="rotation">Rotación:</label>
                             <select id="rotation" class="form-control form-control-sm select2" style="width: 100%;">
@@ -246,7 +246,7 @@
                     <br>
 
                     <div class="row">
-                        <div class="col-md-2">
+                        {{--<div class="col-md-2">
                             <label for="cedula">Cédula:</label>
                             <select id="cedula" name="cedula" class="form-control form-control-sm select2" style="width: 100%;">
                                 <option value="">TODOS</option>
@@ -263,7 +263,7 @@
                                     <option value="{{ $arrayCalidades[$i]['id'] }}">{{ $arrayCalidades[$i]['name'] }}</option>
                                 @endfor
                             </select>
-                        </div>
+                        </div>--}}
                         <div class="col-md-2">
                             <label for="marca">Marca:</label>
                             <select id="marca" name="marca" class="form-control form-control-sm select2" style="width: 100%;">
