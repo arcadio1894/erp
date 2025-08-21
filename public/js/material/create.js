@@ -272,7 +272,7 @@ function saveSubCategoria() {
     let formData = $form.serialize();
 
     $.post(url, formData, function (response) {
-        if (response && response.id) {
+        if (response && response.data) {
             $('#modalSubCategoria').modal('hide');
             $selectSubCategory.append($('<option>', {
                 value: response.data[0].id,
