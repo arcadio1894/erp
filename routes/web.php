@@ -2890,10 +2890,13 @@ Route::middleware('auth')->group(function (){
             ->name('promotionLimit.update')
             ->middleware('permission:edit_promotionLimit');
 
-        Route::get('orden/de/promociones/', 'PromotionLimitController@order')
-            ->name('promotion.order')
+        Route::get('orden/de/promociones/', 'PromotionOrderController@index')
+            ->name('promotionOrder.index')
             ->middleware('permission:list_promotionLimit');
+        Route::post('/promotion-orders/update-order', 'PromotionOrderController@updateOrder');
+        Route::get('/get/data/promotion/orders/{numberPage}', 'PromotionOrderController@getDataPromotions');
 
+        Route::post('/check-promotions', 'PromotionOrderController@checkPromotions');
     });
 });
 

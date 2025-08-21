@@ -101,15 +101,15 @@
 
 @section('page-title')
     <h5 class="card-title">Listado de cotizaciones</h5>
-    @can('create_quote')
-        <a href="{{ route('quote.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nueva cotización </a>
+    @can('create_quoteSale')
+        <a href="{{ route('quoteSale.create') }}" class="btn btn-outline-success btn-sm float-right" > <i class="fa fa-plus font-20"></i> Nueva cotización </a>
     @endcan
-    @hasanyrole('admin|principal')
+    {{--@hasanyrole('admin|principal')
     <button type="button" id="btn-export" class="btn btn-outline-primary btn-sm float-right mr-2" > <i class="far fa-file-excel"></i> Descargar Excel </button>
-    @endhasanyrole
-    @can('create_quote')
+    @endhasanyrole--}}
+    {{--@can('create_quoteSale')
         <button type="button" id="btn-download" class="btn btn-outline-success btn-sm float-right mr-2" > <i class="fas fa-download"></i> Exportar cotizaciones </button>
-    @endcan
+    @endcan--}}
 @endsection
 
 @section('page-breadcrumb')

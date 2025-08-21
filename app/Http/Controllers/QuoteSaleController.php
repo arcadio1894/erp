@@ -21,6 +21,8 @@ use App\NotificationUser;
 use App\OutputDetail;
 use App\PaymentDeadline;
 use App\PorcentageQuote;
+use App\PromotionLimit;
+use App\PromotionUsage;
 use App\Quote;
 use App\QuoteUser;
 use App\UnitMeasure;
@@ -258,13 +260,50 @@ class QuoteSaleController extends Controller
                     $totalMaterial += $equipmentMaterial->total;
                 }
 
-                for ( $k=0; $k<sizeof($consumables); $k++ )
-                {
+                for ($k = 0; $k < sizeof($consumables); $k++) {
                     $material = Material::find($consumables[$k]->id);
 
+                    // 🟢 VALIDAR PROMOCIÓN SI type_promo = limit
+                    if ($consumables[$k]->type_promo == "limit") {
+                        $promotion = PromotionLimit::where('material_id', $consumables[$k]->id)
+                            ->whereDate('start_date', '<=', now())
+                            ->whereDate('end_date', '>=', now())
+                            ->first();
+
+                        if ($promotion) {
+                            // buscar uso
+                            $query = PromotionUsage::where('promotion_limit_id', $promotion->id);
+
+                            if ($promotion->applies_to == 'worker') {
+                                $query->where('user_id', auth()->id());
+                            }
+
+                            $usage = $query->first();
+
+                            if (!$usage) {
+                                $usage = PromotionUsage::create([
+                                    'promotion_limit_id' => $promotion->id,
+                                    'user_id' => $promotion->applies_to == 'worker' ? auth()->id() : null,
+                                    'used_quantity' => 0,
+                                ]);
+                            }
+
+                            $requestedQty = (float) $consumables[$k]->quantity;
+                            $remaining = $promotion->limit_quantity - $usage->used_quantity;
+
+                            if ($remaining < $requestedQty) {
+                                throw new \Exception("La promoción para {$material->full_name} ya no tiene suficiente cantidad disponible");
+                            }
+
+                            // actualizar consumo
+                            $usage->increment('used_quantity', $requestedQty);
+                        }
+                    }
+
+                    // 🟢 REGISTRAR EQUIPMENT CONSUMABLE
                     $equipmentConsumable = EquipmentConsumable::create([
-                        'availability' => ((float) $consumables[$k]->quantity > $material->stock_current) ? 'Agotado':'Completo',
-                        'state' => ((float) $consumables[$k]->quantity > $material->stock_current) ? 'Falta comprar':'En compra',
+                        'availability' => ((float) $consumables[$k]->quantity > $material->stock_current) ? 'Agotado' : 'Completo',
+                        'state' => ((float) $consumables[$k]->quantity > $material->stock_current) ? 'Falta comprar' : 'En compra',
                         'equipment_id' => $equipment->id,
                         'material_id' => $consumables[$k]->id,
                         'quantity' => (float) $consumables[$k]->quantity,
@@ -272,6 +311,7 @@ class QuoteSaleController extends Controller
                         'valor_unitario' => (float) $consumables[$k]->valor,
                         'discount' => (float) $consumables[$k]->discount,
                         'total' => (float) $consumables[$k]->importe,
+                        'type_promo' => $consumables[$k]->type_promo,
                     ]);
 
                     $totalConsumable += $equipmentConsumable->total;
@@ -924,18 +964,58 @@ class QuoteSaleController extends Controller
                         $totalMaterial += $equipmentMaterial->total;
                     }
 
-                    for ( $k=0; $k<sizeof($consumables); $k++ )
-                    {
+                    for ($k = 0; $k < sizeof($consumables); $k++) {
                         $material = Material::find($consumables[$k]->id);
 
+                        // 🟢 VALIDAR PROMOCIÓN SI type_promo = limit
+                        if ($consumables[$k]->type_promo == "limit") {
+                            $promotion = PromotionLimit::where('material_id', $consumables[$k]->id)
+                                ->whereDate('start_date', '<=', now())
+                                ->whereDate('end_date', '>=', now())
+                                ->first();
+
+                            if ($promotion) {
+                                // buscar uso
+                                $query = PromotionUsage::where('promotion_limit_id', $promotion->id);
+
+                                if ($promotion->applies_to == 'worker') {
+                                    $query->where('user_id', auth()->id());
+                                }
+
+                                $usage = $query->first();
+
+                                if (!$usage) {
+                                    $usage = PromotionUsage::create([
+                                        'promotion_limit_id' => $promotion->id,
+                                        'user_id' => $promotion->applies_to == 'worker' ? auth()->id() : null,
+                                        'used_quantity' => 0,
+                                    ]);
+                                }
+
+                                $requestedQty = (float) $consumables[$k]->quantity;
+                                $remaining = $promotion->limit_quantity - $usage->used_quantity;
+
+                                if ($remaining < $requestedQty) {
+                                    throw new \Exception("La promoción para {$material->full_name} ya no tiene suficiente cantidad disponible");
+                                }
+
+                                // actualizar consumo
+                                $usage->increment('used_quantity', $requestedQty);
+                            }
+                        }
+
+                        // 🟢 REGISTRAR EQUIPMENT CONSUMABLE
                         $equipmentConsumable = EquipmentConsumable::create([
+                            'availability' => ((float) $consumables[$k]->quantity > $material->stock_current) ? 'Agotado' : 'Completo',
+                            'state' => ((float) $consumables[$k]->quantity > $material->stock_current) ? 'Falta comprar' : 'En compra',
                             'equipment_id' => $equipment->id,
                             'material_id' => $consumables[$k]->id,
                             'quantity' => (float) $consumables[$k]->quantity,
                             'price' => (float) $consumables[$k]->price,
-                            'total' => (float) $consumables[$k]->quantity*(float) $consumables[$k]->price,
-                            'state' => ((float) $consumables[$k]->quantity > $material->stock_current) ? 'Falta comprar':'En compra',
-                            'availability' => ((float) $consumables[$k]->quantity > $material->stock_current) ? 'Agotado':'Completo',
+                            'valor_unitario' => (float) $consumables[$k]->valor,
+                            'discount' => (float) $consumables[$k]->discount,
+                            'total' => (float) $consumables[$k]->importe,
+                            'type_promo' => $consumables[$k]->type_promo,
                         ]);
 
                         $totalConsumable += $equipmentConsumable->total;
@@ -1154,9 +1234,103 @@ class QuoteSaleController extends Controller
                         //$totalMaterial += $equipmentMaterial->total;
                     }
 
+                    /*for ($k = 0; $k < sizeof($consumables); $k++) {
+                        $material = Material::find($consumables[$k]->id);
+
+                        // 🟢 VALIDAR PROMOCIÓN SI type_promo = limit
+                        if ($consumables[$k]->type_promo == "limit") {
+                            $promotion = PromotionLimit::where('material_id', $consumables[$k]->id)
+                                ->whereDate('start_date', '<=', now())
+                                ->whereDate('end_date', '>=', now())
+                                ->first();
+
+                            if ($promotion) {
+                                // buscar uso
+                                $query = PromotionUsage::where('promotion_limit_id', $promotion->id);
+
+                                if ($promotion->applies_to == 'worker') {
+                                    $query->where('user_id', auth()->id());
+                                }
+
+                                $usage = $query->first();
+
+                                if (!$usage) {
+                                    $usage = PromotionUsage::create([
+                                        'promotion_limit_id' => $promotion->id,
+                                        'user_id' => $promotion->applies_to == 'worker' ? auth()->id() : null,
+                                        'used_quantity' => 0,
+                                    ]);
+                                }
+
+                                $requestedQty = (float) $consumables[$k]->quantity;
+                                $remaining = $promotion->limit_quantity - $usage->used_quantity;
+
+                                if ($remaining < $requestedQty) {
+                                    throw new \Exception("La promoción para {$material->full_name} ya no tiene suficiente cantidad disponible");
+                                }
+
+                                // actualizar consumo
+                                $usage->increment('used_quantity', $requestedQty);
+                            }
+                        }
+
+                        // 🟢 REGISTRAR EQUIPMENT CONSUMABLE
+                        $equipmentConsumable = EquipmentConsumable::create([
+                            'availability' => ((float) $consumables[$k]->quantity > $material->stock_current) ? 'Agotado' : 'Completo',
+                            'state' => ((float) $consumables[$k]->quantity > $material->stock_current) ? 'Falta comprar' : 'En compra',
+                            'equipment_id' => $equipment->id,
+                            'material_id' => $consumables[$k]->id,
+                            'quantity' => (float) $consumables[$k]->quantity,
+                            'price' => (float) $consumables[$k]->price,
+                            'valor_unitario' => (float) $consumables[$k]->valor,
+                            'discount' => (float) $consumables[$k]->discount,
+                            'total' => (float) $consumables[$k]->importe,
+                            'type_promo' => $consumables[$k]->type_promo,
+                        ]);
+
+                        $totalConsumable += $equipmentConsumable->total;
+                    }*/
+
                     foreach ( $consumables as $consumable )
                     {
                         $material = Material::find((int)$consumable['id']);
+
+                        // 🟢 VALIDAR PROMOCIÓN SI type_promo = limit
+                        if ($consumable["type_promo"] == "limit") {
+                            $promotion = PromotionLimit::where('material_id', $consumable["id"])
+                                ->whereDate('start_date', '<=', now())
+                                ->whereDate('end_date', '>=', now())
+                                ->first();
+
+                            if ($promotion) {
+                                // buscar uso
+                                $query = PromotionUsage::where('promotion_limit_id', $promotion->id);
+
+                                if ($promotion->applies_to == 'worker') {
+                                    $query->where('user_id', auth()->id());
+                                }
+
+                                $usage = $query->first();
+
+                                if (!$usage) {
+                                    $usage = PromotionUsage::create([
+                                        'promotion_limit_id' => $promotion->id,
+                                        'user_id' => $promotion->applies_to == 'worker' ? auth()->id() : null,
+                                        'used_quantity' => 0,
+                                    ]);
+                                }
+
+                                $requestedQty = (float) $consumable["quantity"];
+                                $remaining = $promotion->limit_quantity - $usage->used_quantity;
+
+                                if ($remaining < $requestedQty) {
+                                    throw new \Exception("La promoción para {$material->full_name} ya no tiene suficiente cantidad disponible");
+                                }
+
+                                // actualizar consumo
+                                $usage->increment('used_quantity', $requestedQty);
+                            }
+                        }
 
                         $equipmentConsumable = EquipmentConsumable::create([
                             'availability' => ((float) $consumable['quantity'] > $material->stock_current) ? 'Agotado':'Completo',
@@ -1168,6 +1342,7 @@ class QuoteSaleController extends Controller
                             'valor_unitario' => (float) $consumable['valor'],
                             'discount' => (float) $consumable['discount'],
                             'total' => (float) $consumable['importe'],
+                            'type_promo' => $consumables['type_promo'],
                         ]);
                     }
 
@@ -1340,6 +1515,61 @@ class QuoteSaleController extends Controller
                     {
                         $material = Material::find((int)$consumable['id']);
 
+                        // 🟢 VALIDAR PROMOCIÓN SI type_promo = limit
+                        if ($consumable["type_promo"] == "limit") {
+                            $promotion = PromotionLimit::where('material_id', $consumable["id"])
+                                ->whereDate('start_date', '<=', now())
+                                ->whereDate('end_date', '>=', now())
+                                ->first();
+
+                            if ($promotion) {
+                                // buscar uso
+                                $query = PromotionUsage::where('promotion_limit_id', $promotion->id);
+
+                                if ($promotion->applies_to == 'worker') {
+                                    $query->where('user_id', auth()->id());
+                                }
+
+                                $usage = $query->first();
+
+                                if (!$usage) {
+                                    $usage = PromotionUsage::create([
+                                        'promotion_limit_id' => $promotion->id,
+                                        'user_id' => $promotion->applies_to == 'worker' ? auth()->id() : null,
+                                        'used_quantity' => 0,
+                                    ]);
+                                }
+
+                                $requestedQty = (float) $consumable["quantity"];
+                                $remaining = $promotion->limit_quantity - $usage->used_quantity;
+
+                                if ($remaining < $requestedQty) {
+                                    throw new \Exception("La promoción para {$material->full_name} ya no tiene suficiente cantidad disponible");
+                                }
+
+                                // actualizar consumo
+                                $usage->increment('used_quantity', $requestedQty);
+                            }
+                        }
+
+                        $equipmentConsumable = EquipmentConsumable::create([
+                            'availability' => ((float) $consumable['quantity'] > $material->stock_current) ? 'Agotado':'Completo',
+                            'state' => ((float) $consumable['quantity'] > $material->stock_current) ? 'Falta comprar':'En compra',
+                            'equipment_id' => $equipment_quote->id,
+                            'material_id' => $consumable['id'],
+                            'quantity' => (float) $consumable['quantity'],
+                            'price' => (float) $consumable['price'],
+                            'valor_unitario' => (float) $consumable['valor'],
+                            'discount' => (float) $consumable['discount'],
+                            'total' => (float) $consumable['importe'],
+                            'type_promo' => $consumables['type_promo'],
+                        ]);
+                    }
+
+                    /*foreach ( $consumables as $consumable )
+                    {
+                        $material = Material::find((int)$consumable['id']);
+
                         $equipmentConsumable = EquipmentConsumable::create([
                             'availability' => ((float) $consumable['quantity'] > $material->stock_current) ? 'Agotado':'Completo',
                             'state' => ((float) $consumable['quantity'] > $material->stock_current) ? 'Falta comprar':'En compra',
@@ -1353,7 +1583,7 @@ class QuoteSaleController extends Controller
                             ]);
 
                         //$totalConsumable += $equipmentConsumable->total;
-                    }
+                    }*/
 
                     foreach ( $electrics as $electric )
                     {

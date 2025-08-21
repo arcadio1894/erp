@@ -313,6 +313,7 @@ function fillEquipments() {
             var consumablesPrice = [];
             var consumablesImporte = [];
             var consumablesDiscount = [];
+            var consumablesTypePromos = [];
 
             var descuento_nuevo = 0;
 
@@ -327,6 +328,9 @@ function fillEquipments() {
                     consumablesDiscount.push($(this).attr('data-descuento'));
                     console.log(parseFloat($(this).attr('data-descuento')));
                     descuento_nuevo = descuento_nuevo + parseFloat($(this).attr('data-descuento'));
+                });
+                $(this).find('[data-type_promotion]').each(function(){
+                    consumablesTypePromos.push($(this).attr('data-type_promotion'));
                 });
                 $(this).find('[data-consumableUnit]').each(function(){
                     consumablesUnit.push($(this).val());
@@ -350,7 +354,7 @@ function fillEquipments() {
             var consumablesArray = [];
 
             for (let i = 0; i < consumablesDescription.length; i++) {
-                consumablesArray.push({'id':consumablesIds[i], 'description':consumablesDescription[i], 'unit':consumablesUnit[i], 'quantity':consumablesQuantity[i], 'valor': consumablesValor[i], 'price': consumablesPrice[i], 'importe': consumablesImporte[i], 'discount': consumablesDiscount[i]});
+                consumablesArray.push({'id':consumablesIds[i], 'description':consumablesDescription[i], 'unit':consumablesUnit[i], 'quantity':consumablesQuantity[i], 'valor': consumablesValor[i], 'price': consumablesPrice[i], 'importe': consumablesImporte[i], 'discount': consumablesDiscount[i], 'type_promo': consumablesTypePromos[i]});
             }
 
             console.log(consumablesArray);
@@ -675,6 +679,7 @@ function saveEquipment() {
                         var consumablesPrice = [];
                         var consumablesImporte = [];
                         var consumablesDiscount = [];
+                        var consumablesTypePromos = [];
 
                         var descuento_nuevo = 0;
 
@@ -689,6 +694,9 @@ function saveEquipment() {
                             $(this).find('[data-descuento]').each(function(){
                                 consumablesDiscount.push($(this).attr('data-descuento'));
                                 descuento_nuevo = descuento_nuevo + parseFloat($(this).attr('data-descuento'));
+                            });
+                            $(this).find('[data-type_promotion]').each(function(){
+                                consumablesTypePromos.push($(this).attr('data-type_promotion'));
                             });
                             $(this).find('[data-consumableUnit]').each(function(){
                                 consumablesUnit.push($(this).val());
@@ -712,7 +720,7 @@ function saveEquipment() {
                         var consumablesArray = [];
 
                         for (let i = 0; i < consumablesDescription.length; i++) {
-                            consumablesArray.push({'id':consumablesIds[i], 'description':consumablesDescription[i], 'unit':consumablesUnit[i], 'quantity':consumablesQuantity[i], 'valor': consumablesValor[i], 'price': consumablesPrice[i], 'importe': consumablesImporte[i], 'discount': consumablesDiscount[i]});
+                            consumablesArray.push({'id':consumablesIds[i], 'description':consumablesDescription[i], 'unit':consumablesUnit[i], 'quantity':consumablesQuantity[i], 'valor': consumablesValor[i], 'price': consumablesPrice[i], 'importe': consumablesImporte[i], 'discount': consumablesDiscount[i], 'type_promo': consumablesTypePromos[i]});
                         }
 
                         console.log(consumablesArray);
@@ -823,6 +831,7 @@ function saveEquipment() {
                         var consumablesPrice = [];
                         var consumablesImporte = [];
                         var consumablesDiscount = [];
+                        var consumablesTypePromos = [];
 
                         var descuento_nuevo = 0;
 
@@ -837,6 +846,9 @@ function saveEquipment() {
                             $(this).find('[data-descuento]').each(function(){
                                 consumablesDiscount.push($(this).attr('data-descuento'));
                                 descuento_nuevo = descuento_nuevo + parseFloat($(this).attr('data-descuento'));
+                            });
+                            $(this).find('[data-type_promotion]').each(function(){
+                                consumablesTypePromos.push($(this).attr('data-type_promotion'));
                             });
                             $(this).find('[data-consumableUnit]').each(function(){
                                 consumablesUnit.push($(this).val());
@@ -862,7 +874,7 @@ function saveEquipment() {
                         var consumablesArray = [];
 
                         for (let i = 0; i < consumablesDescription.length; i++) {
-                            consumablesArray.push({'id':consumablesIds[i], 'description':consumablesDescription[i], 'unit':consumablesUnit[i], 'quantity':consumablesQuantity[i], 'valor': consumablesValor[i], 'price': consumablesPrice[i], 'importe': consumablesImporte[i], 'discount': consumablesDiscount[i]});
+                            consumablesArray.push({'id':consumablesIds[i], 'description':consumablesDescription[i], 'unit':consumablesUnit[i], 'quantity':consumablesQuantity[i], 'valor': consumablesValor[i], 'price': consumablesPrice[i], 'importe': consumablesImporte[i], 'discount': consumablesDiscount[i], 'type_promo': consumablesTypePromos[i]});
                         }
 
                         console.log("consumablesArray");
@@ -1120,8 +1132,9 @@ function addConsumable() {
         inputQuantity.val(0);
         $(".consumable_search").empty().trigger('change');
         //getDiscountMaterial(consumable.id, cantidad);
+        checkMaterialPromotions(consumable.id, parseFloat(cantidad).toFixed(2), consumable, cantidad, render);
 
-        getDiscountMaterial(consumable.id, parseFloat(cantidad).toFixed(2)).then(function(discount) {
+        /*getDiscountMaterial(consumable.id, parseFloat(cantidad).toFixed(2)).then(function(discount) {
             console.log(discount.valueDiscount);
             if ( discount != -1 )
             {
@@ -1133,6 +1146,7 @@ function addConsumable() {
             }
 
         });
+        */
         //renderTemplateConsumable(render, consumable, cantidad);
 
     } else {
@@ -1221,7 +1235,10 @@ function addConsumable() {
         inputQuantity2.val(0);
         $(".consumable_search").empty().trigger('change');
         //getDiscountMaterial(consumable2.id, cantidad2);
-        getDiscountMaterial(consumable2.id, parseFloat(cantidad2).toFixed(2)).then(function(discount) {
+
+        checkMaterialPromotions(consumable2.id, parseFloat(cantidad2).toFixed(2), consumable2, cantidad2, render2);
+
+        /*getDiscountMaterial(consumable2.id, parseFloat(cantidad2).toFixed(2)).then(function(discount) {
             console.log(discount.valueDiscount);
             if ( discount != -1 )
             {
@@ -1232,11 +1249,191 @@ function addConsumable() {
                 renderTemplateConsumable(render2, consumable2, cantidad2, 0);
             }
 
-        });
+        });*/
 
         //renderTemplateConsumable(render2, consumable2, cantidad2);
     }
 
+}
+
+function checkMaterialPromotions(materialId, cantidad, consumable, cantidadOriginal, render) {
+    $.ajax({
+        url: '/dashboard/check-promotions',
+        method: 'POST',
+        data: {
+            material_id: materialId,
+            quantity: cantidad,
+            _token: $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function (response) {
+            if (response.success && response.promotions.length > 0) {
+                showPromotionModal(response.promotions, consumable, cantidadOriginal, render);
+            } else {
+                toastr.info("No hay promociones aplicables.");
+                renderTemplateConsumable(render, consumable, cantidadOriginal, 0, "ninguno")
+            }
+        },
+        error: function () {
+            toastr.error("Error al verificar promociones.");
+        }
+    });
+}
+
+function showPromotionModal(promotions, consumable, cantidad, render) {
+    let content = '';
+
+    promotions.forEach((promo, index) => {
+        let btn = `<button class="btn btn-primary btn-sm select-promo" 
+                        data-index="${index}" 
+                        data-type="${promo.type}">
+                        Seleccionar
+                   </button>`;
+
+        if (promo.type === 'seasonal') {
+            content += `<div class="mb-2 border p-2 rounded">
+                            <strong>Descuento por Categoría:</strong> ${promo.discount}% hasta el ${promo.valid_until}
+                            <br>${btn}
+                        </div>`;
+        }
+        else if (promo.type === 'quantity_discount') {
+            content += `<div class="mb-2 border p-2 rounded">
+                            <strong>Descuento por Cantidad:</strong> ${promo.percentage}%
+                            <br>${btn}
+                        </div>`;
+        }
+        else if (promo.type === 'limit') {
+            content += `<div class="mb-2 border p-2 rounded">
+                            <strong>Promoción Límite:</strong> ${promo.price_type === 'fixed' ? 'Precio fijo' : 'Descuento'} 
+                            ${promo.percentage || promo.promo_price}
+                            <br>${btn}
+                        </div>`;
+        }
+
+
+    });
+
+    // ➕ Agregar botón de "sin promoción"
+    content += `<div class="mb-2 border p-2 rounded text-center">
+                <button class="btn btn-secondary btn-sm select-promo" 
+                        data-index="-1" 
+                        data-type="none">
+                        No aplicar promoción
+                </button>
+            </div>`;
+
+    $("#promotion-content").html(content);
+    $("#promotionModal").modal('show');
+
+    // Evento de selección de promoción
+    $(".select-promo").off().on("click", function () {
+        let index = $(this).data("index");
+        let type = $(this).data("type");
+        let promo = promotions[index];
+
+        if (type === 'none') {
+            // 👉 El usuario eligió no aplicar ninguna promoción
+            let precioNormal = parseFloat(consumable.list_price);
+            renderTemplateConsumableWithFixedPrice(render, consumable, cantidad, precioNormal, 'ninguno');
+
+            $("#promotionModal").modal('hide');
+            return; // cortar aquí
+        }
+
+        if (type === 'quantity_discount') {
+            getDiscountMaterial(consumable.id, parseFloat(cantidad).toFixed(2)).then(function(discount) {
+                let valueDiscount = discount != -1 ? discount.valueDiscount : 0;
+                $descuento += valueDiscount;
+                renderTemplateConsumable(render, consumable, cantidad, valueDiscount, "quantity_discount");
+            });
+        }
+        else if (type === 'seasonal') {
+            let precioBase = parseFloat(consumable.list_price);
+            let descuento = promo.discount;
+            let precioFinal = precioBase - (precioBase * (descuento / 100));
+            renderTemplateConsumable(render, consumable, cantidad, precioFinal, "seasonal", true);
+        }
+        else if (type === 'limit') {
+            let limite = promo.remaining_quantity;
+            let precioNormal = consumable.list_price;
+
+            if (promo.price_type === 'fixed') {
+                if (cantidad > limite) {
+                    // Parte con precio promo
+                    renderTemplateConsumableWithFixedPrice(render, consumable, limite, promo.promo_price, "limit");
+                    // Parte sin promo
+                    renderTemplateConsumableWithFixedPrice(render, consumable, cantidad - limite, precioNormal, 'ninguno');
+                } else {
+                    renderTemplateConsumableWithFixedPrice(render, consumable, cantidad, promo.promo_price, "limit");
+                }
+            }
+            else if (promo.price_type === 'percentage') {
+                let precioConDescuento = precioNormal - (precioNormal * promo.percentage / 100);
+
+                if (cantidad > limite) {
+                    renderTemplateConsumableWithFixedPrice(render, consumable, limite, precioConDescuento, "limit");
+                    renderTemplateConsumableWithFixedPrice(render, consumable, cantidad - limite, precioNormal, 'ninguno');
+                } else {
+                    renderTemplateConsumableWithFixedPrice(render, consumable, cantidad, precioConDescuento, "limit");
+                }
+            }
+        }
+
+        $("#promotionModal").modal('hide');
+    });
+}
+
+function renderTemplateConsumableWithFixedPrice(render, consumable, quantity, fixedPrice, type_promo) {
+    var card = render.closest('[data-equip]');
+    card.removeClass('card-success').addClass('card-gray-dark');
+
+    let precioBase = parseFloat(fixedPrice);
+    let valorUnitario = precioBase / ((100 + parseFloat($igv)) / 100);
+    let importeTotal = precioBase * parseFloat(quantity);
+
+    var clone = activateTemplate('#template-consumable');
+    clone.querySelector("[data-consumableDescription]").setAttribute('value', consumable.full_description);
+    clone.querySelector("[data-consumableId]").setAttribute('data-consumableId', consumable.id);
+    clone.querySelector("[data-descuento]").setAttribute('data-descuento', "0.00");
+    clone.querySelector("[data-type_promotion]").setAttribute('data-type_promotion', type_promo);
+    clone.querySelector("[data-consumableUnit]").setAttribute('value', consumable.unit_measure.description);
+    clone.querySelector("[data-consumableQuantity]").setAttribute('value', (parseFloat(quantity)).toFixed(2));
+
+    clone.querySelector("[data-consumableValor]").setAttribute('value', (parseFloat(valorUnitario).toFixed(2)));
+    clone.querySelector("[data-consumablePrice]").setAttribute('value', (parseFloat(precioBase).toFixed(2)));
+    clone.querySelector("[data-consumableImporte]").setAttribute('value', (parseFloat(importeTotal).toFixed(2)));
+
+    render.append(clone);
+}
+
+function renderTemplateConsumable(render, consumable, quantity, discountOrPrice, type_promo,isPrice = false) {
+    var card = render.closest('[data-equip]');
+    card.removeClass('card-success').addClass('card-gray-dark');
+
+    var clone = activateTemplate('#template-consumable');
+
+    let precioBase = isPrice ? parseFloat(discountOrPrice) : parseFloat(consumable.list_price);
+    let valorUnitario = precioBase / ((100 + parseFloat($igv)) / 100);
+    let importeTotal = precioBase * parseFloat(quantity);
+
+    if (consumable.enable_status == 0) {
+        clone.querySelector("[data-consumableDescription]").setAttribute('style', "color:purple;");
+    } else if (consumable.stock_current == 0) {
+        clone.querySelector("[data-consumableDescription]").setAttribute('style', "color:red;");
+    } else if (consumable.state_update_price == 1) {
+        clone.querySelector("[data-consumableDescription]").setAttribute('style', "color:blue;");
+    }
+
+    clone.querySelector("[data-consumableDescription]").setAttribute('value', consumable.full_description);
+    clone.querySelector("[data-consumableId]").setAttribute('data-consumableId', consumable.id);
+    clone.querySelector("[data-descuento]").setAttribute('data-descuento', isPrice ? "0.00" : parseFloat(discountOrPrice).toFixed(2));
+    clone.querySelector("[data-type_promotion]").setAttribute('data-type_promotion', type_promo);
+    clone.querySelector("[data-consumableUnit]").setAttribute('value', consumable.unit_measure.description);
+    clone.querySelector("[data-consumableQuantity]").setAttribute('value', parseFloat(quantity).toFixed(2));
+    clone.querySelector("[data-consumableValor]").setAttribute('value', valorUnitario.toFixed(2));
+    clone.querySelector("[data-consumablePrice]").setAttribute('value', precioBase.toFixed(2));
+    clone.querySelector("[data-consumableImporte]").setAttribute('value', importeTotal.toFixed(2));
+
+    render.append(clone);
 }
 
 function getDiscountMaterial(product_id, quantity) {
@@ -2814,7 +3011,7 @@ function calculateTotalMaterialAncho(e) {
 
 }
 
-function renderTemplateConsumable(render, consumable, quantity, discount) {
+/*function renderTemplateConsumable(render, consumable, quantity, discount) {
 
     console.log("renderTemplateConsumable");
     console.log("consumable");
@@ -2918,7 +3115,7 @@ function renderTemplateConsumable(render, consumable, quantity, discount) {
     }
 
 
-}
+}*/
 
 function renderTemplateEquipment() {
     var clone = activateTemplate('#template-equipment');

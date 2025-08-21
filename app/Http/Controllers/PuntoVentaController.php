@@ -274,17 +274,17 @@ class PuntoVentaController extends Controller
                         break;
                     }
 
-                    $stockDisponible = $storeMaterial->stock; // Asumimos que esta columna representa el stock actual
+                    $stockDisponible = $storeMaterial->stock_current; // Asumimos que esta columna representa el stock actual
 
                     if ($stockDisponible >= $cantidadVendida) {
                         // Descontamos solo lo que queda
-                        $storeMaterial->stock -= $cantidadVendida;
+                        $storeMaterial->stock_current -= $cantidadVendida;
                         $storeMaterial->save();
                         $cantidadVendida = 0;
                     } else {
                         // Descontamos todo el stock de este storeMaterial
                         $cantidadVendida -= $stockDisponible;
-                        $storeMaterial->stock = 0;
+                        $storeMaterial->stock_current = 0;
                         $storeMaterial->save();
                     }
                 }

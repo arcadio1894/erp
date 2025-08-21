@@ -472,6 +472,7 @@
                     <input type="text" onkeyup="mayus(this);" class="form-control form-control-sm" data-consumableDescription readonly>
                     <input type="hidden" data-consumableId>
                     <input type="hidden" data-descuento>
+                    <input type="hidden" data-type_promotion>
                 </div>
             </div>
             {{-- Unidad --}}
@@ -519,6 +520,23 @@
             </div>
         </div>
     </template>
+
+    <!-- Modal -->
+    <div class="modal fade" id="promotionModal" tabindex="-1" role="dialog" aria-labelledby="promotionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Promociones disponibles</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="promotion-content">
+                    <!-- Aquí se cargan dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 

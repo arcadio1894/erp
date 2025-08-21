@@ -358,7 +358,7 @@
                             </li>
 
                             <li class="nav-item">
-                                <a href="{{ route('promotion.order') }}" class="nav-link @yield('activePromotionLimit')">
+                                <a href="{{ route('promotionOrder.index') }}" class="nav-link @yield('activePromotionOrder')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Orden de Promociones</p>
                                 </a>
