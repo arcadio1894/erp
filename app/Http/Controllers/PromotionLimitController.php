@@ -24,13 +24,16 @@ class PromotionLimitController extends Controller
     {
         $materials = [];
 
-        if($request->has('q')){
+        if ($request->has('q')) {
             $search = $request->get('q');
-            $materials = Material::all()->filter(function ($item) use ($search) {
-                // replace stristr with your choice of matching function
-                return false !== stristr($item->full_description, $search);
-            });
+
+            $materials = Material::where('enable_status', 1) // 👈 aquí filtras en la BD
+            ->get()
+                ->filter(function ($item) use ($search) {
+                    return stripos($item->full_description, $search) !== false;
+                });
         }
+
         return json_encode($materials);
     }
 
