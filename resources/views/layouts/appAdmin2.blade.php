@@ -950,14 +950,14 @@
                                     </a>
                                 </li>
                                 @endcan
-                                @can('listActive_material')
+                                {{--@can('listActive_material')
                                     <li class="nav-item">
                                         <a href="{{route('material.actives.index')}}" class="nav-link @yield('activeListMaterialActive')">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Listar activos fijos</p>
                                         </a>
                                     </li>
-                                @endcan
+                                @endcan--}}
                                 @can('create_material')
                                 <li class="nav-item">
                                     <a href="{{ route('material.create') }}" class="nav-link @yield('activeCreateMaterial')">
@@ -1246,14 +1246,14 @@
                                 </a>
                             </li>
                             @endcan
-                            @can('reportMaterialEntries_entryPurchase')
+                            {{--@can('reportMaterialEntries_entryPurchase')
                             <li class="nav-item">
                                 <a href="{{ route('report.materials.entries') }}" class="nav-link @yield('activeReportMaterialEntry')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Reporte Ingresos</p>
                                 </a>
                             </li>
-                            @endcan
+                            @endcan--}}
                         </ul>
                     </li>
                     @endcan

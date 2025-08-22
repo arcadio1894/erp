@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Audit;
+use App\DataGeneral;
 use App\DetailEntry;
 use App\Entry;
 use App\EntryImage;
@@ -67,7 +68,19 @@ class EntryInventoryController extends Controller
         $fechaFormato = $fecha->format('Y-m-d');
         //$response = $this->getTipoDeCambio($fechaFormato);
 
-        $tipoCambioSunat = $this->obtenerTipoCambio($fechaFormato);
+        $precioCompra = 1;
+        $precioVenta = 1;
+
+        $dataCurrency = DataGeneral::where('name', 'type_current')->first();
+        $currency = $dataCurrency->valueText;
+
+        //$tipoMoneda = ($request->has('currency_invoice')) ? 'USD':'PEN';
+        if ( $currency == 'USD' ) {
+            $tipoCambioSunat = $this->obtenerTipoCambio($fechaFormato);
+            $precioCompra = (float) $tipoCambioSunat->precioCompra;
+            $precioVenta = (float) $tipoCambioSunat->precioVenta;
+        }
+
 
         if ( $request->get('purchase_order') != '' || $request->get('purchase_order') != null )
         {
@@ -94,8 +107,8 @@ class EntryInventoryController extends Controller
                 'entry_type' => $request->get('entry_type'),
                 'date_entry' => Carbon::createFromFormat('d/m/Y', $request->get('date_invoice')),
                 'finance' => false,
-                'currency_compra' => (float) $tipoCambioSunat->precioCompra,
-                'currency_venta' => (float) $tipoCambioSunat->precioVenta,
+                'currency_compra' => (float) $precioCompra,
+                'currency_venta' => (float) $precioVenta,
                 'observation' => $request->get('observation'),
             ]);
 
