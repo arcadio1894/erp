@@ -295,7 +295,7 @@ class PuntoVentaController extends Controller
 
                 $storeMaterialMinData = DataGeneral::where('name', 'store_material_min')->first();
 
-                $storeMaterialMin = $storeMaterialMinData->valueNumber;
+                //$storeMaterialMin = $storeMaterialMinData->valueNumber;
 
                 /*if ($storeMaterialFinal <= $storeMaterialMin)
                 {
