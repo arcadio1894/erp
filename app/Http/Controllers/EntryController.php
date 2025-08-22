@@ -218,8 +218,8 @@ class EntryController extends Controller
         $fechaFormato = $fecha->format('Y-m-d');
         //$response = $this->getTipoDeCambio($fechaFormato);
 
-        $precioCompra = null;
-        $precioVenta = null;
+        $precioCompra = 1;
+        $precioVenta = 1;
 
         $tipoMoneda = ($request->has('currency_invoice')) ? 'USD':'PEN';
         if ( $tipoMoneda == 'USD' ) {
