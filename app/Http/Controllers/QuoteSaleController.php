@@ -73,13 +73,17 @@ class QuoteSaleController extends Controller
     {
         $materials = [];
 
-        if($request->has('q')){
-            $search = $request->get('q');
-            $materials = Material::where('enable_status', 1)->filter(function ($item) use ($search) {
-                // replace stristr with your choice of matching function
-                return false !== stristr($item->full_description, $search);
-            });
+        if ($request->filled('q')) {
+            $search = trim($request->input('q'));
+
+            $materials = Material::query()
+                ->where('enable_status', 1)
+                ->where('full_description', 'LIKE', "%{$search}%")
+                ->get();
+        } else {
+            $materials = Material::where('enable_status', 1)->get();
         }
+
         return json_encode($materials);
     }
 
