@@ -2736,7 +2736,7 @@ Route::middleware('auth')->group(function (){
         Route::post('/anular/order/{order}', 'PuntoVentaController@anularOrder');
 
         Route::post('/sales/update-invoice-data', 'PuntoVentaController@updateInvoiceData');
-        Route::post('/facturador/generar', 'NubeFactController@generarComprobante')->name('facturador.generar');
+        Route::post('/facturador/generar', 'NubefactController@generarComprobante')->name('facturador.generar');
 
 
         //get/data/products
