@@ -75,7 +75,7 @@ class EntryInventoryController extends Controller
         $currency = $dataCurrency->valueText;
 
         //$tipoMoneda = ($request->has('currency_invoice')) ? 'USD':'PEN';
-        if ( $currency == 'USD' ) {
+        if ( $currency == 'usd' ) {
             $tipoCambioSunat = $this->obtenerTipoCambio($fechaFormato);
             $precioCompra = (float) $tipoCambioSunat->precioCompra;
             $precioVenta = (float) $tipoCambioSunat->precioVenta;
@@ -196,7 +196,7 @@ class EntryInventoryController extends Controller
                     if( $detail_entry->material_id == $items[$i]->id_material )
                     {
 
-                        $price = (float)$detail_entry->material->unit_price;
+                        $price = (float)$detail_entry->material->list_price;
 
                         //dd($detail_entry->material->materialType);
 
