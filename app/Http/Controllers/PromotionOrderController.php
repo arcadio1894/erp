@@ -187,16 +187,15 @@ class PromotionOrderController extends Controller
                     ->first();
 
                 if ($promo) {
-                    // 🔎 Buscar el uso de la promo
+                    // 🔎 Buscar TODOS los usos de la promo
                     $query = PromotionUsage::where('promotion_limit_id', $promo->id);
 
                     if ($promo->applies_to === 'worker') {
                         $query->where('user_id', auth()->id());
                     }
 
-                    $usage = $query->first();
-
-                    $used = $usage ? $usage->used_quantity : 0;
+                    // ✅ Sumar las cantidades usadas
+                    $used = (float) $query->sum('used_quantity');
                     $remaining = $promo->limit_quantity - $used;
 
                     if ($remaining > 0) {
@@ -205,7 +204,7 @@ class PromotionOrderController extends Controller
                             'source' => 'promotion_limits',
                             'material_id' => $material->id,
                             'limit_quantity' => $promo->limit_quantity,
-                            'remaining_quantity' => $remaining,   // ✅ ahora sabes lo que queda
+                            'remaining_quantity' => $remaining,   // ✅ ahora basado en sumatoria
                             'price_type' => $promo->price_type,
                             'percentage' => $promo->percentage,
                             'promo_price' => $promo->promo_price,

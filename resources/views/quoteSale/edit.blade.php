@@ -499,12 +499,12 @@
             </div>
         </template>
 
-        <div class="row">
+        {{--<div class="row">
             <div class="col-12">
                 <a href="{{ route('quoteSale.index') }}" class="btn btn-outline-secondary">Regresar</a>
                 <button type="button" id="btn-submit" class="btn btn-outline-success float-right">Guardar nuevos equipos</button>
             </div>
-        </div>
+        </div>--}}
         <!-- /.card-footer -->
     </form>
 
