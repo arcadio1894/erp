@@ -23,6 +23,8 @@ class Sale extends Model
         'tipo_pago_id',
         'state_annulled',
 
+        'quote_id',
+
         'numero',
         'xml_path',
         'cdr_path',

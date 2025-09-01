@@ -2156,6 +2156,8 @@ class QuoteSaleController extends Controller
                 'importe_total' => $quote->total_importe,
                 'vuelto' => 0,
 
+                'quote_id' => $quote->id,
+
                 // Aquí usamos lo que envías
                 'tipo_pago_id' => $request->tipoPago ?? 4,  // si no llega, por defecto efectivo
 
