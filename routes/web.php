@@ -2862,6 +2862,13 @@ Route::middleware('auth')->group(function (){
             ->name('quoteSale.update.equipment')
             ->middleware('permission:edit_quoteSale');
 
+        Route::get('registrar/comprobante/venta/{type}', 'QuoteSaleController@showRegistrarComprobante')
+            ->name('show.register.comprobante')
+            ->middleware('permission:edit_quoteSale');
+        Route::get('/quotes/buscar', 'QuoteSaleController@buscar')->name('quotes.buscar');
+        Route::get('/get/data/quotes/sale/{id}', 'QuoteSaleController@getDataIndividual')->name('quotes.getDataIndividual');
+        Route::post('/store/sale/from/quote', 'QuoteSaleController@storeFromQuote')
+            ->middleware('permission:edit_quoteSale');
 
         // TODO: PromotionLimits
         Route::get('promociones/por/limite', 'PromotionLimitController@index')

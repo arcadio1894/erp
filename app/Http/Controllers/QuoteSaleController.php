@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Audit;
+use App\CashMovement;
+use App\CashRegister;
 use App\Customer;
 use App\DataGeneral;
 use App\Equipment;
@@ -15,6 +17,7 @@ use App\EquipmentWorkforce;
 use App\Http\Requests\StoreQuoteRequest;
 use App\Http\Requests\UpdateQuoteRequest;
 use App\ImagesQuote;
+use App\Mail\StockLowNotificationMail;
 use App\Material;
 use App\Notification;
 use App\NotificationUser;
@@ -25,14 +28,19 @@ use App\PromotionLimit;
 use App\PromotionUsage;
 use App\Quote;
 use App\QuoteUser;
+use App\Sale;
+use App\SaleDetail;
+use App\TipoPago;
 use App\UnitMeasure;
 use App\User;
+use App\Worker;
 use App\Workforce;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade as PDF;
+use Illuminate\Support\Facades\Mail;
 use Webklex\PDFMerger\Facades\PDFMergerFacade as PDFMerger;
 use Intervention\Image\Facades\Image;
 
@@ -2049,4 +2057,367 @@ class QuoteSaleController extends Controller
 
     }
 
+    public function showRegistrarComprobante($typeComprobante)
+    {
+        $user = Auth::user();
+        $permissions = $user->getPermissionsViaRoles()->pluck('name')->toArray();
+        $dataCurrency = DataGeneral::where('name', 'type_current')->first();
+        $currency = $dataCurrency->valueText;
+
+        $dataIgv = PorcentageQuote::where('name', 'igv')->first();
+        $igv = $dataIgv->value;
+
+        $tipoPagos = TipoPago::all();
+
+        return view('quoteSale.registrarComprobante', compact('typeComprobante', 'permissions', 'currency', 'igv', 'tipoPagos'));
+
+    }
+
+    public function buscar(Request $request)
+    {
+        $query = Quote::query();
+
+        if ($request->has('code') && !empty($request->code)) {
+            $query->where('code', 'LIKE', '%' . $request->code . '%');
+        }
+
+        if ($request->has('name') && !empty($request->name)) {
+            $query->where('description_quote', 'LIKE', '%' . $request->name . '%');
+        }
+
+        $quotes = $query->where('state', 'confirmed')
+            ->limit(20)
+            ->get()
+            ->map(function ($quote) {
+                $quote->customer_name = $quote->customer_id
+                    ? $quote->customer->business_name
+                    : "";
+                $quote->date_quote_format = $quote->date_quote
+                    ? $quote->date_quote->format('d/m/Y')
+                    : "";
+                return $quote;
+            });
+
+        return response()->json($quotes);
+    }
+
+    public function getDataIndividual($id)
+    {
+        $quote = Quote::with('customer')
+            ->with('deadline')
+            ->with(['equipments' => function ($query) {
+                $query->with(['consumables.material']);
+            }])->findOrFail($id);
+
+        // Si quieres formatear la fecha:
+        $quote->date_quote_format = $quote->date_quote ? $quote->date_quote->format('d/m/Y') : "";
+        $quote->date_validate_format = $quote->date_validate ? $quote->date_validate->format('d/m/Y') : "";
+        $quote->deadline_format = $quote->deadline ? $quote->deadline->description : "";
+        $quote->customer_format = $quote->customer_id ? $quote->customer->business_name : "";
+        $quote->contact_format = $quote->contact_id ? $quote->contact->name : "";
+
+        return response()->json($quote);
+    }
+
+    public function storeFromQuote(Request $request)
+    {
+        $begin = microtime(true);
+        $worker = Worker::where('user_id', Auth::user()->id)->first();
+        $dataCurrency = DataGeneral::where('name', 'type_current')->first();
+        $currency = $dataCurrency->valueText;
+
+        DB::beginTransaction();
+        try {
+            $quote = Quote::with(['equipments.consumables.material'])->findOrFail($request->quote_id);
+
+            // Validaciones mínimas
+            if (!$quote || $quote->state !== 'confirmed') {
+                throw new \Exception("La cotización no es válida o no está confirmada.");
+            }
+
+            // Construcción de la venta
+            $sale = Sale::create([
+                // Si viene fechaDocumento la usamos, si no usamos la actual
+                'date_sale' => $request->filled('fechaDocumento')
+                    ? Carbon::createFromFormat('Y-m-d', $request->fechaDocumento)
+                    : Carbon::now(),
+
+                'serie' => $this->generateRandomString(), // método tuyo que genera serie
+                'worker_id' => $worker->id,
+                'caja' => $worker->id,
+                'currency' => ($currency == 'usd') ? 'USD':'PEN',
+
+                // Totales (tomados de la cotización)
+                'op_exonerada' => 0,
+                'op_inafecta' => 0,
+                'op_gravada' => $quote->gravada,
+                'igv' => $quote->igv_total,
+                'total_descuentos' => $quote->descuento,
+                'importe_total' => $quote->total_importe,
+                'vuelto' => 0,
+
+                // Aquí usamos lo que envías
+                'tipo_pago_id' => $request->tipoPago ?? 4,  // si no llega, por defecto efectivo
+
+                // Datos de cliente
+                'type_document' => $request->type_document,  // "01" factura, "03" boleta/ticket
+                'numero_documento_cliente' => $request->numero_documento_cliente,
+                'tipo_documento_cliente' => $request->tipo_documento_cliente, // "1" DNI, "6" RUC
+                'nombre_cliente' => $request->nombre_cliente,
+                'direccion_cliente' => $request->direccion_cliente,
+                'email_cliente' => $request->email_cliente,
+
+                // Campos SUNAT se llenarán luego
+                'serie_sunat' => null,
+                'numero' => null,
+                'sunat_ticket' => null,
+                'sunat_status' => null,
+                'sunat_message' => null,
+                'xml_path' => null,
+                'cdr_path' => null,
+                'fecha_emision' => null,
+            ]);
+
+            // Ahora los detalles
+            foreach ($quote->equipments as $equipment) {
+                foreach ($equipment->consumables as $consumable) {
+                    SaleDetail::create([
+                        'sale_id' => $sale->id,
+                        'material_id' => $consumable->material_id,
+                        'price' => $consumable->price,
+                        'quantity' => $consumable->quantity,
+                        'percentage_tax' => 18, // Asumiendo IGV fijo, ajusta si es dinámico
+                        'total' => $consumable->total,
+                        'discount' => $consumable->discount,
+                    ]);
+
+                    // Descontar stock del material directamente
+                    $material = $consumable->material;
+                    if ($material) {
+                        $material->stock_current = max(0, $material->stock_current - $consumable->quantity);
+                        $material->save();
+                    }
+
+                    /*$this->manageNotifications($material);*/
+                }
+            }
+            $paymentType = $request->tipoPago ?? 4;
+            // Mapear tipo de pago a los nombres de las cajas
+            $paymentTypeMap = [
+                1 => 'yape',
+                2 => 'plin',
+                3 => 'bancario',
+                4 => 'efectivo'
+            ];
+
+            // Obtener la caja del tipo de pago
+            $cashRegister = CashRegister::where('type', $paymentTypeMap[$paymentType])
+                ->where('user_id', Auth::user()->id)
+                ->where('status', 1) // Caja abierta
+                ->latest()
+                ->first();
+
+            if (!isset($cashRegister)) {
+                return response()->json(['message' => 'No hay caja abierta para este tipo de pago.'], 422);
+            }
+            if ( $paymentType != 3 ) {
+                // Crear el movimiento de ingreso (venta)
+                CashMovement::create([
+                    'cash_register_id' => $cashRegister->id,
+                    'type' => 'sale', // Tipo de movimiento: venta
+                    'amount' => (float)$request->get('total_importe')+(float)$request->get('total_vuelto'),
+                    'description' => 'Venta registrada con tipo de pago: ' . $paymentTypeMap[$paymentType],
+                    'sale_id' => $sale->id
+                ]);
+
+                // Actualizar el saldo actual y el total de ventas en la caja
+                $cashRegister->current_balance += (float)$request->get('total_importe')+(float)$request->get('total_vuelto');
+                $cashRegister->total_sales += (float)$request->get('total_importe')+(float)$request->get('total_vuelto');
+                $cashRegister->save();
+            } else {
+                // Crear el movimiento de ingreso (venta)
+                CashMovement::create([
+                    'cash_register_id' => $cashRegister->id,
+                    'type' => 'sale', // Tipo de movimiento: venta
+                    'amount' => (float)$request->get('total_importe')+(float)$request->get('total_vuelto'),
+                    'description' => 'Venta registrada con tipo de pago: ' . $paymentTypeMap[$paymentType],
+                    'regularize' => 0,
+                    'sale_id' => $sale->id
+                ]);
+            }
+
+
+            // Registrar el vuelto como egreso si el tipo de pago es efectivo y hay vuelto
+
+            $typeVuelto = $paymentTypeMap[$paymentType];
+            $vuelto = 0;
+
+            if ($paymentType == 4) {
+                // Mapear el type_vuelto (la caja desde donde se dará el vuelto)
+                $typeVueltoMap = [
+                    'efectivo' => 'efectivo',
+                    'yape' => 'yape',
+                    'plin' => 'plin',
+                    'bancario' => 'bancario'
+                ];
+
+                // Obtener la caja para el vuelto
+                $vueltoCashRegister = CashRegister::where('type', $typeVueltoMap[$typeVuelto])
+                    ->where('user_id', Auth::user()->id)
+                    ->where('status', 1) // Caja abierta
+                    ->latest()
+                    ->first();
+
+                if (!isset($vueltoCashRegister)) {
+                    return response()->json(['message' => 'No hay caja abierta para dar el vuelto.'], 422);
+                }
+
+                // Crear el movimiento de egreso (vuelto)
+                CashMovement::create([
+                    'cash_register_id' => $vueltoCashRegister->id,
+                    'type' => 'expense', // Tipo de movimiento: egreso
+                    'amount' => $vuelto,
+                    'description' => 'Vuelto entregado de la venta',
+                    'sale_id' => $sale->id
+                ]);
+
+                // Actualizar el saldo de la caja del vuelto
+                $vueltoCashRegister->current_balance -= $vuelto;
+                $vueltoCashRegister->total_expenses += $vuelto;
+                $vueltoCashRegister->save();
+            }
+
+            // Crear notificación
+            $notification = Notification::create([
+                'content' => 'Venta creada desde cotización por '.Auth::user()->name,
+                'reason_for_creation' => 'create_sale_from_quote',
+                'user_id' => Auth::user()->id,
+                'url_go' => route('puntoVenta.index')
+            ]);
+
+            $users = User::role(['admin', 'principal', 'logistic'])->get();
+            foreach ($users as $user) {
+                if ($user->id != Auth::user()->id) {
+                    foreach ($user->roles as $role) {
+                        NotificationUser::create([
+                            'notification_id' => $notification->id,
+                            'role_id' => $role->id,
+                            'user_id' => $user->id,
+                            'read' => false
+                        ]);
+                    }
+                }
+            }
+
+            $end = microtime(true) - $begin;
+
+            Audit::create([
+                'user_id' => Auth::user()->id,
+                'action' => 'Guardar venta desde cotización',
+                'time' => $end
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Venta creada con éxito desde cotización',
+                'sale_id' => $sale->id,
+                'url_print' => route('puntoVenta.print', $sale->id)
+            ], 200);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+    }
+
+    public function generateRandomString($length = 25) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+        return $randomString;
+    }
+
+    public function manageNotifications(Material $material)
+    {
+        $dataGeneralTypeNotificationPopUp = DataGeneral::where('name', 'send_notification_store_pop_up')->first();
+        $dataGeneralTypeNotificationCampana = DataGeneral::where('name', 'send_notification_store_campana')->first();
+        $dataGeneralTypeNotificationTelegram = DataGeneral::where('name', 'send_notification_store_email')->first();
+        $dataGeneralTypeNotificationEmail = DataGeneral::where('name', 'send_notification_store_telegram')->first();
+
+        // Texto base
+        $content = 'El producto '.$material->full_name.' está por agotarse.';
+
+        $nameMaterial = $material->full_name;
+
+        // Obtener usuarios con roles específicos (excepto el actual)
+        $users = User::role(['admin', 'principal', 'logistic'])->where('id', '!=', Auth::id())->get();
+
+        if ($dataGeneralTypeNotificationCampana && $dataGeneralTypeNotificationCampana->valueText === 's')
+        {
+            $notification = Notification::create([
+                'content' => $content,
+                'reason_for_creation' => 'check_stock',
+                'user_id' => Auth::id(),
+                'url_go' => route('material.index.store')
+            ]);
+
+            foreach ($users as $user) {
+                foreach ($user->roles as $role) {
+                    NotificationUser::create([
+                        'notification_id' => $notification->id,
+                        'role_id' => $role->id,
+                        'user_id' => $user->id,
+                        'read' => false,
+                        'date_read' => null,
+                        'date_delete' => null
+                    ]);
+                }
+            }
+        }
+
+        if ($dataGeneralTypeNotificationPopUp && $dataGeneralTypeNotificationPopUp->valueText === 's')
+        {
+            $notification = Notification::create([
+                'content' => $content,
+                'reason_for_creation' => 'check_stock_pop_up',
+                'user_id' => Auth::id(),
+                'url_go' => route('material.index.store')
+            ]);
+
+            foreach ($users as $user) {
+                foreach ($user->roles as $role) {
+                    NotificationUser::create([
+                        'notification_id' => $notification->id,
+                        'role_id' => $role->id,
+                        'user_id' => $user->id,
+                        'read' => false,
+                        'date_read' => null,
+                        'date_delete' => null
+                    ]);
+                }
+            }
+        }
+
+        if ($dataGeneralTypeNotificationEmail && $dataGeneralTypeNotificationEmail->valueText === 's')
+        {
+            foreach ($users as $user) {
+                Mail::to($user->email)->queue(new StockLowNotificationMail($nameMaterial));
+            }
+        }
+
+        // Si deseas dejar el código preparado para Telegram:
+        if ($dataGeneralTypeNotificationTelegram && $dataGeneralTypeNotificationTelegram->valueText === 's')
+        {
+            $telegram = new TelegramController();
+
+            // Enviar al canal de procesos
+            $telegram->sendNotification('📦 El producto XYZ está por agotarse.', 'process');
+        }
+
+
+    }
 }

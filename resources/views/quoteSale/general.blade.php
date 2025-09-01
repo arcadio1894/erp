@@ -245,6 +245,22 @@
     <div class="tab-content">
         <!--begin::Tab pane-->
         <hr>
+        <div class="row">
+            <div class="container-fluid">
+                <div class="row text-center">
+                    <div class="col">
+                        <a href="{{ route('show.register.comprobante', 'Boleta') }}" type="button" class="btn btn-primary btn-block">Boleta</a>
+                    </div>
+                    <div class="col">
+                        <a href="{{ route('show.register.comprobante', 'Factura') }}" type="button" class="btn btn-success btn-block">Factura</a>
+                    </div>
+                    <div class="col">
+                        <a href="{{ route('show.register.comprobante', 'Ticket') }}" type="button" class="btn btn-info btn-block">Ticket de venta</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
         <div class="table-responsive">
             <table class="table table-bordered letraTabla table-hover table-sm">
                 <thead>
