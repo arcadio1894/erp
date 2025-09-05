@@ -62,7 +62,10 @@ class CustomerController extends Controller
             return response()->json(['message' => $e->getMessage()], 422);
         }
 
-        return response()->json(['message' => 'Cliente guardado con éxito.'], 200);
+        return response()->json([
+            'message' => 'Cliente guardado con éxito.',
+            'customer' => $customer
+        ], 200);
     }
 
     public function update(UpdateCustomerRequest $request)

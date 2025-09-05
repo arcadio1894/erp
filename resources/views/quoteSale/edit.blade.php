@@ -35,6 +35,14 @@
         .select2-search__field{
             width: 100% !important;
         }
+
+        .input-group .select2-container {
+            flex: 1 1 auto;       /* que ocupe el espacio disponible */
+            width: 1% !important; /* que no se expanda a 100% */
+        }
+        .input-group .select2-selection {
+            height: 100% !important; /* que se ajuste a la altura del input-group */
+        }
     </style>
 @endsection
 
@@ -79,12 +87,16 @@
         @csrf
         <div class="row">
             <div class="col-md-12">
-                <div class="card card-success">
+                <div class="card card-success datos_generales">
                     <div class="card-header">
                         <h3 class="card-title">Datos generales</h3>
                         <input type="hidden" id="customer_quote_id" value="{{ $quote->customer_id }}">
                         <input type="hidden" id="contact_quote_id" value="{{ $quote->contact_id }}">
                         <div class="card-tools">
+                            <a class="btn btn-primary btn-sm" data-quote="{{ $quote->id }}" data-toggle="tooltip" title="Guardar cambios" id="btn-guardar_datos_generales">
+                                <i class="fas fa-check-square"></i> Guardar cambios generales
+                            </a>
+
                             <button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
                                 <i class="fas fa-minus"></i></button>
                         </div>
@@ -142,13 +154,22 @@
                             </div>
                             {{--@hasanyrole('logistic|admin')--}}
                             <div class="col-md-4">
-                                <label for="customer_id">Cliente </label>
-                                <select id="customer_id" name="customer_id" class="form-control form-control-sm select2" style="width: 100%;">
-                                    <option></option>
-                                    @foreach( $customers as $customer )
-                                        <option value="{{ $customer->id }}" {{ ($customer->id == $quote->customer_id) ? 'selected':'' }}>{{ $customer->business_name }}</option>
-                                    @endforeach
-                                </select>
+                                <label for="customer_id">Cliente</label>
+                                <div class="input-group input-group-sm">
+                                    <select id="customer_id" name="customer_id" class="form-control select2bs4">
+                                        <option></option>
+                                        @foreach($customers as $customer)
+                                            <option value="{{ $customer->id }}" {{ ($customer->id == $quote->customer_id) ? 'selected':'' }}>
+                                                {{ $customer->business_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-primary" id="btn-add-customer">
+                                            <i class="fas fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                             <div class="col-md-4">
                                 <label for="contact_id">Contacto </label>
@@ -188,7 +209,7 @@
                             <a data-confirm="{{ $equipment->id }}" class="btn btn-primary btn-sm" style="display:none" data-toggle="tooltip" title="Confirmar" >
                                 <i class="fas fa-check-square"></i> Confirmar productos
                             </a>
-                            <a class="btn btn-warning btn-sm" data-quote="{{ $quote->id }}" data-idEquipment="{{ $equipment->id }}" data-toggle="tooltip" title="Guardar cambios">
+                            <a class="btn btn-primary btn-sm" data-quote="{{ $quote->id }}" data-idEquipment="{{ $equipment->id }}" data-toggle="tooltip" title="Guardar cambios">
                                 <i class="fas fa-check-square"></i> Guardar cambios
                             </a>
                             <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-plus"></i>
@@ -594,6 +615,61 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Cliente -->
+    <div class="modal fade" id="modalCustomer" tabindex="-1" role="dialog" aria-labelledby="modalCustomerLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalCustomerLabel">Nuevo Cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <form id="formCreateCustomer" class="form-horizontal" data-url="{{ route('customer.store') }}" enctype="multipart/form-data">
+                        @csrf
+                        <div class="form-group row">
+                            <div class="col-md-4">
+                                <label class="col-12 col-form-label">RUC <span class="right badge badge-danger">(*)</span></label>
+                                <input type="text" class="form-control" name="ruc" placeholder="Ejm: 1234678901">
+                            </div>
+
+                            <div class="col-md-2">
+                                <label class="col-12 col-form-label">Extranjero <span class="right badge badge-danger">(*)</span></label>
+                                <input id="btn-grouped" type="checkbox" name="special" data-bootstrap-switch data-off-color="danger" data-on-text="SI" data-off-text="NO" data-on-color="success">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="col-12 col-form-label">Razon Social <span class="right badge badge-danger">(*)</span></label>
+                                <input type="text" class="form-control" onkeyup="mayus(this);" name="business_name" placeholder="Ejm: Edesce EIRL">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                <label class="col-12 col-form-label">Direccion</label>
+                                <input type="text" class="form-control" onkeyup="mayus(this);" name="address" placeholder="Ejm: Jr Union">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="col-12 col-form-label">Ubicacion</label>
+                                <input type="text" class="form-control" onkeyup="mayus(this);" name="location" placeholder="Ejm: Moche">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" id="btn-submit-customer" class="btn btn-outline-success">Guardar</button>
+                    <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('plugins')
@@ -643,6 +719,8 @@
 
             $('#customer_id').select2({
                 placeholder: "Selecione cliente",
+                theme: 'bootstrap4',
+                width: 'resolve'
             });
             $('#contact_id').select2({
                 placeholder: "Selecione contacto",

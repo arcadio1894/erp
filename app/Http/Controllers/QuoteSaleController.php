@@ -477,6 +477,37 @@ class QuoteSaleController extends Controller
 
     }
 
+    public function updateDatosGeneral(Request $request)
+    {
+        $quote = Quote::findOrFail($request->get('quote_id'));
+
+        try {
+            $quote->update([
+                'description_quote'   => $request->get('descriptionQuote'),
+                'code'                => $request->get('codeQuote'),
+                'date_quote'          => $request->get('date_quote'),
+                'date_validate'       => $request->get('date_validate'),
+                'way_to_pay'          => $request->get('way_to_pay') ?? '',
+                'delivery_time'       => $request->get('delivery_time') ?? '',
+                'customer_id'         => $request->get('customer_id') ?? null,
+                'contact_id'          => $request->get('contact_id') ?? null,
+                'payment_deadline_id' => $request->get('payment_deadline') ?? null,
+                'observations'        => $request->get('observations') ?? '',
+            ]);
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'Datos generales actualizados correctamente.'
+            ], 200);
+
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
     public function getDataQuotesIndex(Request $request, $pageNumber = 1)
     {
         $perPage = 10;
@@ -2086,6 +2117,7 @@ class QuoteSaleController extends Controller
         }
 
         $quotes = $query->where('state', 'confirmed')
+            ->whereDoesntHave('sales') // 👈 solo las que no tienen ventas
             ->limit(20)
             ->get()
             ->map(function ($quote) {

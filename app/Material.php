@@ -9,7 +9,7 @@ class Material extends Model
 {
     use SoftDeletes;
 
-    protected $appends = ['full_description', 'stock_store', 'price_final'];
+    protected $appends = ['full_description', 'stock_store', 'price_final', 'name_unit'];
 
     protected $fillable = [
         'code',
@@ -79,6 +79,13 @@ class Material extends Model
             $quantity = count($items);
         }
         return $quantity;
+    }
+
+    public function getNameUnitAttribute()
+    {
+        $unit = ($this->unit_measure_id == null) ? '':$this->unitMeasure->name;
+
+        return $unit;
     }
 
     public function getPriceFinalAttribute()

@@ -49,6 +49,11 @@ class Sale extends Model
         return $this->belongsTo('App\Worker');
     }
 
+    public function quote()
+    {
+        return $this->belongsTo('App\Quote');
+    }
+
     public function tipoPago()
     {
         return $this->belongsTo('App\TipoPago');

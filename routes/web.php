@@ -2870,6 +2870,9 @@ Route::middleware('auth')->group(function (){
         Route::post('/store/sale/from/quote', 'QuoteSaleController@storeFromQuote')
             ->middleware('permission:edit_quoteSale');
 
+        Route::post('/quotes/update-general', 'QuoteSaleController@updateDatosGeneral')
+            ->name('quotes.sales.update.general');
+
         // TODO: PromotionLimits
         Route::get('promociones/por/limite', 'PromotionLimitController@index')
             ->name('promotionLimit.index')

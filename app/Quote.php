@@ -300,4 +300,8 @@ class Quote extends Model
         return $this->hasMany('App\Output', 'execution_order', 'order_execution');
     }
 
+    public function sales()
+    {
+        return $this->hasMany('App\Sale');
+    }
 }

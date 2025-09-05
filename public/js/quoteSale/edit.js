@@ -119,6 +119,95 @@ $(document).ready(function () {
         });
 
     });
+
+    // Abrir modal al dar click en +
+    $("#btn-add-customer").on("click", function() {
+        $("#formCreateCustomer")[0].reset(); // limpiar formulario
+        $("#modalCustomer").modal("show");
+    });
+
+    // Enviar formulario por AJAX
+    $("#btn-submit-customer").on("click", function(e) {
+        e.preventDefault();
+
+        let form = $("#formCreateCustomer");
+        let url = form.data("url");
+        let formData = form.serialize();
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: formData,
+            success: function(response) {
+                toastr.success(response.message);
+
+                // Cerrar modal
+                $("#modalCustomer").modal("hide");
+
+                // Obtener el cliente nuevo
+                let customer = response.customer;
+
+                // Crear nueva opción
+                let newOption = new Option(customer.business_name, customer.id, true, true);
+
+                // Agregar al select2 y seleccionarlo
+                $('#customer_id').append(newOption).trigger('change');
+
+                // Limpiar el formulario
+                $("#formCreateCustomer")[0].reset();
+
+            },
+            error: function(xhr) {
+                let errors = xhr.responseJSON?.message || "Error al guardar";
+                toastr.error(errors);
+            }
+        });
+    });
+
+    // detectar cambios en cualquier input, select o textarea dentro del card
+    $(".card.card-success.datos_generales .card-body").on("change input", "input, select, textarea", function () {
+        let card = $(this).closest(".card");
+
+        if (card.hasClass("card-success")) {
+            card.removeClass("card-success").addClass("card-dark");
+        }
+    });
+
+    $(document).on("click", "#btn-guardar_datos_generales", function (e) {
+        e.preventDefault();
+
+        let data = {
+            _token: $('meta[name="csrf-token"]').attr('content'),
+            quote_id: $("#quote_id").val(),
+            descriptionQuote: $("#descriptionQuote").val(),
+            codeQuote: $("#codeQuote").val(),
+            date_quote: $("#date_quote").val(),
+            date_validate: $("#date_validate").val(),
+            way_to_pay: $("#paymentQuote").val(), // si lo usas
+            delivery_time: $("#timeQuote").val(),
+            customer_id: $("#customer_id").val(),
+            contact_id: $("#contact_id").val(),
+            payment_deadline: $("#paymentQuote").val(),
+            observations: $("#observations").val(),
+        };
+
+        $.ajax({
+            url: "/dashboard/quotes/update-general",
+            type: "POST",
+            data: data,
+            success: function (response) {
+                toastr.success(response.message);
+
+                // Cambiar card de vuelta a verde
+                $(".card.datos_generales")
+                    .removeClass("card-dark")
+                    .addClass("card-success");
+            },
+            error: function (xhr) {
+                toastr.error(xhr.responseJSON?.message || "Error al guardar cambios.");
+            }
+        });
+    });
 });
 
 var $formCreate;
@@ -359,7 +448,7 @@ function fillEquipments() {
 
             console.log(consumablesArray);
 
-            var totalEquipment = 0;
+            /*var totalEquipment = 0;
             var gravadaEquipment = 0;
             var totalEquipmentU = 0;
             var totalEquipmentL = 0;
@@ -389,13 +478,36 @@ function fillEquipments() {
             $('#descuento').html(parseFloat($descuento).toFixed(2));
             $('#gravada').html(parseFloat(gravadaEquipment-$descuento).toFixed(2));
             $('#igv_total').html(parseFloat(igv).toFixed(2));
-            $('#total_importe').html(parseFloat(gravadaEquipment-$descuento+igv).toFixed(2));
+            $('#total_importe').html(parseFloat(gravadaEquipment-$descuento+igv).toFixed(2));*/
+            var total = 0;
+
+            for (let i = 0; i < consumablesImporte.length; i++) {
+                let importe = round2(parseFloat(consumablesImporte[i]) || 0);
+                total += importe;
+            }
+
+            // Restar descuentos
+            total = round2(total - $descuento);
+
+            // ===============================================
+            // 2. Calcular GRAVADA e IGV a partir del TOTAL
+            // ===============================================
+            var gravada = round2(total / (1 + ($igv / 100)));
+            var igv = round2(total - gravada);
+
+            // ===============================================
+            // 3. Mostrar en pantalla
+            // ===============================================
+            $('#descuento').html(round2($descuento).toFixed(2));
+            $('#gravada').html(gravada.toFixed(2));
+            $('#igv_total').html(igv.toFixed(2));
+            $('#total_importe').html(total.toFixed(2));
 
             var quote_id = $('#quote_id').val();
 
             button.next().attr('data-saveEquipment', $equipments.length);
             button.next().next().attr('data-deleteEquipment', $equipments.length);
-            $equipments.push({'id':$equipments.length, 'quote': quote_id, 'equipment': idEquipment, 'quantity':quantity, 'utility':utility, 'rent':rent, 'letter':letter, 'total':totalEquipment, 'description':"", 'detail':detail, 'materials': [], 'consumables':consumablesArray, 'electrics':[], 'workforces':[], 'tornos':[], 'dias': []});
+            $equipments.push({'id':$equipments.length, 'quote': quote_id, 'equipment': idEquipment, 'quantity':quantity, 'utility':utility, 'rent':rent, 'letter':letter, 'total':total, 'description':"", 'detail':detail, 'materials': [], 'consumables':consumablesArray, 'electrics':[], 'workforces':[], 'tornos':[], 'dias': []});
 
             $items = [];
         }
@@ -403,6 +515,11 @@ function fillEquipments() {
     });
     //renderTemplateSummary($equipments);
     $("#element_loader").LoadingOverlay("hide", true);
+}
+
+// Función para redondear a 2 decimales
+function round2(num) {
+    return Math.round((num + Number.EPSILON) * 100) / 100;
 }
 
 function deleteEquipment() {
@@ -725,7 +842,7 @@ function saveEquipment() {
 
                         console.log(consumablesArray);
 
-                        var totalEquipment = 0;
+                        /*var totalEquipment = 0;
                         var gravadaEquipment = 0;
                         var totalEquipmentU = 0;
                         var totalEquipmentL = 0;
@@ -755,11 +872,35 @@ function saveEquipment() {
                         $('#descuento').html(parseFloat($descuento).toFixed(2));
                         $('#gravada').html(parseFloat(gravadaEquipment-$descuento).toFixed(2));
                         $('#igv_total').html(parseFloat(igv).toFixed(2));
-                        $('#total_importe').html(parseFloat(gravadaEquipment-$descuento+igv).toFixed(2));
+                        $('#total_importe').html(parseFloat(gravadaEquipment-$descuento+igv).toFixed(2));*/
+
+                        var total = 0;
+
+                        for (let i = 0; i < consumablesImporte.length; i++) {
+                            let importe = round2(parseFloat(consumablesImporte[i]) || 0);
+                            total += importe;
+                        }
+
+                        // Restar descuentos
+                        total = round2(total - $descuento);
+
+                        // ===============================================
+                        // 2. Calcular GRAVADA e IGV a partir del TOTAL
+                        // ===============================================
+                        var gravada = round2(total / (1 + ($igv / 100)));
+                        var igv = round2(total - gravada);
+
+                        // ===============================================
+                        // 3. Mostrar en pantalla
+                        // ===============================================
+                        $('#descuento').html(round2($descuento).toFixed(2));
+                        $('#gravada').html(gravada.toFixed(2));
+                        $('#igv_total').html(igv.toFixed(2));
+                        $('#total_importe').html(total.toFixed(2));
 
                         button.attr('data-saveEquipment', $equipments.length);
                         button.next().attr('data-deleteEquipment', $equipments.length);
-                        $equipments.push({'id':equipmentId, 'quote':'', 'equipment':'', 'quantity':quantity, 'utility':utility, 'rent':rent, 'letter':letter, 'total':parseFloat(gravadaEquipment-$descuento+igv).toFixed(2), 'description':"", 'detail':detail, 'materials': [], 'consumables':consumablesArray, 'electrics':[], 'workforces':[], 'tornos':[], 'dias':[]});
+                        $equipments.push({'id':equipmentId, 'quote':'', 'equipment':'', 'quantity':quantity, 'utility':utility, 'rent':rent, 'letter':letter, 'total':total, 'description':"", 'detail':detail, 'materials': [], 'consumables':consumablesArray, 'electrics':[], 'workforces':[], 'tornos':[], 'dias':[]});
                         //console.log(modifiedEquipment);
 
                         var card = button.parent().parent().parent();
@@ -880,7 +1021,7 @@ function saveEquipment() {
                         console.log("consumablesArray");
                         console.log(consumablesArray);
 
-                        var totalEquipment = 0;
+                        /*var totalEquipment = 0;
                         var gravadaEquipment = 0;
                         var totalEquipmentU = 0;
                         var totalEquipmentL = 0;
@@ -920,11 +1061,35 @@ function saveEquipment() {
                         $('#descuento').html(parseFloat($descuento).toFixed(2));
                         $('#gravada').html(parseFloat(gravadaEquipment-$descuento).toFixed(2));
                         $('#igv_total').html(parseFloat(igv).toFixed(2));
-                        $('#total_importe').html(parseFloat(gravadaEquipment-$descuento+igv).toFixed(2));
+                        $('#total_importe').html(parseFloat(gravadaEquipment-$descuento+igv).toFixed(2));*/
+
+                        var total = 0;
+
+                        for (let i = 0; i < consumablesImporte.length; i++) {
+                            let importe = round2(parseFloat(consumablesImporte[i]) || 0);
+                            total += importe;
+                        }
+
+                        // Restar descuentos
+                        total = round2(total - $descuento);
+
+                        // ===============================================
+                        // 2. Calcular GRAVADA e IGV a partir del TOTAL
+                        // ===============================================
+                        var gravada = round2(total / (1 + ($igv / 100)));
+                        var igv = round2(total - gravada);
+
+                        // ===============================================
+                        // 3. Mostrar en pantalla
+                        // ===============================================
+                        $('#descuento').html(round2($descuento).toFixed(2));
+                        $('#gravada').html(gravada.toFixed(2));
+                        $('#igv_total').html(igv.toFixed(2));
+                        $('#total_importe').html(total.toFixed(2));
 
                         button2.attr('data-saveEquipment', equipmentDeleted.id);
                         button2.next().attr('data-deleteEquipment', equipmentDeleted.id);
-                        modifiedEquipment.push({'id':equipmentDeleted.id, 'quote':idQuote, 'quantity':quantity, 'utility':utility, 'rent':rent, 'letter':letter, 'total':parseFloat(gravadaEquipment-$descuento+igv).toFixed(2), 'description':"", 'detail':detail, 'materials': [], 'consumables':consumablesArray, 'electrics':[], 'workforces':[], 'tornos':[], 'dias':[]});
+                        modifiedEquipment.push({'id':equipmentDeleted.id, 'quote':idQuote, 'quantity':quantity, 'utility':utility, 'rent':rent, 'letter':letter, 'total':total, 'description':"", 'detail':detail, 'materials': [], 'consumables':consumablesArray, 'electrics':[], 'workforces':[], 'tornos':[], 'dias':[]});
                         //console.log(modifiedEquipment);
                         $items = [];
                         var equipos = JSON.stringify(modifiedEquipment);
@@ -933,7 +1098,7 @@ function saveEquipment() {
                         console.log(modifiedEquipment);
 
                         let descuento = $("#descuento").html();
-                        let gravada = $("#gravada").html();
+                        let gravada_2 = $("#gravada").html();
                         let igv_total = $("#igv_total").html();
                         let total_importe = $("#total_importe").html();
 
@@ -946,7 +1111,7 @@ function saveEquipment() {
                             data: JSON.stringify({
                                 equipment: modifiedEquipment,
                                 descuento: descuento,
-                                gravada: gravada,
+                                gravada: gravada_2,
                                 igv_total: igv_total,
                                 total_importe: total_importe
                             }),

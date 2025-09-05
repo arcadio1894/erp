@@ -81,7 +81,8 @@ $(document).ready(function () {
                 $('#timeQuote').val(quote.delivery_time);
                 $('#customer_id').val(quote.customer_format);
                 $('#contact_id').val(quote.contact_format);
-                $('#observations').val(quote.observations);
+                //$('#observations').val(quote.observations);
+                $('#observations').summernote('code', quote.observations);
 
                 $('#descuento').html(parseFloat(quote.descuento).toFixed(2));
                 $('#gravada').html(parseFloat(quote.gravada).toFixed(2));
@@ -94,6 +95,9 @@ $(document).ready(function () {
 
                 // 🔹 Iteramos los consumables
                 quote.equipments.forEach(function(equipment) {
+
+                    console.log(equipment.detail);
+                    $('[data-detailequipment]').summernote('code', equipment.detail);
                     if (equipment.consumables && equipment.consumables.length > 0) {
                         equipment.consumables.forEach(function(consumable) {
 
@@ -107,7 +111,7 @@ $(document).ready(function () {
                             $(clone).find('[data-descuento]').val(consumable.discount);
                             $(clone).find('[data-type_promotion]').val(consumable.type_promo);
 
-                            $(clone).find('[data-consumableUnit]').val(consumable.material.unit_measure_id ?? '');
+                            $(clone).find('[data-consumableUnit]').val(consumable.material.name_unit);
                             $(clone).find('[data-consumableQuantity]').val(consumable.quantity);
                             $(clone).find('[data-consumableValor]').val(consumable.valor_unitario);
                             $(clone).find('[data-consumablePrice]').val(consumable.price);
@@ -235,7 +239,15 @@ $(document).ready(function () {
                                     title: 'Éxito',
                                     content: typeComprobante + ' generada correctamente',
                                     type: 'green',
-                                    buttons: { ok: { text: 'OK', btnClass: 'btn-success' } }
+                                    buttons: {
+                                        ok: {
+                                            text: 'OK',
+                                            btnClass: 'btn-success',
+                                            action: function () {
+                                                location.reload(); // Recarga la página
+                                            }
+                                        }
+                                    }
                                 });
                             },
                             error: function (err) {
