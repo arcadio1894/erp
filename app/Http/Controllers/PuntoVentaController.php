@@ -78,11 +78,13 @@ class PuntoVentaController extends Controller
 
         foreach ( $products as $product )
         {
+            $stock = StoreMaterial::where('material_id', $product->id)->sum('stock_current');
             array_push($arrayProducts, [
                 "id" => $product->id,
                 "full_name" => $product->full_name,
                 "category" => ($product->category_id == null) ? '': $product->category->description,
                 "price" => $product->list_price,
+                "stock" => $stock,
                 "image" => $product->image,
                 "unit" => $product->unitMeasure->description,
                 "tax" => ($product->type_tax_id == null) ? 18 : $product->typeTax->tax,

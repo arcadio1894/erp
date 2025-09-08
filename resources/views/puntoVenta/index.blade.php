@@ -701,6 +701,7 @@
 
                 <input type="hidden" id="quantity_productId">
                 <input type="hidden" id="quantity_productPrice">
+                <input type="hidden" id="quantity_productStock">
                 <input type="hidden" id="quantity_productName">
                 <input type="hidden" id="quantity_productUnit">
                 <input type="hidden" id="quantity_productTax">
@@ -728,7 +729,7 @@
             <div class="flex-grow-1 ms-3">
                 <a href="#!" class="float-right" data-delete><i class="fas fa-times"></i></a>
                 <h5 class="text-primary" data-name>Samsung Galaxy M11 64GB</h5>
-                <h6 style="color: #9e9e9e;" data-price></h6>
+                <h6 style="color: #9e9e9e;" data-price data-stock></h6>
                 <div class="d-flex align-items-center justify-content-between w-100">
 
                     <div class="def-number-input number-input safari_only">
@@ -756,8 +757,8 @@
                 <div class='cvp'>
                     <h5 class="card-title font-weight-bold product-title" data-name>Yail wrist watch</h5>
                     <p class="card-text product-price" data-price>$299</p>
-                    <a href="#" class="btn details px-auto" data-add_cart_special data-product_id data-product_price data-product_name data-product_unit data-product_tax data-product_type>ADD SPECIAL</a>
-                    <a href="#" class="btn cart px-auto" data-add_cart data-product_id data-product_price data-product_name data-product_unit data-product_tax>ADD TO CART</a>
+                    <a href="#" class="btn details px-auto" data-add_cart_special data-product_id data-product_price data-product_stock data-product_name data-product_unit data-product_tax data-product_type>ADD SPECIAL</a>
+                    <a href="#" class="btn cart px-auto" data-add_cart data-product_id data-product_price data-product_stock data-product_name data-product_unit data-product_tax>ADD TO CART</a>
                 </div>
             </div>
         </div>

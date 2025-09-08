@@ -149,6 +149,7 @@ function addProductCartSpecial() {
 
     let productId = $(this).data('product_id');
     let productPrice = $(this).data('product_price');
+    let productStock = $(this).data('product_stock');
     let productName = $(this).data('product_name');
     let productUnit = $(this).data('product_unit');
     let productTax = $(this).data('product_tax');
@@ -200,15 +201,16 @@ function addProductCartSpecial() {
                 "hideMethod": "fadeOut"
             });
     } else {
-        showModalQuantity(productId, productPrice, productName, productUnit, productTax, productType);
+        showModalQuantity(productId, productPrice, productName, productUnit, productTax, productType, productStock);
     }
 
 }
 
-function showModalQuantity(productId, productPrice, productName, productUnit, productTax, productType) {
+function showModalQuantity(productId, productPrice, productName, productUnit, productTax, productType, productStock) {
 
     $("#quantity_productId").val(productId);
     $("#quantity_productPrice").val(productPrice);
+    $("#quantity_productStock").val(productStock);
     $("#quantity_productName").val(productName);
     $("#quantity_productUnit").val(productUnit);
     $("#quantity_productTax").val(productTax);
@@ -222,6 +224,7 @@ function addProduct() {
 
     let productId =  $("#quantity_productId").val();
     let productPrice = $("#quantity_productPrice").val();
+    let productStock = $("#quantity_productStock").val();
     let productName = $("#quantity_productName").val();
     let productUnit = $("#quantity_productUnit").val();
     let productTax = $("#quantity_productTax").val();
@@ -229,6 +232,32 @@ function addProduct() {
     let productType = $("#quantity_productType").val();
 
     let quantity = $("#quantity_total").val();
+
+    console.log("productStock");
+    console.log(productStock);
+    console.log("quantity");
+    console.log(quantity);
+
+    if (parseFloat(productStock) < parseFloat(quantity)) {
+        toastr.error("La cantidad sobrepasa el stock del material.", 'Error', {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "2000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        });
+        return;
+    }
 
     if (productType == 2) {
         // Permitir decimales en quantity, no hacemos nada
@@ -1014,6 +1043,7 @@ function renderDataCart(productId, productPrice, productName, productUnit) {
     var quantity = 1;
     var clone = activateTemplate('#item-cart');
     clone.querySelector("[data-delete]").setAttribute("data-delete", productId);
+    clone.querySelector("[data-stock]").setAttribute("data-stock", productId);
     clone.querySelector("[data-name]").innerHTML = productName;
     clone.querySelector("[data-price]").innerHTML = "<strong>" + quantity + "</strong> "+productUnit+" a " + productPrice + " / Unit";
     clone.querySelector("[data-product_id_minus]").setAttribute("data-product_id_minus", productId);
@@ -1371,12 +1401,14 @@ function renderDataCard(data) {
 
     clone.querySelector("[data-add_cart]").setAttribute("data-product_id", data.id);
     clone.querySelector("[data-add_cart]").setAttribute("data-product_price", data.price);
+    clone.querySelector("[data-add_cart]").setAttribute("data-product_stock", data.stock);
     clone.querySelector("[data-add_cart]").setAttribute("data-product_name", data.full_name);
     clone.querySelector("[data-add_cart]").setAttribute("data-product_unit", data.unit);
     clone.querySelector("[data-add_cart]").setAttribute("data-product_tax", data.tax);
 
     clone.querySelector("[data-add_cart_special]").setAttribute("data-product_id", data.id);
     clone.querySelector("[data-add_cart_special]").setAttribute("data-product_price", data.price);
+    clone.querySelector("[data-add_cart_special]").setAttribute("data-product_stock", data.stock);
     clone.querySelector("[data-add_cart_special]").setAttribute("data-product_name", data.full_name);
     clone.querySelector("[data-add_cart_special]").setAttribute("data-product_unit", data.unit);
     clone.querySelector("[data-add_cart_special]").setAttribute("data-product_tax", data.tax);

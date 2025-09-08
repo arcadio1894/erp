@@ -407,7 +407,7 @@ class EntryController extends Controller
                             if ( $entry->currency_invoice === 'PEN' )
                             {
                                 $precio1 = round((float)$items[$i]->price,2) / (float) $entry->currency_compra;
-                                $price1 = ($detail_entry->material->price > $precio1) ? $detail_entry->material->price : $precio1;
+                                $price1 = ($detail_entry->material->unit_price > $precio1) ? $detail_entry->material->unit_price : $precio1;
                                 $materialS = Material::find($detail_entry->material_id);
                                 if ( $materialS->unit_price < $price1 )
                                 {
@@ -508,7 +508,7 @@ class EntryController extends Controller
                             if ( $entry->currency_invoice === 'USD' )
                             {
                                 $precio1 = round((float)$items[$i]->price,2) * (float) $entry->currency_venta;
-                                $price1 = ($detail_entry->material->price > $precio1) ? $detail_entry->material->price : $precio1;
+                                $price1 = ($detail_entry->material->unit_price > $precio1) ? $detail_entry->material->unit_price : $precio1;
                                 $materialS = Material::find($detail_entry->material_id);
                                 if ( $materialS->unit_price < $price1 )
                                 {
@@ -2010,7 +2010,7 @@ class EntryController extends Controller
                 if ( $entry->currency_invoice === 'PEN' )
                 {
                     $precio1 = (float)$items[$i]->price / (float) $entry->currency_compra;
-                    $price1 = ($detail_entry->material->price > $precio1) ? $detail_entry->material->price : $precio1;
+                    $price1 = ($detail_entry->material->unit_price > $precio1) ? $detail_entry->material->unit_price : $precio1;
                     $materialS = Material::find($detail_entry->material_id);
                     if ( $materialS->price < $price1 )
                     {
