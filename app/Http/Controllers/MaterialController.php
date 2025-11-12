@@ -1454,7 +1454,24 @@ class MaterialController extends Controller
         $shelves = Shelf::with('levels.containers.positions')
             ->where('warehouse_id', $warehouse_id)->get();
 
-        return view('material.indexStore', compact( 'permissions', 'arrayCategories', 'arrayCedulas', 'arrayCalidades', 'arrayMarcas', 'arrayRetacerias', 'arrayRotations', 'arrayMaterials', 'shelves'));
+        $rows = StoreMaterial::resumenPorMaterial()->get();
+
+        // Calculamos el estado de stock
+        foreach ($rows as $row) {
+            if ($row->stock_total <= 0) {
+                $row->estado = 'desabastecido';
+            } elseif ($row->stock_total <= $row->stock_min) {
+                $row->estado = 'por_desabastecer';
+            } else {
+                $row->estado = 'ok';
+            }
+        }
+
+        $hayAlertas = $rows->contains(function ($r) {
+            return $r->estado === 'desabastecido' || $r->estado === 'por_desabastecer';
+        });
+
+        return view('material.indexStore', compact( 'permissions', 'arrayCategories', 'arrayCedulas', 'arrayCalidades', 'arrayMarcas', 'arrayRetacerias', 'arrayRotations', 'arrayMaterials', 'shelves', 'rows', 'hayAlertas'));
 
     }
 

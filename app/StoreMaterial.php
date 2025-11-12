@@ -33,4 +33,17 @@ class StoreMaterial extends Model
     {
         return $this->hasMany(StoreMaterialVencimiento::class);
     }
+
+    // Scope para obtener el resumen por material
+    public function scopeResumenPorMaterial($query)
+    {
+        return $query->selectRaw('
+                material_id,
+                full_name,
+                MIN(stock_min) as stock_min,
+                SUM(stock_current) as stock_total
+            ')
+            ->groupBy('material_id', 'full_name')
+            ->orderBy('full_name');
+    }
 }
