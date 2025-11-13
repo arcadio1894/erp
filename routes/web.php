@@ -2873,6 +2873,10 @@ Route::middleware('auth')->group(function (){
         Route::post('/quotes/update-general', 'QuoteSaleController@updateDatosGeneral')
             ->name('quotes.sales.update.general');
 
+        Route::post('/raise/quote/sale/{quote}', 'QuoteSaleController@raiseQuote')
+            ->name('quote.raise.quote.sale')
+            ->middleware('permission:raise_quote');
+
         // TODO: PromotionLimits
         Route::get('promociones/por/limite', 'PromotionLimitController@index')
             ->name('promotionLimit.index')

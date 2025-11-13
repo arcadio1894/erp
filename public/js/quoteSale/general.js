@@ -429,6 +429,20 @@ function showModalDetraction() {
     });
 }
 
+function showLoader(msg = "Procesando solicitud...") {
+    return $.dialog({
+        title: false,
+        closeIcon: false,
+        backgroundDismiss: false,
+        theme: 'modern',
+        content:
+            '<div class="text-center" style="padding:20px;">' +
+            '<div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>' +
+            '<p class="mt-3">'+ msg +'</p>' +
+            '</div>',
+    });
+}
+
 function raiseQuote() {
     var quote_id = $(this).data('raise');
     var code = ($(this).data('code')===null) ? 'No tiene' : $(this).data('code');
@@ -440,7 +454,7 @@ function raiseQuote() {
         animation: 'zoom',
         type: 'green',
         columnClass: 'medium',
-        title: '¿Está seguro de elevar esta cotización a orden de ejecución?',
+        title: '¿Está seguro de elevar esta cotización?',
         content: '' +
             '<form action="" class="formName">' +
             '<div class="form-group">' +
@@ -459,22 +473,29 @@ function raiseQuote() {
                         $.alert('Ingrese un código válido');
                         return false;
                     }
+                    var loader = showLoader("Procesando solicitud, por favor espere...");
                     $.ajax({
-                        url: '/dashboard/raise/quote/'+quote_id+'/code/'+name,
+                        url: '/dashboard/raise/quote/sale/' + quote_id, // ya SIN /code/...
                         method: 'POST',
                         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                        processData:false,
-                        contentType:false,
+                        data: {
+                            code_customer: name   // <- aquí mandamos el código
+                        },
                         success: function (data) {
                             console.log(data);
+                            loader.close(); // Cerrar loader
                             $.alert("Cotización elevada.");
-                            setTimeout( function () {
-                                /*location.reload();*/
+                            setTimeout(function () {
                                 getDataQuotes(1);
-                            }, 2000 )
+                            }, 2000);
                         },
-                        error: function (data) {
-                            $.alert("Sucedió un error en el servidor. Intente nuevamente.");
+                        error: function (xhr) {
+                            loader.close(); // Cerrar loader también en errores
+                            let msg = "Sucedió un error en el servidor. Intente nuevamente.";
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            }
+                            $.alert(msg);
                         },
                     });
                     //$.alert('Your name is ' + name);

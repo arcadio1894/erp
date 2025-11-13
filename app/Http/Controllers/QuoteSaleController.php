@@ -28,6 +28,8 @@ use App\PromotionLimit;
 use App\PromotionUsage;
 use App\Quote;
 use App\QuoteUser;
+use App\ResumenEquipment;
+use App\ResumenQuote;
 use App\Sale;
 use App\SaleDetail;
 use App\TipoPago;
@@ -2453,5 +2455,178 @@ class QuoteSaleController extends Controller
         }
 
 
+    }
+
+    public function raiseQuote(Request $request, $quote_id)
+    {
+        $begin = microtime(true);
+        $quote = Quote::find($quote_id);
+        // Leer el código enviado desde el popup
+        $code = trim($request->input('code_customer', ''));
+
+        if ($code === '') {
+            return response()->json(['message' => 'El código de cliente es obligatorio.'], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            if ( !isset( $quote->order_execution ) )
+            {
+                $all_quotes = Quote::whereNotNull('order_execution')->get();
+                $quantity = count($all_quotes) + 1;
+                $length = 5;
+                $codeOrderExecution = 'OE-'.str_pad($quantity,$length,"0", STR_PAD_LEFT);
+                $quote->order_execution = $codeOrderExecution;
+                $quote->save();
+            }
+
+            $quote->code_customer = $code;
+            $quote->raise_status = true;
+            $quote->save();
+
+            // TODO: Guardar el pdf interna en el sistema
+            $quote = Quote::where('id', $quote->id)
+                ->with('customer')
+                ->with('deadline')
+                ->with(['equipments' => function ($query) {
+                    $query->with(['materials', 'consumables', 'electrics', 'workforces', 'turnstiles']);
+                }])->first();
+
+            $images = ImagesQuote::where('quote_id', $quote->id)
+                ->where('type', 'img')
+                ->orderBy('order', 'ASC')->get();
+
+            $view = view('exports.quoteInternal', compact('quote', 'images'));
+
+            $pdf = PDF::loadHTML($view);
+
+            $description = str_replace(array('"', "'", "/"),'',$quote->description_quote);
+
+            $name = $quote->code . ' '. ltrim(rtrim($description)) . '.pdf';
+
+            $image_path = public_path().'/pdfs/quotes/'.$name;
+            if (file_exists($image_path)) {
+                unlink($image_path);
+            }
+
+            $output = $pdf->output();
+            file_put_contents(public_path().'/pdfs/quotes/'.$name, $output);
+
+            $pdfPrincipal = public_path().'/pdfs/quotes/'.$name;
+
+            $oMerger = PDFMerger::init();
+
+            $oMerger->addPDF($pdfPrincipal, 'all');
+
+            $pdfs = ImagesQuote::where('quote_id', $quote->id)
+                ->where('type', 'pdf')->get();
+
+            foreach ( $pdfs as $pdf )
+            {
+                $namePdf = public_path().'/images/planos/'.$pdf->image;
+                $oMerger->addPDF($namePdf, 'all');
+            }
+
+            $oMerger->merge();
+            $oMerger->setFileName($name);
+            // Guarda el archivo fusionado en la misma carpeta
+            $output_path = public_path('pdfs/quotes/' . $name);
+            $oMerger->save($output_path);
+
+            // TODO: Guardar los resumenes
+            $resumen = ResumenQuote::create([
+                'quote_id' => $quote->id,
+                'code' => $quote->code,
+                'description_quote' => $quote->description_quote,
+                'date_quote' => $quote->date_quote,
+                'customer_id' => ($quote->customer_id == null) ? null : $quote->customer_id,
+                'customer' => ($quote->customer_id == null) ? "" : $quote->customer->business_name,
+                'contact_id' => ($quote->contact_id == null) ? null : $quote->contact_id,
+                'contact' => ($quote->contact_id == null) ? "" : $quote->contact->name,
+                'total_sin_igv' => round(($quote->total_equipments)/1.18, 2),
+                'total_con_igv' => round($quote->total_equipments, 2),
+                'total_utilidad_sin_igv' => round(($quote->total_quote)/1.18, 2),
+                'total_utilidad_con_igv' => round($quote->total_quote, 2),
+                'path_pdf' => $name
+            ]);
+
+            foreach ( $quote->equipments as $equipment )
+            {
+                $resumenEquipment = ResumenEquipment::create([
+                    'resumen_quote_id' => $resumen->id,
+                    'equipment_id' => $equipment->id,
+                    'description' => $equipment->description,
+                    'total_materials' => $equipment->total_materials,
+                    'total_consumables' => $equipment->total_consumables,
+                    'total_electrics' => $equipment->total_electrics,
+                    'total_workforces' => $equipment->total_workforces,
+                    'total_turnstiles' => $equipment->total_turnstiles,
+                    'total_workdays' => $equipment->total_workdays,
+                    'quantity' => $equipment->quantity,
+                    'total' => round($equipment->subtotal_percentage/1.18, 2),
+                    'utility' => $equipment->utility,
+                    'letter' => $equipment->letter,
+                    'rent' => $equipment->rent
+                ]);
+            }
+
+            // TODO: Actualizar los stocks
+            $equipment_materials = $quote->equipments;
+            foreach ( $equipment_materials as $equipment )
+            {
+                $quote_materials = $equipment->consumables;
+                foreach ( $quote_materials as $consumable )
+                {
+                    $mat = Material::find($consumable->material_id);
+                    $quantity = $consumable->quantity;
+                    $mat->stock_current = $mat->stock_current - $quantity;
+                    $mat->save();
+                }
+            }
+
+
+            // Crear notificacion
+            $notification = Notification::create([
+                'content' => $quote->code.' elevada por '.Auth::user()->name,
+                'reason_for_creation' => 'raise_quote',
+                'user_id' => Auth::user()->id,
+                'url_go' => route('quote.raise', $quote->id)
+            ]);
+
+            // Roles adecuados para recibir esta notificación admin, logistica
+            $users = User::role(['admin', 'principal' , 'logistic' , 'finance'])->get();
+            foreach ( $users as $user )
+            {
+                if ( $user->id != Auth::user()->id )
+                {
+                    foreach ( $user->roles as $role )
+                    {
+                        NotificationUser::create([
+                            'notification_id' => $notification->id,
+                            'role_id' => $role->id,
+                            'user_id' => $user->id,
+                            'read' => false,
+                            'date_read' => null,
+                            'date_delete' => null
+                        ]);
+                    }
+                }
+            }
+
+            $end = microtime(true) - $begin;
+
+            Audit::create([
+                'user_id' => Auth::user()->id,
+                'action' => 'Elevar cotizacion',
+                'time' => $end
+            ]);
+
+            DB::commit();
+        } catch ( \Throwable $e ) {
+            DB::rollBack();
+            return response()->json(['message' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['message' => 'Cotización elevada.'], 200);
     }
 }

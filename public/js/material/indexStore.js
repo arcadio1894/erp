@@ -399,6 +399,7 @@ $(document).ready(function () {
             useBootstrap: true,
             columnClass: 'col-md-8',
             content: resumenHtml,
+            autoClose: 'cerrar|10000',
             buttons: {
                 cerrar: {
                     text: 'Cerrar',
