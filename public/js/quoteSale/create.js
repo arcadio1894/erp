@@ -204,6 +204,7 @@ function saveEquipment() {
                     var equipmentId = parseInt(button.data('saveequipment'));
                     console.log(equipmentId);
 
+                    $equipments = $equipments.filter(equipment => equipment.id !== equipmentId);
                     var quantity = 1;
 
                     var utility = button.parent().parent().next().children().children().val();
@@ -266,38 +267,6 @@ function saveEquipment() {
                     }
 
                     console.log(consumablesArray);
-
-                    /*var totalEquipment = 0;
-                    var gravadaEquipment = 0;
-                    var totalEquipmentU = 0;
-                    var totalEquipmentL = 0;
-                    var totalEquipmentR = 0;
-                    var totalEquipmentUtility = 0;
-                    var totalDias = 0;
-
-                    for (let i = 0; i < consumablesImporte.length; i++) {
-                        totalEquipment = parseFloat(totalEquipment) + parseFloat(consumablesImporte[i]);
-                        gravadaEquipment = parseFloat(gravadaEquipment) + (parseFloat(consumablesQuantity[i])*parseFloat(consumablesValor[i]));
-                    }
-
-                    totalEquipment = parseFloat((totalEquipment * quantity)).toFixed(2);
-
-                    console.log(totalEquipment);
-
-                    totalEquipmentU = totalEquipment*((utility/100)+1);
-                    totalEquipmentL = totalEquipmentU*((letter/100)+1);
-                    totalEquipmentR = totalEquipmentL*((rent/100)+1);
-                    totalEquipmentUtility = totalEquipmentR.toFixed(2);
-
-                    $total = parseFloat($total) + parseFloat(totalEquipment);
-                    $totalUtility = parseFloat($totalUtility) + parseFloat(totalEquipmentUtility);
-
-                    var igv = parseFloat(gravadaEquipment)*parseFloat($igv/100);
-
-                    $('#descuento').html(parseFloat($descuento).toFixed(2));
-                    $('#gravada').html(parseFloat(gravadaEquipment-$descuento).toFixed(2));
-                    $('#igv_total').html(parseFloat(igv).toFixed(2));
-                    $('#total_importe').html(parseFloat(gravadaEquipment-$descuento+igv).toFixed(2));*/
 
                     // ===============================================
                     // 1. Calcular el TOTAL real (sumatoria de importes)
@@ -824,6 +793,7 @@ function confirmEquipment() {
             confirm: {
                 text: 'CONFIRMAR',
                 action: function (e) {
+
                     //var cantidad = button.parent().parent().next().children().children().children().next();
                     //console.log($(this));
                     /*$equipmentStatus = true;*/
@@ -926,7 +896,6 @@ function confirmEquipment() {
                     $('#total_importe').html(total.toFixed(2));
 
                     button.next().attr('data-saveEquipment', $equipments.length);
-                    button.next().next().attr('data-deleteEquipment', $equipments.length);
                     $equipments.push({'id':$equipments.length, 'quantity':quantity, 'utility':utility, 'rent':rent, 'letter':letter, 'total':total, 'description':"", 'detail':detail, 'materials': [], 'consumables':consumablesArray, 'electrics':[], 'workforces':[], 'tornos':[], 'dias':[]});
                     var card = button.parent().parent().parent();
                     card.removeClass('card-gray-dark');
