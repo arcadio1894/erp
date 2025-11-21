@@ -1185,7 +1185,7 @@ function getDataQuotes($numberPage) {
     var startDate = $('#start').val();
     var endDate = $('#end').val();
 
-    $.get('/dashboard/get/data/quotes/v2/'+$numberPage, {
+    $.get('/dashboard/get/data/quotes/sale/index/v2/'+$numberPage, {
         description_quote:description_quote,
         year: year,
         code: code,
@@ -1380,7 +1380,7 @@ function renderDataTable(data) {
         }
 
         if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/imprimir/cliente/'+data.id;
+            let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
             cloneBtnCreated.querySelector("[data-imprimir_cliente]").setAttribute("href", url);
         } else {
             let element = cloneBtnCreated.querySelector("[data-imprimir_cliente]");
@@ -1487,7 +1487,7 @@ function renderDataTable(data) {
         }
 
         if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/imprimir/cliente/'+data.id;
+            let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
             cloneBtnSend.querySelector("[data-imprimir_cliente]").setAttribute("href", url);
         } else {
             let element = cloneBtnSend.querySelector("[data-imprimir_cliente]");
@@ -1507,7 +1507,7 @@ function renderDataTable(data) {
         }
 
         if ( $.inArray('update_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/editar/cotizacion/'+data.id;
+            let url = document.location.origin+ '/dashboard/editar/cotizacion/venta/'+data.id;
             cloneBtnSend.querySelector("[data-editar]").setAttribute("href", url);
         } else {
             let element = cloneBtnSend.querySelector("[data-editar]");
@@ -1585,7 +1585,7 @@ function renderDataTable(data) {
         }
 
         if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/imprimir/cliente/'+data.id;
+            let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
             cloneBtnConfirm.querySelector("[data-imprimir_cliente]").setAttribute("href", url);
         } else {
             let element = cloneBtnConfirm.querySelector("[data-imprimir_cliente]");
@@ -1703,7 +1703,7 @@ function renderDataTable(data) {
         }
 
         if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/imprimir/cliente/'+data.id;
+            let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
             cloneBtnRaised.querySelector("[data-imprimir_cliente]").setAttribute("href", url);
         } else {
             let element = cloneBtnRaised.querySelector("[data-imprimir_cliente]");
@@ -1871,7 +1871,7 @@ function renderDataTable(data) {
         }*/
 
         if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/imprimir/cliente/'+data.id;
+            let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
             cloneBtnVB_finance.querySelector("[data-imprimir_cliente]").setAttribute("href", url);
         } else {
             let element = cloneBtnVB_finance.querySelector("[data-imprimir_cliente]");
@@ -2009,7 +2009,7 @@ function renderDataTable(data) {
         }
 
         if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/imprimir/cliente/'+data.id;
+            let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
             cloneBtnVB_operation.querySelector("[data-imprimir_cliente]").setAttribute("href", url);
         } else {
             let element = cloneBtnVB_operation.querySelector("[data-imprimir_cliente]");
@@ -2137,7 +2137,7 @@ function renderDataTable(data) {
         }
 
         if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/imprimir/cliente/'+data.id;
+            let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
             cloneBtnClose.querySelector("[data-imprimir_cliente]").setAttribute("href", url);
         } else {
             let element = cloneBtnClose.querySelector("[data-imprimir_cliente]");

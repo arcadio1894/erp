@@ -1127,7 +1127,7 @@ function saveEquipment() {
                                 button2.attr('data-idequipment', equipment.id);
                                 button2.next().attr('data-quote', quote.id);
                                 button2.next().attr('data-idequipment', equipment.id);
-                                $equipments.push({'id':equipmentDeleted.id, 'quote':quote.id, 'equipment':equipment.id, 'quantity':quantity, 'utility':utility, 'rent':rent, 'letter':letter, 'total':parseFloat(gravadaEquipment-$descuento+igv).toFixed(2), 'description':"", 'detail':detail, 'materials': [], 'consumables':consumablesArray, 'electrics':[], 'workforces':[], 'tornos':[], 'dias':[]});
+                                $equipments.push({'id':equipmentDeleted.id, 'quote':quote.id, 'equipment':equipment.id, 'quantity':quantity, 'utility':utility, 'rent':rent, 'letter':letter, 'total':parseFloat(gravada_2-$descuento+igv).toFixed(2), 'description':"", 'detail':detail, 'materials': [], 'consumables':consumablesArray, 'electrics':[], 'workforces':[], 'tornos':[], 'dias':[]});
 
                                 $.alert(data.message);
 

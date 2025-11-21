@@ -136,7 +136,7 @@ class PuntoVentaController extends Controller
                     "id" => $materialDiscount->id,
                     "percentage" => $materialDiscount->percentage,
                     "haveDiscount" => true,
-                    "valueDiscount" => round(($material->list_price/$igv)*($materialDiscount->percentage/100), 2),
+                    "valueDiscount" => round(($material->list_price/$igv)*($materialDiscount->percentage/100)*$quantity, 2),
                     "stringDiscount" => "<p>Dscto. ".$materialDiscount->discount->description." <strong class='float-right'> ".round(($material->list_price/$igv)*($materialDiscount->percentage/100), 2)."</strong></p>",
                 ]);
 

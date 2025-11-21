@@ -2835,6 +2835,8 @@ Route::middleware('auth')->group(function (){
         Route::get('cotizaciones/venta', 'QuoteSaleController@index')
             ->name('quoteSale.index')
             ->middleware('permission:list_quoteSale');
+        Route::get('/get/data/quotes/sale/index/v2/{numberPage}', 'QuoteSaleController@getDataQuotesIndex')
+            ->middleware('permission:list_quoteSale');
         Route::get('cotizaciones/venta/totales', 'QuoteSaleController@indexGeneral')
             ->name('quoteSale.list.general')
             ->middleware('permission:list_quoteSale');
@@ -2848,6 +2850,8 @@ Route::middleware('auth')->group(function (){
         Route::post('store/quote/sale', 'QuoteSaleController@store')
             ->name('quoteSale.store')
             ->middleware('permission:create_quoteSale');
+        Route::get('imprimir/cotizacion/cliente/{quote}', 'QuoteSaleController@printQuoteToCustomer')
+            ->middleware('permission:printCustomer_quote');
 
         Route::get('editar/cotizacion/venta/{quote}', 'QuoteSaleController@edit')
             ->name('quoteSale.edit')

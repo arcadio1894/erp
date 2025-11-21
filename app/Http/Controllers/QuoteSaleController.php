@@ -27,6 +27,7 @@ use App\PorcentageQuote;
 use App\PromotionLimit;
 use App\PromotionUsage;
 use App\Quote;
+use App\QuoteMaterialReservation;
 use App\QuoteUser;
 use App\ResumenEquipment;
 use App\ResumenQuote;
@@ -276,6 +277,20 @@ class QuoteSaleController extends Controller
                 for ($k = 0; $k < sizeof($consumables); $k++) {
                     $material = Material::find($consumables[$k]->id);
 
+                    if (!$material) {
+                        throw new \Exception("El material con ID {$consumables[$k]->id} no existe.");
+                    }
+
+                    $requestedQty = (float) $consumables[$k]->quantity;
+
+                    // Stock disponible = lo que hay en almacén - lo que ya está reservado en otras cotizaciones
+                    $available = (float) $material->stock_current - (float) $material->stock_reserved;
+
+                    if ($requestedQty > $available) {
+                        // No hay suficiente stock disponible para esta cotización
+                        throw new \Exception("El material {$material->full_name} no cuenta con stock suficiente para la cantidad solicitada ({$requestedQty}). Stock disponible: {$available}.");
+                    }
+
                     // 🟢 REGISTRAR EQUIPMENT CONSUMABLE
                     $equipmentConsumable = EquipmentConsumable::create([
                         'availability' => ((float) $consumables[$k]->quantity > $material->stock_current) ? 'Agotado' : 'Completo',
@@ -291,6 +306,28 @@ class QuoteSaleController extends Controller
                     ]);
 
                     $totalConsumable += $equipmentConsumable->total;
+
+                    // 🟢 REGISTRAR/ACTUALIZAR RESERVA POR COTIZACIÓN
+                    // si ya había reserva de este material en esta misma cotización, la acumulamos
+                    $reservation = QuoteMaterialReservation::where('quote_id', $quote->id)
+                        ->where('material_id', $material->id)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($reservation) {
+                        $reservation->quantity += $requestedQty;
+                        $reservation->save();
+                    } else {
+                        $reservation = QuoteMaterialReservation::create([
+                            'quote_id'   => $quote->id,
+                            'material_id'=> $material->id,
+                            'quantity'   => $requestedQty,
+                        ]);
+                    }
+
+                    // 🟢 ACTUALIZAR EL STOCK RESERVADO DEL MATERIAL
+                    $material->stock_reserved += $requestedQty;
+                    $material->save();
 
                     // 🟢 VALIDAR PROMOCIÓN SI type_promo = limit
                     if ($consumables[$k]->type_promo == "limit") {
@@ -484,11 +521,19 @@ class QuoteSaleController extends Controller
         $quote = Quote::findOrFail($request->get('quote_id'));
 
         try {
+            $dateQuote = $request->get('date_quote')
+                ? Carbon::createFromFormat('d/m/Y', $request->get('date_quote'))
+                : null;
+
+            $dateValidate = $request->get('date_validate')
+                ? Carbon::createFromFormat('d/m/Y', $request->get('date_validate'))
+                : null;
+
             $quote->update([
                 'description_quote'   => $request->get('descriptionQuote'),
                 'code'                => $request->get('codeQuote'),
-                'date_quote'          => $request->get('date_quote'),
-                'date_validate'       => $request->get('date_validate'),
+                'date_quote'          => $dateQuote,
+                'date_validate'       => $dateValidate,
                 'way_to_pay'          => $request->get('way_to_pay') ?? '',
                 'delivery_time'       => $request->get('delivery_time') ?? '',
                 'customer_id'         => $request->get('customer_id') ?? null,
@@ -724,8 +769,8 @@ class QuoteSaleController extends Controller
                 "deadline" => ($quote->payment_deadline_id == null || $quote->payment_deadline_id == "") ? "":$quote->deadline->description,
                 "time_delivery" => $quote->time_delivery.' DÍAS',
                 "customer" => ($quote->customer_id == "" || $quote->customer_id == null) ? "" : $quote->customer->business_name,
-                "total_igv" => number_format($quote->total_quote/1.18, 0),
-                "total" => number_format($quote->total_importe),
+                "total_igv" => number_format($quote->total_importe/1.18, 2),
+                "total" => number_format($quote->total_importe, 2),
                 "currency" => ($quote->currency_invoice == null || $quote->currency_invoice == "") ? '': $quote->currency_invoice,
                 "state" => $state,
                 "stateText" => $stateText,
@@ -1715,6 +1760,33 @@ class QuoteSaleController extends Controller
                     $material->delete();
                 }
                 foreach( $equipment_quote->consumables as $consumable ) {
+                    // 🧮 devolver reserva de este consumible
+                    $material = Material::lockForUpdate()->find($consumable->material_id);
+
+                    if ($material) {
+                        // buscar la reserva total de este material para esta cotización
+                        $reservation = QuoteMaterialReservation::where('quote_id', $quote->id)
+                            ->where('material_id', $consumable->material_id)
+                            ->lockForUpdate()
+                            ->first();
+
+                        if ($reservation) {
+                            $reservation->quantity -= (float) $consumable->quantity;
+
+                            if ($reservation->quantity <= 0) {
+                                $reservation->delete();
+                            } else {
+                                $reservation->save();
+                            }
+                        }
+
+                        // restar del stock_reserved del material
+                        $material->stock_reserved -= (float) $consumable->quantity;
+                        if ($material->stock_reserved < 0) {
+                            $material->stock_reserved = 0; // por seguridad
+                        }
+                        $material->save();
+                    }
                     // 🟢 eliminar usages ligados
                     PromotionUsage::where('equipment_consumable_id', $consumable->id)->delete();
                     $consumable->delete();
@@ -1776,7 +1848,19 @@ class QuoteSaleController extends Controller
 
                     foreach ( $consumables as $consumable )
                     {
-                        $material = Material::find((int)$consumable['id']);
+                        // 🔒 bloquear material para evitar race conditions
+                        $material = Material::lockForUpdate()->find((int)$consumable['id']);
+
+                        if (!$material) {
+                            throw new \Exception("El material con ID {$consumable['id']} no existe.");
+                        }
+
+                        $requestedQty = (float) $consumable['quantity'];
+                        $available = (float) $material->stock_current - (float) $material->stock_reserved;
+
+                        if ($requestedQty > $available) {
+                            throw new \Exception("El material {$material->full_name} no cuenta con stock suficiente para la cantidad solicitada ({$requestedQty}). Stock disponible: {$available}.");
+                        }
 
                         // 🟢 PRIMERO crear consumible
                         $equipmentConsumable = EquipmentConsumable::create([
@@ -1791,6 +1875,27 @@ class QuoteSaleController extends Controller
                             'total' => (float) $consumable['importe'],
                             'type_promo' => $consumable['type_promo'],
                         ]);
+
+                        // 🟢 REGISTRAR/ACTUALIZAR RESERVA POR COTIZACIÓN
+                        $reservation = QuoteMaterialReservation::where('quote_id', $quote->id)
+                            ->where('material_id', $material->id)
+                            ->lockForUpdate()
+                            ->first();
+
+                        if ($reservation) {
+                            $reservation->quantity += $requestedQty;
+                            $reservation->save();
+                        } else {
+                            $reservation = QuoteMaterialReservation::create([
+                                'quote_id'    => $quote->id,
+                                'material_id' => $material->id,
+                                'quantity'    => $requestedQty,
+                            ]);
+                        }
+
+                        // 🟢 ACTUALIZAR EL STOCK RESERVADO DEL MATERIAL
+                        $material->stock_reserved += $requestedQty;
+                        $material->save();
 
                         // 🟢 Luego validar promoción
                         if ($consumable["type_promo"] == "limit") {
@@ -1906,6 +2011,33 @@ class QuoteSaleController extends Controller
                     $material->delete();
                 }
                 foreach( $equipment_quote->consumables as $consumable ) {
+                    // 🧮 devolver reserva de este consumible
+                    $material = Material::lockForUpdate()->find($consumable->material_id);
+
+                    if ($material) {
+                        // buscar la reserva total de este material para esta cotización
+                        $reservation = QuoteMaterialReservation::where('quote_id', $quote->id)
+                            ->where('material_id', $consumable->material_id)
+                            ->lockForUpdate()
+                            ->first();
+
+                        if ($reservation) {
+                            $reservation->quantity -= (float) $consumable->quantity;
+
+                            if ($reservation->quantity <= 0) {
+                                $reservation->delete();
+                            } else {
+                                $reservation->save();
+                            }
+                        }
+
+                        // restar del stock_reserved del material
+                        $material->stock_reserved -= (float) $consumable->quantity;
+                        if ($material->stock_reserved < 0) {
+                            $material->stock_reserved = 0; // por seguridad
+                        }
+                        $material->save();
+                    }
                     PromotionUsage::where('equipment_consumable_id', $consumable->id)->delete();
                     $consumable->delete();
                 }
@@ -1964,7 +2096,19 @@ class QuoteSaleController extends Controller
 
                     foreach ( $consumables as $consumable )
                     {
-                        $material = Material::find((int)$consumable['id']);
+                        // 🔒 bloquear material para evitar race conditions
+                        $material = Material::lockForUpdate()->find((int)$consumable['id']);
+
+                        if (!$material) {
+                            throw new \Exception("El material con ID {$consumable['id']} no existe.");
+                        }
+
+                        $requestedQty = (float) $consumable['quantity'];
+                        $available = (float) $material->stock_current - (float) $material->stock_reserved;
+
+                        if ($requestedQty > $available) {
+                            throw new \Exception("El material {$material->full_name} no cuenta con stock suficiente para la cantidad solicitada ({$requestedQty}). Stock disponible: {$available}.");
+                        }
 
                         $equipmentConsumable = EquipmentConsumable::create([
                             'availability' => ((float) $consumable['quantity'] > $material->stock_current) ? 'Agotado':'Completo',
@@ -1978,6 +2122,27 @@ class QuoteSaleController extends Controller
                             'total' => (float) $consumable['importe'],
                             'type_promo' => $consumable['type_promo'],
                         ]);
+
+                        // 🟢 REGISTRAR/ACTUALIZAR RESERVA POR COTIZACIÓN
+                        $reservation = QuoteMaterialReservation::where('quote_id', $quote->id)
+                            ->where('material_id', $material->id)
+                            ->lockForUpdate()
+                            ->first();
+
+                        if ($reservation) {
+                            $reservation->quantity += $requestedQty;
+                            $reservation->save();
+                        } else {
+                            $reservation = QuoteMaterialReservation::create([
+                                'quote_id'    => $quote->id,
+                                'material_id' => $material->id,
+                                'quantity'    => $requestedQty,
+                            ]);
+                        }
+
+                        // 🟢 ACTUALIZAR EL STOCK RESERVADO DEL MATERIAL
+                        $material->stock_reserved += $requestedQty;
+                        $material->save();
 
                         if ($consumable["type_promo"] == "limit") {
                             $promotion = PromotionLimit::where('material_id', $consumable["id"])
@@ -2628,5 +2793,77 @@ class QuoteSaleController extends Controller
         }
 
         return response()->json(['message' => 'Cotización elevada.'], 200);
+    }
+
+    public function printQuoteToCustomer($id)
+    {
+        // Eliminamos elos archivos
+        $files = glob(public_path().'/pdfs/*');
+        foreach($files as $file){
+            if(is_file($file))
+                unlink($file);
+        }
+
+        $quote = Quote::where('id', $id)
+            ->with('customer')
+            ->with('deadline')
+            ->with('users')
+            ->with(['equipments' => function ($query) {
+                $query->with(['materials', 'consumables.material', 'workforces', 'turnstiles']);
+            }])->first();
+
+
+        $images = ImagesQuote::where('quote_id', $quote->id)
+            ->where('type', 'img')
+            ->orderBy('order', 'ASC')->get();
+
+        $dataIgv = PorcentageQuote::where('name', 'igv')->first();
+        $igv = $dataIgv->value;
+
+        $monedaTexto = $quote->currency_invoice === 'USD'
+            ? 'DÓLARES'
+            : 'SOLES';
+
+        $montoEnLetras = numeroALetras($quote->total_importe, $monedaTexto);
+
+        $view = view('exports.quoteSaleCustomerV2', compact('quote', 'images', 'igv', 'montoEnLetras'));
+
+        $pdf = PDF::loadHTML($view);
+
+        $description = str_replace(array('"', "'", "/"),'',$quote->description_quote);
+
+        $name = $quote->code . ' '. ltrim(rtrim($description)) . '.pdf';
+
+        $image_path = public_path().'/pdfs/'.$name;
+        //$image_path = 'C:/wamp64/www/construction/public/pdfs/'.$name;
+        if (file_exists($image_path)) {
+            unlink($image_path);
+        }
+
+        $output = $pdf->output();
+
+        file_put_contents(public_path().'/pdfs/'.$name, $output);
+        //file_put_contents('C:/wamp64/www/construction/public/pdfs/'.$name, $output);
+        $pdfPrincipal = public_path().'/pdfs/'.$name;
+        //$pdfPrincipal = 'C:/wamp64/www/construction/public/pdfs/'.$name;
+        $oMerger = PDFMerger::init();
+
+        $oMerger->addPDF($pdfPrincipal, 'all');
+
+        $pdfs = ImagesQuote::where('quote_id', $quote->id)
+            ->where('type', 'pdf')->get();
+
+        foreach ( $pdfs as $pdf )
+        {
+            $namePdf = public_path().'/images/planos/'.$pdf->image;
+            //$namePdf ='C:/wamp64/www/construction/public/images/planos/'.$pdf->image;
+            $oMerger->addPDF($namePdf, 'all');
+        }
+
+        $oMerger->merge();
+        $oMerger->setFileName($name);
+        $oMerger->stream();
+
+        //return $pdf->stream($name);
     }
 }

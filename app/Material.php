@@ -19,6 +19,7 @@ class Material extends Model
         'stock_max',
         'stock_min',
         'stock_current',
+        'stock_reserved',
         'priority',
         'unit_price',
         'image',

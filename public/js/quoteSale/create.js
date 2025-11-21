@@ -898,37 +898,6 @@ function confirmEquipment() {
 
                     console.log(consumablesArray);
 
-                    /*var totalEquipment = 0;
-                    var gravadaEquipment = 0;
-                    var totalEquipmentU = 0;
-                    var totalEquipmentL = 0;
-                    var totalEquipmentR = 0;
-                    var totalEquipmentUtility = 0;
-                    var totalDias = 0;
-
-                    for (let i = 0; i < consumablesImporte.length; i++) {
-                        totalEquipment = parseFloat(totalEquipment) + parseFloat(consumablesImporte[i]);
-                        gravadaEquipment = parseFloat(gravadaEquipment) + (parseFloat(consumablesQuantity[i])*parseFloat(consumablesValor[i]));
-                    }
-
-                    totalEquipment = parseFloat((totalEquipment * quantity)).toFixed(2);
-
-                    console.log(totalEquipment);
-
-                    totalEquipmentU = totalEquipment*((utility/100)+1);
-                    totalEquipmentL = totalEquipmentU*((letter/100)+1);
-                    totalEquipmentR = totalEquipmentL*((rent/100)+1);
-                    totalEquipmentUtility = totalEquipmentR.toFixed(2);
-
-                    $total = parseFloat($total) + parseFloat(totalEquipment);
-                    $totalUtility = parseFloat($totalUtility) + parseFloat(totalEquipmentUtility);
-
-                    var igv = parseFloat(gravadaEquipment-$descuento)*parseFloat($igv/100);
-
-                    $('#descuento').html(parseFloat($descuento).toFixed(2));
-                    $('#gravada').html(parseFloat(gravadaEquipment-$descuento).toFixed(2));
-                    $('#igv_total').html(parseFloat(igv).toFixed(2));
-                    $('#total_importe').html(parseFloat(gravadaEquipment-$descuento+igv).toFixed(2));*/
                     // ===============================================
                     // 1. Calcular el TOTAL real (sumatoria de importes)
                     // ===============================================
