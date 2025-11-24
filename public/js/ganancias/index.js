@@ -11,6 +11,8 @@ $(document).ready(function () {
     $permissions = JSON.parse($('#permissions').val());
     getDataGanancias(1);
 
+    $(document).on('click', '[data-item]', showData);
+
 });
 
 function showData() {
