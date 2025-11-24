@@ -710,7 +710,7 @@ class ReferralGuideController extends Controller
             "details" => $arrayDetails
         ]);
 
-        $view = view('referralGuide.printGuide', compact('arrayGuide'));
+        $view = view('referralGuide.printGuideV2', compact('arrayGuide'));
 
         $pdf = PDF::loadHTML($view);
 

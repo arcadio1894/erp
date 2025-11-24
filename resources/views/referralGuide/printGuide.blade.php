@@ -270,45 +270,7 @@
         <div><span>LICENCIA DE CONDUCIR</span>: {{ $arrayGuide[0]['driver_licence'] }} </div>
     </div>
 </main>
-{{--<div class="page-break"></div>
-<header class="clearfix">
-    <div id="logo">
-        <img src="{{ asset('/landing/img/logo_pdf.png') }}">
-        <div id="company3" class="clearfix">
-            <div>RUC 20540001384</div>
-            <div>A.H. Ramiro Prialé Mz. 17 Lte. 1</div>
-            <div>La Esperanza, Trujillo, Perú</div>
-            <div>Sitio Web: www.sermeind.com.pe</div>
-            <div>Teléfono: +51 998-396-337</div>
-        </div>
-    </div>
 
-    <h1>COTIZACIÓN: {{ $quote->code }}</h1>
-
-    <div id="company2" class="clearfix">
-        <div>CLIENTE</div>
-        <div>{{ ($quote->customer !== null) ? $quote->customer->business_name : 'No tiene cliente' }}</div>
-        <div>{{ ($quote->customer !== null) ? $quote->customer->address : 'No tiene dirección' }}</div>
-        <div>{{ ($quote->customer !== null) ? $quote->customer->location : 'No tiene localización' }}</div>
-    </div>
-
-    <div id="project">
-        <div><span>COTIZACIÓN #</span>: {{ $quote->id }}</div>
-        <div><span>FECHA</span>: {{ date( "d/m/Y", strtotime( $quote->date_quote )) }}</div>
-        <div><span>CLIENTE ID</span>: {{ ($quote->customer !== null) ? $quote->customer_id : 'No tiene localización'}}</div>
-        <div><span>VALIDO HASTA</span>: {{ date( "d/m/Y", strtotime( $quote->date_validate )) }} </div>
-
-    </div>
-
-</header>
-<div id="notices">
-    <div>CARACTERISTICAS DE {{ $quote->code }}:</div>
-    <br>
-    @foreach( $quote->equipments as $equipment )
-        <div class="notice"><strong>{{ $equipment->description }}</strong> </div>
-        <div class="notice">{!! nl2br($equipment->detail) !!}</div><br>
-    @endforeach
-</div>--}}
 <footer>
     Predio el Horcón - Sector el Horcón U.C 02972- F-Moche  |  +51 959 332 205
 </footer>

@@ -353,7 +353,7 @@ class OrderServiceController extends Controller
         $accounts = SupplierAccount::with('bank')
             ->where('supplier_id', $service_order->supplier_id)->get();
 
-        $view = view('exports.orderService', compact('service_order', 'codeOrder', 'accounts'));
+        $view = view('exports.orderServiceV2', compact('service_order', 'codeOrder', 'accounts'));
 
         $pdf = PDF::loadHTML($view);
 

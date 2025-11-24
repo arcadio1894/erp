@@ -303,69 +303,14 @@
             <td class="qty">TOTAL </td>
             <td class="total">{{ $purchase_order->currency_order }} {{ $purchase_order->total }}</td>
         </tr>
-        {{--<tr>
-            <td class="desc"></td>
-            <td class="unit"></td>
-            <td class="qty">RENTA {{ $quote->rent }}%</td>
-            <td class="total">S/. {{ $quote->subtotal_rent }}.00</td>
-        </tr>--}}
+
         </tbody>
     </table>
-    {{--<div id="notices">
-        <div>TÉRMINOS Y CONDICIONES:</div>
-        <div class="notice">FORMA DE PAGO: {{ $quote->way_to_pay }}</div>
-        <div class="notice">TIEMPO DE ENTREGA: {{ $quote->delivery_time }}</div>
-        <div class="notice">PRECIO NO INCLUYE IGV, EL PRECIO ESTA EXPRESADO EN DÓLARES AMERICANOS</div>
 
-    </div>--}}
     <br><br>
-    {{--<div id="notices">
-        <div class="center">Los equipos cotizados cumplen con los estándares de fabricación de equipos para plantas de alimentos (diseño
-            sanitarios) , adecuado uso de recursos (estándares de ahorro energético, emisiones).</div>
-        <br><br>
-        <div class="notice">Sin otro particular, quedamos de usted.</div>
-        <div class="notice">Atentamente</div>
-    </div>--}}
+
 </main>
-{{--<div class="page-break"></div>
-<header class="clearfix">
-    <div id="logo">
-        <img src="{{ asset('/landing/img/logo_pdf.png') }}">
-        <div id="company3" class="clearfix">
-            <div>RUC 20540001384</div>
-            <div>A.H. Ramiro Prialé Mz. 17 Lte. 1</div>
-            <div>La Esperanza, Trujillo, Perú</div>
-            <div>Sitio Web: www.sermeind.com.pe</div>
-            <div>Teléfono: +51 998-396-337</div>
-        </div>
-    </div>
 
-    <h1>COTIZACIÓN: {{ $quote->code }}</h1>
-
-    <div id="company2" class="clearfix">
-        <div>CLIENTE</div>
-        <div>{{ ($quote->customer !== null) ? $quote->customer->business_name : 'No tiene cliente' }}</div>
-        <div>{{ ($quote->customer !== null) ? $quote->customer->address : 'No tiene dirección' }}</div>
-        <div>{{ ($quote->customer !== null) ? $quote->customer->location : 'No tiene localización' }}</div>
-    </div>
-
-    <div id="project">
-        <div><span>COTIZACIÓN #</span>: {{ $quote->id }}</div>
-        <div><span>FECHA</span>: {{ date( "d/m/Y", strtotime( $quote->date_quote )) }}</div>
-        <div><span>CLIENTE ID</span>: {{ ($quote->customer !== null) ? $quote->customer_id : 'No tiene localización'}}</div>
-        <div><span>VALIDO HASTA</span>: {{ date( "d/m/Y", strtotime( $quote->date_validate )) }} </div>
-
-    </div>
-
-</header>
-<div id="notices">
-    <div>CARACTERISTICAS DE {{ $quote->code }}:</div>
-    <br>
-    @foreach( $quote->equipments as $equipment )
-        <div class="notice"><strong>{{ $equipment->description }}</strong> </div>
-        <div class="notice">{!! nl2br($equipment->detail) !!}</div><br>
-    @endforeach
-</div>--}}
 <footer>
     Predio el Horcón - Sector el Horcón U.C 02972- F-Moche  |  +51 959 332 205
 </footer>

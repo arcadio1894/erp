@@ -2565,7 +2565,7 @@ class OrderPurchaseController extends Controller
         $accounts = SupplierAccount::with('bank')
             ->where('supplier_id', $purchase_order->supplier_id)->get();
 
-        $view = view('exports.entryPurchase', compact('purchase_order','codeOrder', 'accounts'));
+        $view = view('exports.entryPurchaseV2', compact('purchase_order','codeOrder', 'accounts'));
 
         $pdf = PDF::loadHTML($view);
 
@@ -2591,7 +2591,7 @@ class OrderPurchaseController extends Controller
         $accounts = SupplierAccount::with('bank')
             ->where('supplier_id', $purchase_order->supplier_id)->get();
 
-        $view = view('exports.entryPurchase', compact('purchase_order','codeOrder', 'accounts'));
+        $view = view('exports.entryPurchaseV2', compact('purchase_order','codeOrder', 'accounts'));
 
         $pdf = PDF::loadHTML($view);
 
