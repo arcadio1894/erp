@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\GananciaDiaria;
 use App\GananciaDiariaDetail;
+use App\Sale;
+use App\Worker;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class GananciaDiariaController extends Controller
 {
@@ -18,6 +21,148 @@ class GananciaDiariaController extends Controller
 
         return view('ganancia.index', compact( 'permissions'));
 
+    }
+
+    public function indexTrabajador()
+    {
+        $user = Auth::user();
+
+        $permissions = $user->getPermissionsViaRoles()->pluck('name')->toArray();
+
+        $workers = Worker::select(
+            'id',
+            DB::raw("CONCAT(first_name, ' ', last_name) as name")
+        )
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
+
+        return view('ganancia.indexTrabajador', compact( 'permissions', 'workers'));
+
+    }
+
+    public function getDataGananciasTrabajador(Request $request, $pageNumber = 1)
+    {
+        $perPage   = 10;
+        $creator   = $request->input('creator');
+        $startDate = $request->input('startDate');
+        $endDate   = $request->input('endDate');
+
+        // ==========================
+        // BASE QUERY (con relaciones)
+        // ==========================
+        if ($startDate == "" || $endDate == "") {
+            $query = Sale::with(['worker', 'details.material'])
+                ->orderBy('created_at', 'DESC');
+        } else {
+            $fechaInicio = Carbon::createFromFormat('d/m/Y', $startDate);
+            $fechaFinal  = Carbon::createFromFormat('d/m/Y', $endDate);
+
+            $query = Sale::with(['worker', 'details.material'])
+                ->whereDate('created_at', '>=', $fechaInicio)
+                ->whereDate('created_at', '<=', $fechaFinal)
+                ->orderBy('created_at', 'DESC');
+        }
+
+        if (!empty($creator)) {
+            // si Sale tiene campo worker_id:
+            $query->where('worker_id', $creator);
+        }
+
+        // ==========================
+        // TOTALES GENERALES (de todo el filtro, sin paginación)
+        // ==========================
+        $total_quantity_sale_global = 0;
+        $total_total_sale_global    = 0;
+        $total_total_utility_global = 0;
+
+        $allSales = (clone $query)->get();
+
+        foreach ($allSales as $saleGlobal) {
+            foreach ($saleGlobal->details as $detailGlobal) {
+                $qtyGlobal       = (float) $detailGlobal->quantity;
+                $lineTotalGlobal = (float) $detailGlobal->total;
+                $lineDiscGlobal  = (float) $detailGlobal->discount;
+                $unitPriceGlobal = (float) optional($detailGlobal->material)->unit_price ?? 0;
+
+                $netLineGlobal = $lineTotalGlobal - $lineDiscGlobal;
+
+                $total_quantity_sale_global += $qtyGlobal;
+                $total_total_sale_global    += $netLineGlobal;
+                $total_total_utility_global += $netLineGlobal - ($unitPriceGlobal * $qtyGlobal);
+            }
+        }
+
+        // ==========================
+        // PAGINACIÓN
+        // ==========================
+        $array = [];
+
+        $totalFilteredRecords = $query->count();
+        $totalPages           = ceil($totalFilteredRecords / $perPage);
+
+        $startRecord = ($pageNumber - 1) * $perPage + 1;
+        $endRecord   = min($totalFilteredRecords, $pageNumber * $perPage);
+
+        $sales = $query->skip(($pageNumber - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        // ==========================
+        // DATA POR CADA SALE (PÁGINA ACTUAL)
+        // ==========================
+        foreach ($sales as $sale) {
+            $quantity_sale = 0;
+            $total_sale    = 0;
+            $total_utility = 0;
+
+            foreach ($sale->details as $detail) {
+                $qty          = (float) $detail->quantity;
+                $lineTotal    = (float) $detail->total;
+                $lineDiscount = (float) $detail->discount;
+                $unitPrice    = (float) optional($detail->material)->unit_price ?? 0;
+
+                // Cantidad total de productos
+                $quantity_sale += $qty;
+
+                // Total de la venta (total - descuento)
+                $netLine = $lineTotal - $lineDiscount;
+                $total_sale += $netLine;
+
+                // Utilidad: (venta neta) - (costo)
+                $total_utility += $netLine - ($unitPrice * $qty);
+            }
+
+            $array[] = [
+                "id"            => $sale->id,
+                "date_resumen"  => $sale->created_at->format('d/m/Y'),
+                "quantity_sale" => $quantity_sale,
+                "total_sale"    => round($total_sale, 2),
+                "total_utility" => round($total_utility, 2),
+            ];
+        }
+
+        $pagination = [
+            'currentPage'          => (int) $pageNumber,
+            'totalPages'           => (int) $totalPages,
+            'startRecord'          => $startRecord,
+            'endRecord'            => $endRecord,
+            'totalRecords'         => $totalFilteredRecords,
+            'totalFilteredRecords' => $totalFilteredRecords
+        ];
+
+        // Totales generales para enviar al Blade
+        $totals = [
+            'quantity_sale_sum' => $total_quantity_sale_global,
+            'total_sale_sum'    => round($total_total_sale_global, 2),
+            'total_utility_sum' => round($total_total_utility_global, 2),
+        ];
+
+        return [
+            'data'       => $array,
+            'pagination' => $pagination,
+            'totals'     => $totals,
+        ];
     }
 
     public function getDataGanancias(Request $request, $pageNumber = 1)

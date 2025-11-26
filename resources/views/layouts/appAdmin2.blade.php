@@ -311,6 +311,13 @@
                                     <p>Ganancia Diaria</p>
                                 </a>
                             </li>
+
+                            <li class="nav-item">
+                                <a href="{{ route('ganancia.index.trabajador') }}" class="nav-link @yield('activeGananciaDiariaTrabajador')">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Ganancia x Trabajador</p>
+                                </a>
+                            </li>
                         </ul>
                     </li>
 
