@@ -864,6 +864,24 @@
 
 
     </script>
+    <script>
+        // flag: ¿pedir trabajador en el pago?
+        window.PV_ASK_WORKER = @json($askWorker);
+
+        // lista simple de trabajadores para el popup
+        window.PV_WORKERS = @json(
+        $workers->map(function($w){
+            return [
+                'id'   => $w->id,
+                'name' => $w->first_name.' '.$w->last_name,
+            ];
+        })
+    );
+
+        // aquí guardaremos el id elegido
+        window.PV_SELECTED_WORKER_ID = null;
+    </script>
+
     <script src="{{ asset('js/puntoVenta/index.js') }}?v={{ time() }}"></script>
 
 @endsection

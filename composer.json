@@ -51,7 +51,9 @@
             "database/factories"
         ],
         "files": [
-            "app/Helpers/NumeroALetras.php"
+            "app/Helpers/NumeroALetras.php",
+            "app/Helpers/CalendarioHelper.php",
+            "app/Helpers/MetaCalendarHelper.php"
         ]
     },
     "autoload-dev": {

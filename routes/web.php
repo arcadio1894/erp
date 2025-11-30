@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use \App\Http\Controllers\MetaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -2817,6 +2818,37 @@ Route::middleware('auth')->group(function (){
 
         Route::get('/sales/chart-data-sale', 'GraphsController@getChartDataSale');
         Route::get('/sales/chart-data-utilidad', 'GraphsController@getChartDataCashFlow');
+
+        // TODO: Metas
+        Route::prefix('metas')->name('metas.')->group(function () {
+
+            // Listado
+            Route::get('/', [MetaController::class, 'index'])->name('index');
+
+            // Configurar tipo de meta (POST desde el formulario de configuración)
+            Route::post('/config-tipo', [MetaController::class, 'configTipo'])->name('configTipo');
+
+            // Crear (la vista la harás luego)
+            Route::get('/create', [MetaController::class, 'create'])->name('create');
+
+            // Guardar meta
+            Route::post('/store', [MetaController::class, 'store'])->name('store');
+
+            Route::get('/{meta}/edit', [MetaController::class, 'edit'])->name('edit');
+            Route::put('/{meta}/update', [MetaController::class, 'update'])->name('update');
+
+            Route::get('/weeks', [MetaController::class, 'getWeeksByYearMonth'])->name('weeks');
+
+            // Progreso (lo verás después)
+            //Route::get('/progreso', [MetaController::class, 'progreso'])->name('progreso');
+
+            // Eliminar meta
+            Route::delete('/delete/{meta}', [MetaController::class, 'destroy'])->name('destroy');
+
+            Route::get('/ranking', [MetaController::class, 'ranking'])->name('ranking');
+
+            Route::get('/ranking/data', [MetaController::class, 'getRankingData'])->name('ranking.data');
+        });
 
         // TODO: Faces
         Route::get('/faces', [\App\Http\Controllers\FaceController::class, 'index'])->name('faces.index');

@@ -398,14 +398,72 @@ function payNow() {
     // Obtener el valor de data-vuelto
     var dataVuelto = selectedRadio.data('vuelto');
 
-    // Verificar el valor de data-vuelto y realizar acciones
-    if (dataVuelto === 1) {
-        // Acción si se muestra el vuelto
-        mostrarVuelto();
-    } else {
-        // Acción si data-vuelto no es 1
-        guardarVenta();
+    // Si la config dice que NO se pide trabajador, seguimos normal
+    if (!window.PV_ASK_WORKER) {
+        window.PV_SELECTED_WORKER_ID = null;
+        continuarFlujoPago();
+        return;
     }
+
+    // Si hay que pedir trabajador, mostramos popup para elegirlo
+    mostrarPopupTrabajador(continuarFlujoPago);
+
+    // Verificar el valor de data-vuelto y realizar acciones
+    function continuarFlujoPago() {
+        if (dataVuelto === 1) {
+            mostrarVuelto();   // aquí internamente luego llamas a la confirmación
+        } else {
+            guardarVenta();    // idem
+        }
+    }
+}
+
+function mostrarPopupTrabajador(doneCallback) {
+    // construir options
+    let optionsHtml = '<option value="">Seleccione trabajador...</option>';
+    (window.PV_WORKERS || []).forEach(function (w) {
+        optionsHtml += '<option value="'+w.id+'">'+w.name+'</option>';
+    });
+
+    $.confirm({
+        title: 'Asignar trabajador',
+        content:
+            '<form>' +
+            '<div class="form-group">' +
+            '<label>Seleccione el trabajador que cerrará la venta</label>' +
+            '<select id="pv-worker-select" class="form-control">' +
+            optionsHtml +
+            '</select>' +
+            '</div>' +
+            '</form>',
+        type: 'blue',
+        buttons: {
+            confirmar: {
+                text: 'Aceptar',
+                btnClass: 'btn-primary',
+                action: function () {
+                    var workerId = this.$content.find('#pv-worker-select').val();
+                    if (!workerId) {
+                        $.alert('Debe seleccionar un trabajador.');
+                        return false; // mantiene el popup abierto
+                    }
+
+                    window.PV_SELECTED_WORKER_ID = workerId;
+
+                    if (typeof doneCallback === 'function') {
+                        doneCallback();
+                    }
+                }
+            },
+            cancelar: {
+                text: 'Cancelar',
+                btnClass: 'btn-secondary',
+                action: function () {
+                    $("#btn-pay").attr("disabled", false);
+                }
+            }
+        }
+    });
 }
 
 function mostrarVuelto() {
@@ -491,101 +549,6 @@ function guardarVenta() {
 
     var tipo_pago_text = $('input[name="tipo_pago"]:checked').siblings('label').text().trim();
 
-    /*form.append('items', items);
-    form.append('total_exonerada', $fin_total_exonerada);
-    form.append('total_igv', $fin_total_igv);
-    form.append('total_gravada', $fin_total_gravada);
-    form.append('total_descuentos', $fin_total_descuentos);
-    form.append('total_importe', $fin_total_importe);
-    form.append('total_vuelto', $fin_vuelto);
-    form.append('type_vuelto', $type_vuelto);
-    form.append('tipo_pago', tipo_pago);
-
-    $.ajax({
-        url: createUrl,
-        method: 'POST',
-        data: form,
-        processData:false,
-        contentType:false,
-        success: function (data) {
-            console.log(data);
-            toastr.success(data.message, 'Éxito',
-                {
-                    "closeButton": true,
-                    "debug": false,
-                    "newestOnTop": false,
-                    "progressBar": true,
-                    "positionClass": "toast-top-right",
-                    "preventDuplicates": false,
-                    "onclick": null,
-                    "showDuration": "300",
-                    "hideDuration": "1000",
-                    "timeOut": "2000",
-                    "extendedTimeOut": "1000",
-                    "showEasing": "swing",
-                    "hideEasing": "linear",
-                    "showMethod": "fadeIn",
-                    "hideMethod": "fadeOut"
-                });
-            setTimeout( function () {
-                $("#btn-pay").attr("disabled", false);
-                // No permitimos seguir agregando productos
-                $modeEdit = 0;
-                $sale_id = data.sale_id;
-
-                $("#btn-pay").hide();
-                $("#btn-newSale").show();
-                $("#btn-printDocument").show();
-                $("#btn-printDocument").attr("href", data.url_print);
-                //location.reload();
-            }, 2000 )
-        },
-        error: function (data) {
-            if( data.responseJSON.message && !data.responseJSON.errors )
-            {
-                toastr.error(data.responseJSON.message, 'Error',
-                    {
-                        "closeButton": true,
-                        "debug": false,
-                        "newestOnTop": false,
-                        "progressBar": true,
-                        "positionClass": "toast-top-right",
-                        "preventDuplicates": false,
-                        "onclick": null,
-                        "showDuration": "300",
-                        "hideDuration": "1000",
-                        "timeOut": "2000",
-                        "extendedTimeOut": "1000",
-                        "showEasing": "swing",
-                        "hideEasing": "linear",
-                        "showMethod": "fadeIn",
-                        "hideMethod": "fadeOut"
-                    });
-            }
-            for ( var property in data.responseJSON.errors ) {
-                toastr.error(data.responseJSON.errors[property], 'Error',
-                    {
-                        "closeButton": true,
-                        "debug": false,
-                        "newestOnTop": false,
-                        "progressBar": true,
-                        "positionClass": "toast-top-right",
-                        "preventDuplicates": false,
-                        "onclick": null,
-                        "showDuration": "300",
-                        "hideDuration": "1000",
-                        "timeOut": "2000",
-                        "extendedTimeOut": "1000",
-                        "showEasing": "swing",
-                        "hideEasing": "linear",
-                        "showMethod": "fadeIn",
-                        "hideMethod": "fadeOut"
-                    });
-            }
-            $("#btn-pay").attr("disabled", false);
-
-        },
-    });*/
     // Confirmación con jQuery Confirm
     $.confirm({
         title: 'Confirmar pago',
@@ -611,6 +574,8 @@ function guardarVenta() {
                     form.append('total_vuelto', $fin_vuelto);
                     form.append('type_vuelto', $type_vuelto);
                     form.append('tipo_pago', tipo_pago);
+                    // ⬇️ NUEVO: worker elegido (si no hay, va vacío)
+                    form.append('worker_id', window.PV_SELECTED_WORKER_ID || '');
 
                     const tipoComprobante = $('input[name="invoice_type"]:checked').val();
 

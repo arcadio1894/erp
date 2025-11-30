@@ -32,8 +32,29 @@ class PuntoVentaController extends Controller
     public function index()
     {
         $categories = Category::all();
-        $tipoPagos = TipoPago::all();
-        return view('puntoVenta.index', compact('categories', 'tipoPagos'));
+        $tipoPagos  = TipoPago::all();
+
+        // Si no existe, se crea con valueText = 'no'
+        $cfg = DataGeneral::firstOrCreate(
+            ['name' => 'punto_venta_worker'],
+            ['valueText' => 'no']
+        );
+
+        // True solo si está configurado en "si"
+        $askWorker = strtolower($cfg->valueText) === 'si';
+
+        // Lista de trabajadores habilitados
+        $workers = Worker::where('enable', true)
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get();
+
+        return view('puntoVenta.index', compact(
+            'categories',
+            'tipoPagos',
+            'askWorker',
+            'workers'
+        ));
     }
 
     public function getDataProducts(Request $request, $pageNumber = 1)
@@ -165,7 +186,10 @@ class PuntoVentaController extends Controller
     {
         //dd($request);
         $begin = microtime(true);
-        $worker = Worker::where('user_id', Auth::user()->id)->first();
+        $workerDefault = Worker::where('user_id', Auth::user()->id)->first();
+        $workerId = $request->input('worker_id');
+
+
         DB::beginTransaction();
         try {
 
@@ -215,8 +239,8 @@ class PuntoVentaController extends Controller
             $sale = Sale::create([
                 'date_sale' => Carbon::now(),
                 'serie' => $this->generateRandomString(),
-                'worker_id' => $worker->id,
-                'caja' => $worker->id,
+                'worker_id' => null,
+                'caja' => null,
                 'currency' => 'PEN',
                 'op_exonerada' => $request->get('total_exonerada'),
                 'op_inafecta' => 0,
@@ -245,6 +269,17 @@ class PuntoVentaController extends Controller
                 'cdr_path' => null,
                 'fecha_emision' => null,
             ]);
+
+            if ($workerId) {
+                $sale->worker_id = $workerId;
+                $sale->caja = $workerId;
+                $sale->save();
+            } else {
+                // fallback: el trabajador actual logueado, por ejemplo
+                $sale->worker_id = $workerDefault;
+                $sale->caja = $workerDefault;
+                $sale->save();
+            }
 
             //$items = json_decode($request->get('items'));
 

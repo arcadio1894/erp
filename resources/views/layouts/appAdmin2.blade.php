@@ -321,6 +321,40 @@
                         </ul>
                     </li>
 
+                    <li class="nav-header">METAS</li>
+                    <li class="nav-item has-treeview @yield('openMetas')">
+                        <a href="#" class="nav-link @yield('activeMetas')">
+                            <i class="nav-icon fas fa-truck-loading"></i>
+                            <p>
+                                METAS
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+
+                            <li class="nav-item">
+                                <a href="{{ route('metas.index') }}" class="nav-link @yield('activeMetasListado')">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Listado de Metas</p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="{{ route('metas.create') }}" class="nav-link @yield('activeMetasCreate')">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Crear Metas</p>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a href="{{ route('metas.ranking') }}" class="nav-link @yield('activeMetasProgreso')">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Progreso de Metas</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
                     <li class="nav-header">PROMOCIONES</li>
                     <li class="nav-item has-treeview @yield('openPromotions')">
 
