@@ -451,15 +451,22 @@ class MetaController extends Controller
         // IMPORTANTE: asumimos que cada worker solo pertenece a una meta
         $ranking = [];
 
+        $inicio = $fechaInicio->copy()->startOfDay();  // 2025-11-24 00:00:00
+        $fin    = $fechaFin->copy()->endOfDay();      // 2025-11-30 23:59:59
+
         foreach ($metas as $meta) {
             foreach ($meta->workers as $worker) {
 
                 // 2) Ventas del trabajador en ese rango
-                $ventasTotal = Sale::where('worker_id', $worker->id)
+                /*$ventasTotal = Sale::where('worker_id', $worker->id)
                     ->whereBetween('date_sale', [
                         $fechaInicio->format('Y-m-d'),
                         $fechaFin->format('Y-m-d'),
                     ])
+                    ->where('state_annulled', false)
+                    ->sum('importe_total');*/
+                $ventasTotal = Sale::where('worker_id', $worker->id)
+                    ->whereBetween('date_sale', [$inicio, $fin])
                     ->where('state_annulled', false)
                     ->sum('importe_total');
 
