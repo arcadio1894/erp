@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\ContactName;
 use App\Customer;
+use App\DataGeneral;
 use App\DateDimension;
 use App\Entry;
+use App\Helpers\MetaCalendarHelper;
 use App\Location;
 use App\Material;
+use App\Meta;
 use App\Output;
+use App\Sale;
 use App\Supplier;
 use App\Warehouse;
 use Illuminate\Http\Request;
@@ -77,8 +81,106 @@ class HomeController extends Controller
             ->orderBy('month')
             ->get(['month', 'month_name']);
 
+        /**
+         * =============================
+         *  RANKING DE METAS (TOP 10)
+         * =============================
+         */
+        $rankingMetasDashboard = [];
+        $rankingPeriodText     = null;
+
+        // leer tipo_meta
+        $tipoMeta = DataGeneral::where('name', 'tipo_meta')->value('valueText');
+        $tiposValidos = ['semanal', 'quincenal', 'mensual'];
+
+        if (in_array($tipoMeta, $tiposValidos)) {
+
+            try {
+                // Determinar año / mes / semana / quincena según HOY
+                $hoy = $fechaActual->copy();
+
+                if ($tipoMeta === 'mensual') {
+                    $params = [
+                        'year'  => $hoy->year,
+                        'month' => $hoy->month,
+                    ];
+                } elseif ($tipoMeta === 'quincenal') {
+                    $quincena = ($hoy->day <= 15) ? 1 : 2;
+                    $params = [
+                        'year'     => $hoy->year,
+                        'month'    => $hoy->month,
+                        'quincena' => $quincena,
+                    ];
+                } else { // semanal
+                    $rowHoy = DateDimension::whereDate('date', $hoy->toDateString())->first();
+                    if ($rowHoy) {
+                        $params = [
+                            'year' => $rowHoy->year,
+                            'month' => $rowHoy->month,
+                            'week'  => $rowHoy->week_of_year, // usamos week_of_year como en MetaCalendarHelper
+                        ];
+                    } else {
+                        $params = null;
+                    }
+                }
+
+                if ($params) {
+                    // obtener rango real usando el helper
+                    $range = MetaCalendarHelper::getRangeForPeriod($tipoMeta, $params);
+                    $inicio = $range['start']->copy()->startOfDay();
+                    $fin    = $range['end']->copy()->endOfDay();
+
+                    $rankingPeriodText = $inicio->format('d/m/Y') . ' al ' . $fin->format('d/m/Y');
+
+                    // metas del periodo
+                    $metas = Meta::with('workers')
+                        ->whereDate('fecha_inicio', $inicio->toDateString())
+                        ->whereDate('fecha_fin', $fin->toDateString())
+                        ->get();
+
+                    $tempRanking = [];
+
+                    foreach ($metas as $meta) {
+                        foreach ($meta->workers as $worker) {
+                            // suma de ventas del trabajador en el periodo
+                            $ventasTotal = Sale::where('worker_id', $worker->id)
+                                ->whereBetween('date_sale', [$inicio, $fin])
+                                ->where('state_annulled', false)
+                                ->sum('importe_total');
+
+                            $porcentaje = 0;
+                            if ($meta->monto > 0) {
+                                $porcentaje = round(($ventasTotal / $meta->monto) * 100, 2);
+                            }
+
+                            $tempRanking[] = [
+                                'worker_name'  => trim($worker->first_name . ' ' . $worker->last_name),
+                                'meta_nombre'  => $meta->nombre,
+                                'meta_monto'   => (float) $meta->monto,
+                                'ventas_total' => (float) $ventasTotal,
+                                'porcentaje'   => $porcentaje,
+                            ];
+                        }
+                    }
+
+                    // ordenar por porcentaje desc
+                    usort($tempRanking, function ($a, $b) {
+                        return $b['porcentaje'] <=> $a['porcentaje'];
+                    });
+
+                    // tomar solo top 10
+                    $rankingMetasDashboard = array_slice($tempRanking, 0, 10);
+                }
+
+            } catch (\Throwable $e) {
+                // Si falla algo, simplemente dejamos el ranking vacío
+                $rankingMetasDashboard = [];
+            }
+        }
+
         return view('dashboard.dashboard',
-            compact('customerCount',
+            compact(
+                'customerCount',
                 'contactNameCount',
                 'supplierCount',
                 'materialCount',
@@ -90,6 +192,11 @@ class HomeController extends Controller
                 'years',
                 'months',
                 'currentYear',
-                'currentMonth'));
+                'currentMonth',
+                'rankingMetasDashboard',
+                'rankingPeriodText',
+                'tipoMeta'
+            )
+        );
     }
 }

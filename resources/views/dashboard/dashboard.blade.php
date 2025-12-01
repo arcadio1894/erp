@@ -338,6 +338,61 @@
         </div>
     </div>
     @endhasanyrole
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card card-success">
+                <div class="card-header {{--d-flex justify-content-between align-items-center--}}">
+                    <h3 class="card-title">
+                        <i class="fas fa-trophy mr-1"></i> Ranking de Cumplimiento de Metas
+                    </h3>
+                    <div class="card-tools d-flex align-items-center">
+                        @if($rankingPeriodText)
+                            <span class="mr-3 text-sm text-light">
+                                {{ $rankingPeriodText }}
+                            </span>
+                        @endif
+                        <a href="{{ route('metas.ranking') }}" class="btn btn-warning btn-sm">
+                            Ver más
+                        </a>
+                        <button type="button" class="btn btn-tool " data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    @if(empty($rankingMetasDashboard))
+                        <p class="text-muted mb-0">
+                            No hay datos de metas configuradas para el periodo actual.
+                        </p>
+                    @else
+                        <ul class="list-unstyled mb-0">
+                            @foreach($rankingMetasDashboard as $row)
+                                @php
+                                    $pct = max(0, min(100, $row['porcentaje']));
+                                    if ($pct < 40)      $barClass = 'bg-danger';
+                                    elseif ($pct < 80) $barClass = 'bg-warning';
+                                    else               $barClass = 'bg-success';
+                                @endphp
+                                <li class="mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>{{ $row['worker_name'] }}</strong></span>
+                                        <span class="text-muted">
+                                {{ number_format($row['porcentaje'], 1) }}% cumplimiento
+                            </span>
+                                    </div>
+                                    <div class="progress progress-xs mt-1" style="height: 8px;">
+                                        <div class="progress-bar {{ $barClass }}" style="width: {{ $pct }}%;"></div>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
     {{--<div class="row">
         <div class="col-lg-6">
             <div class="card card-warning">
