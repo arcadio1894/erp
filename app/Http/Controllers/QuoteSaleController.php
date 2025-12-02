@@ -938,7 +938,7 @@ class QuoteSaleController extends Controller
                 'type_scrap' => $material->typeScrap,
                 'stock_current' => $material->stock_current,
                 'unit_price' => $material->unit_price,
-                'unit' => $material->unitMeasure->name,
+                'unit' => ($material->unitMeasure == null) ? "":$material->unitMeasure->name,
                 'code' => $material->code,
                 'unit_measure' => $material->unitMeasure,
                 'typescrap_id' => $material->typescrap_id,
@@ -2865,5 +2865,71 @@ class QuoteSaleController extends Controller
         $oMerger->stream();
 
         //return $pdf->stream($name);
+    }
+
+    public function show($id)
+    {
+        $begin = microtime(true);
+        $user = Auth::user();
+        $permissions = $user->getPermissionsViaRoles()->pluck('name')->toArray();
+        $unitMeasures = UnitMeasure::all();
+        $customers = Customer::all();
+        $defaultConsumable = '(*)';
+        $defaultElectric = '(e)';
+        $consumables = Material::with('unitMeasure')->where('category_id', 2)->where('description','LIKE',"%".$defaultConsumable."%")->orderBy('full_name', 'asc')->get();
+        $electrics = Material::with('unitMeasure')->where('category_id', 2)->whereElectric('description',$defaultElectric)->orderBy('full_name', 'asc')->get();
+        $workforces = Workforce::with('unitMeasure')->get();
+        $paymentDeadlines = PaymentDeadline::where('type', 'quotes')->get();
+        $utility = PorcentageQuote::where('name', 'utility')->first();
+        $rent = PorcentageQuote::where('name', 'rent')->first();
+        $letter = PorcentageQuote::where('name', 'letter')->first();
+
+        $quote = Quote::where('id', $id)
+            ->with('customer')
+            ->with('deadline')
+            ->with(['equipments' => function ($query) {
+                $query->with(['materials', 'consumables', 'electrics', 'workforces', 'turnstiles', 'workdays']);
+            }])->first();
+
+        $images = [];
+
+        $materials = Material::with('unitMeasure','typeScrap')
+            /*->where('enable_status', 1)*/->get();
+
+        /*$array = [];
+        foreach ( $materials as $material )
+        {
+            array_push($array, [
+                'id'=> $material->id,
+                'full_name' => $material->full_name,
+                'type_scrap' => $material->typeScrap,
+                'stock_current' => $material->stock_current,
+                'unit_price' => $material->unit_price,
+                'unit' => ($material->unitMeasure == null) ? "":$material->unitMeasure->name,
+                'code' => $material->code,
+                'unit_measure' => $material->unitMeasure,
+                'typescrap_id' => $material->typescrap_id,
+                'enable_status' => $material->enable_status,
+                'update_price' => $material->state_update_price
+            ]);
+        }*/
+
+        $dataCurrency = DataGeneral::where('name', 'type_current')->first();
+        $currency = $dataCurrency->valueText;
+
+        $dataIgv = PorcentageQuote::where('name', 'igv')->first();
+        $igv = $dataIgv->value;
+
+        $end = microtime(true) - $begin;
+
+        Audit::create([
+            'user_id' => Auth::user()->id,
+            'action' => 'Ver cotizacion venta VISTA',
+            'time' => $end
+        ]);
+
+
+        return view('quoteSale.show', compact('quote', 'unitMeasures', 'customers', 'consumables', 'electrics', 'workforces', 'permissions', 'paymentDeadlines', 'utility', 'rent', 'letter', 'images', 'currency', 'igv'));
+
     }
 }

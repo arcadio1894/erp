@@ -221,9 +221,22 @@
 </div>
 
 {{-- OBSERVACIONES --}}
-<div style="margin-top:8px; white-space:pre-line;">
-    <strong>OBSERVACIONES:</strong><br>
-    {!! nl2br(e($quote->observations)) !!}
+<div style="margin-top:8px;">
+    <strong>OBSERVACIONES:</strong>
+    <div style="margin-top:4px; font-size:10px; line-height:1.3;">
+        {!! nl2br(e(trim(strip_tags($quote->observations)))) !!}
+    </div>
+</div>
+
+<div style="margin-top:8px;">
+    <strong>DETALLES:</strong>
+    <div style="font-size:10px;">
+        @foreach($quote->equipments as $eq)
+            @if($eq->detail)
+                <p>{!! nl2br($eq->detail) !!}</p>
+            @endif
+        @endforeach
+    </div>
 </div>
 
 {{-- FOOTER --}}
@@ -235,7 +248,7 @@
 {{-- SEGUNDA PÁGINA (si aplica)   --}}
 {{-- ============================= --}}
 
-@if($quote->have_details || $quote->have_images)
+@if($quote->have_images)
     <div class="page-break"></div>
 
     {{-- Encabezado repetido --}}
@@ -253,17 +266,6 @@
             </td>
         </tr>
     </table>
-
-    {{-- Detalles --}}
-    <div style="margin-top:10px;">
-        @foreach($quote->equipments as $eq)
-            <p><strong>{{ $eq->description }}</strong></p>
-            @if($eq->detail)
-                <p>{!! nl2br(e($eq->detail)) !!}</p>
-            @endif
-            <br>
-        @endforeach
-    </div>
 
     {{-- Planos --}}
     @if(count($images) > 0)

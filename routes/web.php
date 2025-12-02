@@ -2916,6 +2916,10 @@ Route::middleware('auth')->group(function (){
             ->name('quote.raise.quote.sale')
             ->middleware('permission:raise_quote');
 
+        Route::get('ver/cotizacion/venta/{quote}', 'QuoteSaleController@show')
+            ->name('quoteSale.show')
+            ->middleware('permission:list_quoteSale');
+
         // TODO: PromotionLimits
         Route::get('promociones/por/limite', 'PromotionLimitController@index')
             ->name('promotionLimit.index')

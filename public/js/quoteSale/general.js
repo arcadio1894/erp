@@ -1360,7 +1360,7 @@ function renderDataTable(data) {
         var cloneBtnCreated = activateTemplate('#template-btn_created');
 
         if ( $.inArray('show_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/ver/cotizacion/'+data.id;
+            let url = document.location.origin+ '/dashboard/ver/cotizacion/venta/'+data.id;
             cloneBtnCreated.querySelector("[data-ver_cotizacion]").setAttribute("href", url);
         } else {
             let element = cloneBtnCreated.querySelector("[data-ver_cotizacion]");
@@ -1369,7 +1369,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('update_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('update_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/editar/planos/cotizacion/'+data.id;
             cloneBtnCreated.querySelector("[data-editar_planos]").setAttribute("href", url);
         } else {
@@ -1377,7 +1377,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
@@ -1389,7 +1389,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('printInternal_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('printInternal_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/imprimir/interno/'+data.id;
             cloneBtnCreated.querySelector("[data-imprimir_interna]").setAttribute("href", url);
         } else {
@@ -1397,7 +1397,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         if ( $.inArray('send_quote', $permissions) !== -1 ) {
             cloneBtnCreated.querySelector("[data-enviar]").setAttribute("data-send", data.id);
@@ -1440,7 +1440,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('renew_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('renew_quote', $permissions) !== -1 ) {
             cloneBtnCreated.querySelector("[data-recotizar]").setAttribute("data-renew", data.id);
             cloneBtnCreated.querySelector("[data-recotizar]").setAttribute("data-name", data.description);
         } else {
@@ -1448,9 +1448,9 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
-        if ( $.inArray('list_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('list_quote', $permissions) !== -1 ) {
             cloneBtnCreated.querySelector("[data-decimales]").setAttribute("data-decimals", data.id);
             cloneBtnCreated.querySelector("[data-decimales]").setAttribute("data-name", data.description);
         } else {
@@ -1458,7 +1458,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         botones.append(cloneBtnCreated);
     }
@@ -1467,7 +1467,7 @@ function renderDataTable(data) {
     {
         var cloneBtnSend = activateTemplate('#template-btn_send');
         if ( $.inArray('show_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/ver/cotizacion/'+data.id;
+            let url = document.location.origin+ '/dashboard/ver/cotizacion/venta/'+data.id;
             cloneBtnSend.querySelector("[data-ver_cotizacion]").setAttribute("href", url);
         } else {
             let element = cloneBtnSend.querySelector("[data-ver_cotizacion]");
@@ -1476,7 +1476,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('update_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('update_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/editar/planos/cotizacion/'+data.id;
             cloneBtnSend.querySelector("[data-editar_planos]").setAttribute("href", url);
         } else {
@@ -1484,7 +1484,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
@@ -1496,7 +1496,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('printInternal_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('printInternal_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/imprimir/interno/'+data.id;
             cloneBtnSend.querySelector("[data-imprimir_interna]").setAttribute("href", url);
         } else {
@@ -1504,7 +1504,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         if ( $.inArray('update_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/editar/cotizacion/venta/'+data.id;
@@ -1537,7 +1537,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('renew_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('renew_quote', $permissions) !== -1 ) {
             cloneBtnSend.querySelector("[data-recotizar]").setAttribute("data-renew", data.id);
             cloneBtnSend.querySelector("[data-recotizar]").setAttribute("data-name", data.description);
         } else {
@@ -1545,9 +1545,9 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
-        if ( $.inArray('list_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('list_quote', $permissions) !== -1 ) {
             cloneBtnSend.querySelector("[data-decimales]").setAttribute("data-decimals", data.id);
             cloneBtnSend.querySelector("[data-decimales]").setAttribute("data-name", data.description);
         } else {
@@ -1555,7 +1555,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         botones.append(cloneBtnSend);
     }
@@ -1565,7 +1565,7 @@ function renderDataTable(data) {
         var cloneBtnConfirm = activateTemplate('#template-btn_confirm');
 
         if ( $.inArray('show_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/ver/cotizacion/'+data.id;
+            let url = document.location.origin+ '/dashboard/ver/cotizacion/venta/'+data.id;
             cloneBtnConfirm.querySelector("[data-ver_cotizacion]").setAttribute("href", url);
         } else {
             let element = cloneBtnConfirm.querySelector("[data-ver_cotizacion]");
@@ -1574,7 +1574,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('update_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('update_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/editar/planos/cotizacion/'+data.id;
             cloneBtnConfirm.querySelector("[data-editar_planos]").setAttribute("href", url);
         } else {
@@ -1582,7 +1582,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
@@ -1594,7 +1594,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('printInternal_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('printInternal_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/imprimir/interno/'+data.id;
             cloneBtnConfirm.querySelector("[data-imprimir_interna]").setAttribute("href", url);
         } else {
@@ -1602,7 +1602,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         if ( $.inArray('raise_quote', $permissions) !== -1 ) {
             cloneBtnConfirm.querySelector("[data-regresar_enviado]").setAttribute("data-deselevar", data.id);
@@ -1614,7 +1614,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('adjust_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('adjust_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/ajustar/cotizacion/'+data.id;
             cloneBtnConfirm.querySelector("[data-ajustar_porcentajes]").setAttribute("href", url);
         } else {
@@ -1622,7 +1622,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         if ( $.inArray('raise_quote', $permissions) !== -1 ) {
             cloneBtnConfirm.querySelector("[data-elevar]").setAttribute("data-raise", data.id);
@@ -1635,7 +1635,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('confirm_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('confirm_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/cotizar/soles/cotizacion/'+data.id;
             cloneBtnConfirm.querySelector("[data-cotizar_soles]").setAttribute("href", url);
         } else {
@@ -1643,7 +1643,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         if ( $.inArray('destroy_quote', $permissions) !== -1 ) {
             cloneBtnConfirm.querySelector("[data-anular]").setAttribute("data-delete", data.id);
@@ -1655,7 +1655,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('renew_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('renew_quote', $permissions) !== -1 ) {
             cloneBtnConfirm.querySelector("[data-recotizar]").setAttribute("data-renew", data.id);
             cloneBtnConfirm.querySelector("[data-recotizar]").setAttribute("data-name", data.description);
         } else {
@@ -1663,9 +1663,9 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
-        if ( $.inArray('list_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('list_quote', $permissions) !== -1 ) {
             cloneBtnConfirm.querySelector("[data-decimales]").setAttribute("data-decimals", data.id);
             cloneBtnConfirm.querySelector("[data-decimales]").setAttribute("data-name", data.description);
         } else {
@@ -1673,7 +1673,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         botones.append(cloneBtnConfirm);
     }
@@ -1683,178 +1683,10 @@ function renderDataTable(data) {
         var cloneBtnRaised = activateTemplate('#template-btn_raised');
 
         if ( $.inArray('show_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/ver/cotizacion/'+data.id;
+            let url = document.location.origin+ '/dashboard/ver/cotizacion/venta/'+data.id;
             cloneBtnRaised.querySelector("[data-ver_cotizacion]").setAttribute("href", url);
         } else {
             let element = cloneBtnRaised.querySelector("[data-ver_cotizacion]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('update_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/editar/planos/cotizacion/'+data.id;
-            cloneBtnRaised.querySelector("[data-editar_planos]").setAttribute("href", url);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-editar_planos]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
-            cloneBtnRaised.querySelector("[data-imprimir_cliente]").setAttribute("href", url);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-imprimir_cliente]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('printInternal_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/imprimir/interno/'+data.id;
-            cloneBtnRaised.querySelector("[data-imprimir_interna]").setAttribute("href", url);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-imprimir_interna]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('raise_quote', $permissions) !== -1 ) {
-            cloneBtnRaised.querySelector("[data-modificar_codigo]").setAttribute("data-raise2", data.id);
-            cloneBtnRaised.querySelector("[data-modificar_codigo]").setAttribute("data-code", data.order);
-            cloneBtnRaised.querySelector("[data-modificar_codigo]").setAttribute("data-name", data.description);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-modificar_codigo]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('raise_quote', $permissions) !== -1 ) {
-            cloneBtnRaised.querySelector("[data-seleccionar_detraccion]").setAttribute("data-detraction", data.id);
-            cloneBtnRaised.querySelector("[data-seleccionar_detraccion]").setAttribute("data-name", data.description);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-seleccionar_detraccion]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('finish_quote', $permissions) !== -1 ) {
-            cloneBtnRaised.querySelector("[data-finalizar]").setAttribute("data-finish", data.id);
-            cloneBtnRaised.querySelector("[data-finalizar]").setAttribute("data-name", data.description);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-finalizar]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('replacement_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/reemplazar/materiales/cotizacion/'+data.id;
-            cloneBtnRaised.querySelector("[data-reemplazar_materiales]").setAttribute("href", url);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-reemplazar_materiales]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('finishEquipment_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/finalizar/equipos/cotizacion/'+data.id;
-            cloneBtnRaised.querySelector("[data-finalizar_equipos]").setAttribute("href", url);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-finalizar_equipos]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('raise_quote', $permissions) !== -1 ) {
-            cloneBtnRaised.querySelector("[data-regresar_enviado]").setAttribute("data-deselevar", data.id);
-            cloneBtnRaised.querySelector("[data-regresar_enviado]").setAttribute("data-name", data.description);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-regresar_enviado]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('confirm_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/cotizar/soles/cotizacion/'+data.id;
-            cloneBtnRaised.querySelector("[data-cotizar_soles]").setAttribute("href", url);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-cotizar_soles]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        /*if ( $.inArray('VBFinances_quote', $permissions) !== -1 ) {
-            cloneBtnRaised.querySelector("[data-visto_bueno_finanzas]").setAttribute("data-vb_finances", data.id);
-            cloneBtnRaised.querySelector("[data-visto_bueno_finanzas]").setAttribute("data-name", data.description);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-visto_bueno_finanzas]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }*/
-
-        if ( $.inArray('VBOperations_quote', $permissions) !== -1 ) {
-            cloneBtnRaised.querySelector("[data-visto_bueno_operaciones]").setAttribute("data-vb_operations", data.id);
-            cloneBtnRaised.querySelector("[data-visto_bueno_operaciones]").setAttribute("data-name", data.description);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-visto_bueno_operaciones]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('destroy_quote', $permissions) !== -1 ) {
-            cloneBtnRaised.querySelector("[data-anular]").setAttribute("data-delete", data.id);
-            cloneBtnRaised.querySelector("[data-anular]").setAttribute("data-name", data.description);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-anular]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('renew_quote', $permissions) !== -1 ) {
-            cloneBtnRaised.querySelector("[data-recotizar]").setAttribute("data-renew", data.id);
-            cloneBtnRaised.querySelector("[data-recotizar]").setAttribute("data-name", data.description);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-recotizar]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        if ( $.inArray('list_quote', $permissions) !== -1 ) {
-            cloneBtnRaised.querySelector("[data-decimales]").setAttribute("data-decimals", data.id);
-            cloneBtnRaised.querySelector("[data-decimales]").setAttribute("data-name", data.description);
-        } else {
-            let element = cloneBtnRaised.querySelector("[data-decimales]");
-            if (element) {
-                element.style.display = 'none';
-            }
-        }
-
-        botones.append(cloneBtnRaised);
-    }
-
-    if ( data.state == "VB_finance" )
-    {
-        var cloneBtnVB_finance = activateTemplate('#template-btn_VB_finance');
-
-        if ( $.inArray('show_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/ver/cotizacion/'+data.id;
-            cloneBtnVB_finance.querySelector("[data-ver_cotizacion]").setAttribute("href", url);
-        } else {
-            let element = cloneBtnVB_finance.querySelector("[data-ver_cotizacion]");
             if (element) {
                 element.style.display = 'none';
             }
@@ -1869,6 +1701,174 @@ function renderDataTable(data) {
                 element.style.display = 'none';
             }
         }*/
+
+        if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
+            let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
+            cloneBtnRaised.querySelector("[data-imprimir_cliente]").setAttribute("href", url);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-imprimir_cliente]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }
+
+        /*if ( $.inArray('printInternal_quote', $permissions) !== -1 ) {
+            let url = document.location.origin+ '/dashboard/imprimir/interno/'+data.id;
+            cloneBtnRaised.querySelector("[data-imprimir_interna]").setAttribute("href", url);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-imprimir_interna]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }*/
+
+        if ( $.inArray('raise_quote', $permissions) !== -1 ) {
+            cloneBtnRaised.querySelector("[data-modificar_codigo]").setAttribute("data-raise2", data.id);
+            cloneBtnRaised.querySelector("[data-modificar_codigo]").setAttribute("data-code", data.order);
+            cloneBtnRaised.querySelector("[data-modificar_codigo]").setAttribute("data-name", data.description);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-modificar_codigo]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }
+
+        /*if ( $.inArray('raise_quote', $permissions) !== -1 ) {
+            cloneBtnRaised.querySelector("[data-seleccionar_detraccion]").setAttribute("data-detraction", data.id);
+            cloneBtnRaised.querySelector("[data-seleccionar_detraccion]").setAttribute("data-name", data.description);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-seleccionar_detraccion]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }*/
+
+        if ( $.inArray('finish_quote', $permissions) !== -1 ) {
+            cloneBtnRaised.querySelector("[data-finalizar]").setAttribute("data-finish", data.id);
+            cloneBtnRaised.querySelector("[data-finalizar]").setAttribute("data-name", data.description);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-finalizar]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }
+
+        /*if ( $.inArray('replacement_quote', $permissions) !== -1 ) {
+            let url = document.location.origin+ '/dashboard/reemplazar/materiales/cotizacion/'+data.id;
+            cloneBtnRaised.querySelector("[data-reemplazar_materiales]").setAttribute("href", url);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-reemplazar_materiales]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }*/
+
+        /*if ( $.inArray('finishEquipment_quote', $permissions) !== -1 ) {
+            let url = document.location.origin+ '/dashboard/finalizar/equipos/cotizacion/'+data.id;
+            cloneBtnRaised.querySelector("[data-finalizar_equipos]").setAttribute("href", url);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-finalizar_equipos]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }*/
+
+        if ( $.inArray('raise_quote', $permissions) !== -1 ) {
+            cloneBtnRaised.querySelector("[data-regresar_enviado]").setAttribute("data-deselevar", data.id);
+            cloneBtnRaised.querySelector("[data-regresar_enviado]").setAttribute("data-name", data.description);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-regresar_enviado]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }
+
+        /*if ( $.inArray('confirm_quote', $permissions) !== -1 ) {
+            let url = document.location.origin+ '/dashboard/cotizar/soles/cotizacion/'+data.id;
+            cloneBtnRaised.querySelector("[data-cotizar_soles]").setAttribute("href", url);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-cotizar_soles]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }*/
+
+        /*if ( $.inArray('VBFinances_quote', $permissions) !== -1 ) {
+            cloneBtnRaised.querySelector("[data-visto_bueno_finanzas]").setAttribute("data-vb_finances", data.id);
+            cloneBtnRaised.querySelector("[data-visto_bueno_finanzas]").setAttribute("data-name", data.description);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-visto_bueno_finanzas]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }*/
+
+        /*if ( $.inArray('VBOperations_quote', $permissions) !== -1 ) {
+            cloneBtnRaised.querySelector("[data-visto_bueno_operaciones]").setAttribute("data-vb_operations", data.id);
+            cloneBtnRaised.querySelector("[data-visto_bueno_operaciones]").setAttribute("data-name", data.description);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-visto_bueno_operaciones]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }*/
+
+        if ( $.inArray('destroy_quote', $permissions) !== -1 ) {
+            cloneBtnRaised.querySelector("[data-anular]").setAttribute("data-delete", data.id);
+            cloneBtnRaised.querySelector("[data-anular]").setAttribute("data-name", data.description);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-anular]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }
+
+        /*if ( $.inArray('renew_quote', $permissions) !== -1 ) {
+            cloneBtnRaised.querySelector("[data-recotizar]").setAttribute("data-renew", data.id);
+            cloneBtnRaised.querySelector("[data-recotizar]").setAttribute("data-name", data.description);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-recotizar]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }*/
+
+        /*if ( $.inArray('list_quote', $permissions) !== -1 ) {
+            cloneBtnRaised.querySelector("[data-decimales]").setAttribute("data-decimals", data.id);
+            cloneBtnRaised.querySelector("[data-decimales]").setAttribute("data-name", data.description);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-decimales]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }*/
+
+        botones.append(cloneBtnRaised);
+    }
+
+    /*if ( data.state == "VB_finance" )
+    {
+        var cloneBtnVB_finance = activateTemplate('#template-btn_VB_finance');
+
+        if ( $.inArray('show_quote', $permissions) !== -1 ) {
+            let url = document.location.origin+ '/dashboard/ver/cotizacion/'+data.id;
+            cloneBtnVB_finance.querySelector("[data-ver_cotizacion]").setAttribute("href", url);
+        } else {
+            let element = cloneBtnVB_finance.querySelector("[data-ver_cotizacion]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }
+
+        /!*if ( $.inArray('update_quote', $permissions) !== -1 ) {
+            let url = document.location.origin+ '/dashboard/editar/planos/cotizacion/'+data.id;
+            cloneBtnRaised.querySelector("[data-editar_planos]").setAttribute("href", url);
+        } else {
+            let element = cloneBtnRaised.querySelector("[data-editar_planos]");
+            if (element) {
+                element.style.display = 'none';
+            }
+        }*!/
 
         if ( $.inArray('printCustomer_quote', $permissions) !== -1 ) {
             let url = document.location.origin+ '/dashboard/imprimir/cotizacion/cliente/'+data.id;
@@ -2120,14 +2120,14 @@ function renderDataTable(data) {
         }
 
         botones.append(cloneBtnVB_operation);
-    }
+    }*/
 
     if ( data.state == "close" )
     {
         var cloneBtnClose = activateTemplate('#template-btn_close');
 
         if ( $.inArray('show_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/ver/cotizacion/'+data.id;
+            let url = document.location.origin+ '/dashboard/ver/cotizacion/venta/'+data.id;
             cloneBtnClose.querySelector("[data-ver_cotizacion]").setAttribute("href", url);
         } else {
             let element = cloneBtnClose.querySelector("[data-ver_cotizacion]");
@@ -2157,7 +2157,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('renew_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('renew_quote', $permissions) !== -1 ) {
             cloneBtnClose.querySelector("[data-recotizar]").setAttribute("data-renew", data.id);
             cloneBtnClose.querySelector("[data-recotizar]").setAttribute("data-name", data.description);
         } else {
@@ -2165,7 +2165,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         if ( $.inArray('finish_quote', $permissions) !== -1 ) {
             cloneBtnClose.querySelector("[data-reactivar]").setAttribute("data-active", data.id);
@@ -2184,7 +2184,7 @@ function renderDataTable(data) {
         var cloneBtnCanceled = activateTemplate('#template-btn_canceled');
 
         if ( $.inArray('show_quote', $permissions) !== -1 ) {
-            let url = document.location.origin+ '/dashboard/ver/cotizacion/'+data.id;
+            let url = document.location.origin+ '/dashboard/ver/cotizacion/venta/'+data.id;
             cloneBtnCanceled.querySelector("[data-ver_cotizacion]").setAttribute("href", url);
         } else {
             let element = cloneBtnCanceled.querySelector("[data-ver_cotizacion]");
@@ -2193,7 +2193,7 @@ function renderDataTable(data) {
             }
         }
 
-        if ( $.inArray('renew_quote', $permissions) !== -1 ) {
+        /*if ( $.inArray('renew_quote', $permissions) !== -1 ) {
             cloneBtnCanceled.querySelector("[data-recotizar]").setAttribute("data-renew", data.id);
             cloneBtnCanceled.querySelector("[data-recotizar]").setAttribute("data-name", data.description);
         } else {
@@ -2201,7 +2201,7 @@ function renderDataTable(data) {
             if (element) {
                 element.style.display = 'none';
             }
-        }
+        }*/
 
         botones.append(cloneBtnCanceled);
     }
