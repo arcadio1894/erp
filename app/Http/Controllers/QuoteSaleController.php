@@ -574,7 +574,6 @@ class QuoteSaleController extends Controller
             $date4MonthAgo = $dateCurrent->subMonths(6);
             $query = Quote::with('customer', 'deadline', 'users')
                 /*->where('created_at', '>=', $date4MonthAgo)*/
-                ->where('raise_status', 0)
                 ->whereNotIn('state', ['canceled', 'expired'])
                 ->where('state_active', 'open')
                 ->orderBy('created_at', 'DESC');
@@ -584,7 +583,6 @@ class QuoteSaleController extends Controller
             $fechaFinal = Carbon::createFromFormat('d/m/Y', $endDate);
 
             $query = Quote::with('customer', 'deadline', 'users')
-                ->where('raise_status', 0)
                 ->whereNotIn('state', ['canceled', 'expired'])
                 ->where('state_active', 'open')
                 ->whereDate('date_quote', '>=', $fechaInicio)
@@ -648,27 +646,11 @@ class QuoteSaleController extends Controller
                         case 'close':
                             $q->where('state_active', 'close');
                             break;
-                        case 'VB_finance':
-                            $q->where('state', 'confirmed')
-                                ->where('raise_status', 1)
-                                ->where('vb_finances', 1)
-                                ->whereNull('vb_operations');
-                            break;
-                        case 'VB_operation':
-                            $q->where('state', 'confirmed')
-                                ->where('raise_status', 1)
-                                ->where('vb_finances', 1)
-                                ->where('vb_operations', 1);
-                            break;
                         case 'raised':
                             $q->where('state', 'confirmed')
                                 ->where('raise_status', 1)
                                 ->where('state', '<>','canceled')
-                                ->where('state_active', '<>','close')
-                                ->where(function ($q2) {
-                                    $q2->where('vb_finances', null)
-                                        ->where('vb_operations', null);
-                                });
+                                ->where('state_active', '<>','close');
                             break;
                         case 'confirm':
                             $q->where('state', 'confirmed')
@@ -720,26 +702,9 @@ class QuoteSaleController extends Controller
                 $stateText = '<span class="badge bg-danger">Finalizada</span>';
             } else {
                 if ($quote->state === 'confirmed' && $quote->raise_status === 1){
-                    if ( $quote->vb_finances == 1 && $quote->vb_operations == null )
-                    {
-                        $state = 'raise';
-                        $stateText = '<span class="badge bg-success">Elevada</span>';
-                        /*$state = 'VB_finance';
-                        $stateText = '<span class="badge bg-gradient-navy text-white">V.B. Finanzas <br>'. $quote->date_vb_finances->format("d/m/Y") .' </span>';
-                    */
-                    } else {
-                        if ( /*$quote->vb_finances == 1 &&*/ $quote->vb_operations == 1 )
-                        {
-                            $state = 'VB_operation';
-                            $stateText = '<span class="badge bg-gradient-orange text-white">V.B. Operaciones <br> '.$quote->date_vb_operations->format("d/m/Y").'</span>';
-                        } else {
-                            if ( $quote->vb_operations == 0 || $quote->vb_operations == null )
-                            {
-                                $state = 'raise';
-                                $stateText = '<span class="badge bg-success">Elevada</span>';
-                            }
-                        }
-                    }
+
+                    $state = 'raise';
+                    $stateText = '<span class="badge bg-success">Elevada</span>';
                 }
                 if ($quote->state === 'confirmed' && $quote->raise_status === 0){
                     $state = 'confirm';

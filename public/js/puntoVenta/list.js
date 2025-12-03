@@ -71,7 +71,9 @@ $(document).ready(function () {
 
     $(document).on('click', '[data-facturador]', function () {
         const btn = $(this);
-
+        if (!$('#downloadSection').hasClass('d-none')) {
+            $('#downloadSection').addClass('d-none');
+        }
         // Asignar ID
         $('#order_id').val(btn.data('id'));
 

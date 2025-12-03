@@ -191,12 +191,12 @@
                 <!-- /.card -->
             </div>
         </div>
-        <div class="row">
+        {{--<div class="row">
             <div class="col-md-4 offset-md-4 col-sm-4 offset-sm-4">
                 <button type="button" id="btn-addEquipment" class="btn btn-block bg-gradient-primary">Nuevo equipo <i class="fas fa-plus-circle"></i></button>
                 <br>
             </div>
-        </div>
+        </div>--}}
 
         <div class="row" id="element_loader">
             @foreach( $quote->equipments as $equipment )

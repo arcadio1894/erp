@@ -378,7 +378,7 @@
                     <button id="btnGenerarComprobante" type="button" class="btn btn-warning">Generar comprobante</button>
 
                 </div>
-                <div id="downloadSection" class="mt-3 text-center d-none">
+                <div id="downloadSection" class="mt-3 text-center d-none mb-5">
                     <a id="btnDescargarPDF" href="#" target="_blank" class="btn btn-success">
                         Descargar PDF del Comprobante
                     </a>
