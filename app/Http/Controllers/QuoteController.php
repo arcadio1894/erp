@@ -634,7 +634,7 @@ class QuoteController extends Controller
                 'type_scrap' => $material->typeScrap,
                 'stock_current' => $material->stock_current,
                 'unit_price' => $material->unit_price,
-                'unit' => $material->unitMeasure->name,
+                'unit' => ($material->unitMeasure == null) ? "":$material->unitMeasure->name,
                 'code' => $material->code,
                 'unit_measure' => $material->unitMeasure,
                 'typescrap_id' => $material->typescrap_id,

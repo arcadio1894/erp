@@ -69,7 +69,7 @@ class QuoteSaleController extends Controller
             ["value" => "send", "display" => "ENVIADAS"],
             ["value" => "confirm", "display" => "CONFIRMADAS"],
             ["value" => "raised", "display" => "ELEVADAS"],
-            ["value" => "VB_operation", "display" => "VB OPERACIONES"],
+            /*["value" => "VB_operation", "display" => "VB OPERACIONES"],*/
             ["value" => "close", "display" => "FINALIZADOS"],
             ["value" => "canceled", "display" => "CANCELADAS"]
         ];
@@ -77,6 +77,37 @@ class QuoteSaleController extends Controller
         $arrayUsers = User::select('id', 'name')->get()->toArray();
 
         return view('quoteSale.general', compact( 'permissions', 'arrayYears', 'arrayCustomers', 'arrayStates', 'arrayUsers'));
+
+    }
+
+    public function indexFacturadas()
+    {
+        $user = Auth::user();
+        $permissions = $user->getPermissionsViaRoles()->pluck('name')->toArray();
+
+        $registros = Quote::all();
+
+        $arrayYears = $registros->pluck('date_quote')->map(function ($date) {
+            return Carbon::parse($date)->format('Y');
+        })->unique()->toArray();
+
+        $arrayYears = array_values($arrayYears);
+
+        $arrayCustomers = Customer::select('id', 'business_name')->get()->toArray();
+        // created, send, confirm, raised, VB_finance, VB_operation, close, canceled
+        $arrayStates = [
+            ["value" => "created", "display" => "CREADAS"],
+            ["value" => "send", "display" => "ENVIADAS"],
+            ["value" => "confirm", "display" => "CONFIRMADAS"],
+            ["value" => "raised", "display" => "ELEVADAS"],
+            /*["value" => "VB_operation", "display" => "VB OPERACIONES"],*/
+            ["value" => "close", "display" => "FINALIZADOS"],
+            ["value" => "canceled", "display" => "CANCELADAS"]
+        ];
+
+        $arrayUsers = User::select('id', 'name')->get()->toArray();
+
+        return view('quoteSale.facturadas', compact( 'permissions', 'arrayYears', 'arrayCustomers', 'arrayStates', 'arrayUsers'));
 
     }
 
@@ -108,7 +139,7 @@ class QuoteSaleController extends Controller
             array_push($array, [
                 'id'=> $material->id,
                 'full_description' => $material->full_description,
-                'unit' => $material->unitMeasure->name,
+                'unit' => ($material->unitMeasure == null) ? "":$material->unitMeasure->name,
                 'code' => $material->code,
                 'type_scrap' => $material->typeScrap,
                 'unit_measure' => $material->unitMeasure,
@@ -570,12 +601,10 @@ class QuoteSaleController extends Controller
 
         if ( $startDate == "" || $endDate == "" )
         {
-            $dateCurrent = Carbon::now('America/Lima');
-            $date4MonthAgo = $dateCurrent->subMonths(6);
             $query = Quote::with('customer', 'deadline', 'users')
-                /*->where('created_at', '>=', $date4MonthAgo)*/
                 ->whereNotIn('state', ['canceled', 'expired'])
                 ->where('state_active', 'open')
+                ->whereDoesntHave('sales')
                 ->orderBy('created_at', 'DESC');
 
         } else {
@@ -587,6 +616,209 @@ class QuoteSaleController extends Controller
                 ->where('state_active', 'open')
                 ->whereDate('date_quote', '>=', $fechaInicio)
                 ->whereDate('date_quote', '<=', $fechaFinal)
+                ->whereDoesntHave('sales')
+                ->orderBy('created_at', 'DESC');
+        }
+
+        // Aplicar filtros si se proporcionan
+        if ($description_quote) {
+            $query->where('description_quote', 'LIKE', '%'.$description_quote.'%');
+        }
+
+        if ($year) {
+            $query->whereYear('date_quote', $year);
+        }
+
+        if ($code) {
+            $query->where('code', 'LIKE', '%'.$code.'%');
+
+        }
+
+        if ($order) {
+            $query->where('code_customer', 'LIKE', '%'.$order.'%');
+
+        }
+
+        if ($customer) {
+            $query->whereHas('customer', function ($query2) use ($customer) {
+                $query2->where('customer_id', $customer);
+            });
+
+        }
+
+        if ($creator != "")
+        {
+            $query->whereHas('users', function ($query2) use ($creator) {
+                $query2->where('user_id', $creator);
+            });
+        }
+
+        if ($stateQuote) {
+            // Creada, Enviada, confirmada, elevada, VB Finanzas, VB Operaciones, Finalizadas, Anuladas
+            // created, send, confirm, raised, VB_finance, VB_operation, close, canceled
+            $query->where(function ($subquery) use ($stateQuote) {
+                $subquery->where(function ($q) use ($stateQuote) {
+                    switch ($stateQuote) {
+                        case 'created':
+                            $q->where('state', 'created')
+                                ->where(function ($q2) {
+                                    $q2->where('send_state', 0)
+                                        ->orWhere('send_state', false);
+                                });
+                            break;
+                        case 'send':
+                            $q->where('state', 'created')
+                                ->where(function ($q2) {
+                                    $q2->where('send_state', 1)
+                                        ->orWhere('send_state', true);
+                                });
+                            break;
+                        case 'close':
+                            $q->where('state_active', 'close');
+                            break;
+                        case 'raised':
+                            $q->where('state', 'confirmed')
+                                ->where('raise_status', 1)
+                                ->where('state', '<>','canceled')
+                                ->where('state_active', '<>','close');
+                            break;
+                        case 'confirm':
+                            $q->where('state', 'confirmed')
+                                ->where('raise_status', 0);
+                            break;
+                        case 'canceled':
+                            $q->where('state', 'canceled');
+                            break;
+                        default:
+                            // Lógica por defecto o manejo de errores si es necesario
+                            break;
+                    }
+                });
+            });
+        }
+
+        //$query = FinanceWork::with('quote', 'bank');
+
+        $totalFilteredRecords = $query->count();
+        $totalPages = ceil($totalFilteredRecords / $perPage);
+
+        $startRecord = ($pageNumber - 1) * $perPage + 1;
+        $endRecord = min($totalFilteredRecords, $pageNumber * $perPage);
+
+        $quotes = $query->skip(($pageNumber - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        //dd($proformas);
+
+        $array = [];
+
+        foreach ( $quotes as $quote )
+        {
+            $state = "";
+            $stateText = "";
+            if ( $quote->state === 'created' ) {
+                if ( $quote->send_state == 1 || $quote->send_state == true )
+                {
+                    $state = 'send';
+                    $stateText = '<span class="badge bg-warning">Enviado</span>';
+                } else {
+                    $state = 'created';
+                    $stateText = '<span class="badge bg-primary">Creada</span>';
+                }
+            }
+            if ($quote->state_active === 'close'){
+                $state = 'close';
+                $stateText = '<span class="badge bg-danger">Finalizada</span>';
+            } else {
+                if ($quote->state === 'confirmed' && $quote->raise_status === 1){
+
+                    $state = 'raise';
+                    $stateText = '<span class="badge bg-success">Elevada</span>';
+                }
+                if ($quote->state === 'confirmed' && $quote->raise_status === 0){
+                    $state = 'confirm';
+                    $stateText =  '<span class="badge bg-success">Confirmada</span>';
+                }
+                if ($quote->state === 'canceled'){
+                    $state = 'canceled';
+                    $stateText = '<span class="badge bg-danger">Cancelada</span>';
+                }
+            }
+
+            $stateDecimals = '';
+            if ( $quote->state_decimals == 1 )
+            {
+                $stateDecimals = '<span class="badge bg-success">Mostrar</span>';
+            } else {
+                $stateDecimals = '<span class="badge bg-danger">Ocultar</span>';
+            }
+            array_push($array, [
+                "id" => $quote->id,
+                "year" => ( $quote->date_quote == null || $quote->date_quote == "") ? '':$quote->date_quote->year,
+                "code" => ($quote->code == null || $quote->code == "") ? '': $quote->code,
+                "description" => ($quote->description_quote == null || $quote->description_quote == "") ? '': $quote->description_quote,
+                "date_quote" => ($quote->date_quote == null || $quote->date_quote == "") ? '': $quote->date_quote->format('d/m/Y'),
+                "order" => ($quote->code_customer == null || $quote->code_customer == "") ? "": $quote->code_customer,
+                "date_validate" => ($quote->date_validate == null || $quote->date_validate == "") ? '': $quote->date_validate->format('d/m/Y'),
+                "deadline" => ($quote->payment_deadline_id == null || $quote->payment_deadline_id == "") ? "":$quote->deadline->description,
+                "time_delivery" => $quote->time_delivery.' DÍAS',
+                "customer" => ($quote->customer_id == "" || $quote->customer_id == null) ? "" : $quote->customer->business_name,
+                "total_igv" => number_format($quote->total_importe/1.18, 2),
+                "total" => number_format($quote->total_importe, 2),
+                "currency" => ($quote->currency_invoice == null || $quote->currency_invoice == "") ? '': $quote->currency_invoice,
+                "state" => $state,
+                "stateText" => $stateText,
+                "created_at" => $quote->created_at->format('d/m/Y'),
+                "creator" => ($quote->users[0] == null) ? "": $quote->users[0]->user->name,
+                "decimals" => $stateDecimals,
+                "send_state" => $quote->send_state
+            ]);
+        }
+
+        $pagination = [
+            'currentPage' => (int)$pageNumber,
+            'totalPages' => (int)$totalPages,
+            'startRecord' => $startRecord,
+            'endRecord' => $endRecord,
+            'totalRecords' => $totalFilteredRecords,
+            'totalFilteredRecords' => $totalFilteredRecords
+        ];
+
+        return ['data' => $array, 'pagination' => $pagination];
+    }
+
+    public function getDataQuotesSalesIndex(Request $request, $pageNumber = 1)
+    {
+        $perPage = 10;
+        $description_quote = $request->input('description_quote');
+        $year = $request->input('year');
+        $code = $request->input('code');
+        $order = $request->input('order');
+        $customer = $request->input('customer');
+        $creator = $request->input('creator');
+        $stateQuote = $request->input('stateQuote');
+        $startDate = $request->input('startDate');
+        $endDate = $request->input('endDate');
+
+        if ( $startDate == "" || $endDate == "" )
+        {
+            $query = Quote::with('customer', 'deadline', 'users')
+                ->whereNotIn('state', ['canceled', 'expired'])
+                ->where('state_active', 'open')
+                ->whereHas('sales')
+                ->orderBy('created_at', 'DESC');
+
+        } else {
+            $fechaInicio = Carbon::createFromFormat('d/m/Y', $startDate);
+            $fechaFinal = Carbon::createFromFormat('d/m/Y', $endDate);
+
+            $query = Quote::with('customer', 'deadline', 'users')
+                ->whereNotIn('state', ['canceled', 'expired'])
+                ->where('state_active', 'open')
+                ->whereDate('date_quote', '>=', $fechaInicio)
+                ->whereDate('date_quote', '<=', $fechaFinal)
+                ->whereHas('sales')
                 ->orderBy('created_at', 'DESC');
         }
 
@@ -774,111 +1006,6 @@ class QuoteSaleController extends Controller
         $utility = PorcentageQuote::where('name', 'utility')->first();
         $rent = PorcentageQuote::where('name', 'rent')->first();
         $letter = PorcentageQuote::where('name', 'letter')->first();
-        /*$quote3 = Quote::where('id', $id)
-            ->with(['equipments' => function ($query) {
-                $query->with(['materials', 'consumables', 'electrics', 'workforces', 'turnstiles', 'workdays']);
-            }])->first();*/
-
-        /*if ( $quote3->state === 'created' )
-        {
-
-            foreach( $quote3->equipments as $equipment )
-            {
-                // TODO: Actualizamos los porcentages si no estan registrados
-                if ( $equipment->utility == 0 && $equipment->rent && $equipment->letter == 0 )
-                {
-                    $equipment->utility = $quote3->utility;
-                    $equipment->rent = $quote3->rent;
-                    $equipment->letter = $quote3->letter;
-                    $equipment->save();
-
-                }
-
-                // TODO: Actualizar los precios
-                foreach ( $equipment->materials as $equipment_material )
-                {
-                    if ( $equipment_material->price !== $equipment_material->material->unit_price )
-                    {
-                        $equipment_material->price = $equipment_material->material->unit_price;
-                        $equipment_material->total = $equipment_material->material->unit_price * $equipment_material->quantity;
-                        $equipment_material->save();
-                    }
-                }
-
-                foreach ( $equipment->consumables as $equipment_consumable )
-                {
-                    if ( $equipment_consumable->price !== $equipment_consumable->material->unit_price )
-                    {
-                        $equipment_consumable->price = $equipment_consumable->material->list_price;
-                        $equipment_consumable->total = $equipment_consumable->material->list_price * $equipment_consumable->quantity;
-                        $equipment_consumable->save();
-                    }
-                }
-
-                foreach ( $equipment->electrics as $equipment_electric )
-                {
-                    if ( $equipment_electric->price !== $equipment_electric->material->unit_price )
-                    {
-                        $equipment_electric->price = $equipment_electric->material->unit_price;
-                        $equipment_electric->total = $equipment_electric->material->unit_price * $equipment_electric->quantity;
-                        $equipment_electric->save();
-                    }
-                }
-            }
-
-            $quote2 = Quote::where('id', $id)
-                ->with(['equipments' => function ($query) {
-                    $query->with(['materials', 'consumables', 'electrics', 'workforces', 'turnstiles', 'workdays']);
-                }])->first();
-
-            $new_total_quote = 0;
-            foreach( $quote2->equipments as $equipment )
-            {
-                $new_total_material = 0;
-                foreach ( $equipment->materials as $equipment_material )
-                {
-                    $new_total_material = $new_total_material + $equipment_material->total;
-                }
-                $new_total_consumable = 0;
-                foreach ( $equipment->consumables as $equipment_consumable )
-                {
-                    $new_total_consumable = $new_total_consumable + $equipment_consumable->total;
-                }
-                $new_total_electric = 0;
-                foreach ( $equipment->electrics as $equipment_electric )
-                {
-                    $new_total_electric = $new_total_electric + $equipment_electric->total;
-                }
-                $new_total_workforce = 0;
-                foreach ( $equipment->workforces as $equipment_workforce )
-                {
-                    $new_total_workforce = $new_total_workforce + $equipment_workforce->total;
-                }
-                $new_total_turnstile = 0;
-                foreach ( $equipment->turnstiles as $equipment_turnstile )
-                {
-                    $new_total_turnstile = $new_total_turnstile + $equipment_turnstile->total;
-                }
-                $new_total_workday = 0;
-                foreach ( $equipment->workdays as $equipment_workday )
-                {
-                    $new_total_workday = $new_total_workday + $equipment_workday->total;
-                }
-
-                $totalEquipo = (($new_total_material + $new_total_consumable + $new_total_electric + $new_total_workforce + $new_total_turnstile  + $new_total_workday ) * $equipment->quantity);
-                $totalEquipmentU = $totalEquipo*(($equipment->utility/100)+1);
-                $totalEquipmentL = $totalEquipmentU*(($equipment->letter/100)+1);
-                $totalEquipmentR = $totalEquipmentL*(($equipment->rent/100)+1);
-
-                $new_total_quote = $new_total_quote + $totalEquipmentR;
-                $equipment->total = $totalEquipo;
-                $equipment->save();
-            }
-            $quote2->total = $new_total_quote ;
-            $quote2->save();
-
-
-        }*/
 
         $quote = Quote::where('id', $id)
             ->with('customer')
@@ -1177,8 +1304,64 @@ class QuoteSaleController extends Controller
 
     public function destroy(Quote $quote)
     {
-        $quote->state = 'canceled';
-        $quote->save();
+        DB::transaction(function () use ($quote) {
+
+            /*
+             * 1) LIBERAR RESERVAS DE MATERIALES (QuoteMaterialReservation)
+             *    y AJUSTAR stock_reserved EN Material
+             */
+            $reservations = QuoteMaterialReservation::where('quote_id', $quote->id)
+                ->lockForUpdate()
+                ->get();
+
+            foreach ($reservations as $reservation) {
+                $material = Material::lockForUpdate()->find($reservation->material_id);
+
+                if ($material) {
+                    // Restar la cantidad reservada y evitar negativos
+                    $material->stock_reserved = max(
+                        0,
+                        (float) $material->stock_reserved - (float) $reservation->quantity
+                    );
+                    $material->save();
+                }
+
+                // Borramos la reserva de esta cotización
+                $reservation->delete();
+            }
+
+            /*
+             * 2) LIMPIAR EQUIPOS Y CONSUMIBLES LIGADOS A LA COTIZACIÓN
+             *    - Eliminar PromotionUsage por consumible
+             *    - Eliminar consumibles
+             *    - Eliminar equipos
+             */
+            $equipments = Equipment::where('quote_id', $quote->id)
+                ->with('consumables')   // relación: equipment -> consumables
+                ->get();
+
+            foreach ($equipments as $equipment) {
+                foreach ($equipment->consumables as $consumable) {
+
+                    // Borrar usos de promociones ligados a este consumible
+                    PromotionUsage::where('equipment_consumable_id', $consumable->id)->delete();
+
+                    // Borrar el consumible
+                    //$consumable->delete();
+                }
+
+                // Borrar el equipo
+                //$equipment->delete();
+            }
+
+            /*
+             * 3) MARCAR LA COTIZACIÓN COMO ANULADA
+             */
+            $quote->state = 'canceled';
+            $quote->save();
+        });
+
+        return response()->json(['ok' => true]);
     }
 
     public function updateEquipmentOfQuoteOriginal(Request $request, $id_equipment, $id_quote)
@@ -2361,6 +2544,7 @@ class QuoteSaleController extends Controller
                     $material = $consumable->material;
                     if ($material) {
                         $material->stock_current = max(0, $material->stock_current - $consumable->quantity);
+                        $material->stock_current = max(0, $material->stock_reserved - $consumable->quantity);
                         $material->save();
                     }
 

@@ -2872,6 +2872,13 @@ Route::middleware('auth')->group(function (){
             ->middleware('permission:list_quoteSale');
         Route::get('/get/data/quotes/sale/index/v2/{numberPage}', 'QuoteSaleController@getDataQuotesIndex')
             ->middleware('permission:list_quoteSale');
+
+        Route::get('cotizaciones/venta/facturadas', 'QuoteSaleController@indexFacturadas')
+            ->name('quoteSale.index.facturadas')
+            ->middleware('permission:list_quoteSale');
+        Route::get('/get/data/quotes/sale/facturadas/index/v2/{numberPage}', 'QuoteSaleController@getDataQuotesSalesIndex')
+            ->middleware('permission:list_quoteSale');
+
         Route::get('cotizaciones/venta/totales', 'QuoteSaleController@indexGeneral')
             ->name('quoteSale.list.general')
             ->middleware('permission:list_quoteSale');

@@ -714,7 +714,7 @@ class MaterialController extends Controller
             array_push($array, [
                 'id'=> $material->id,
                 'material' => $material->full_name,
-                'unit' => $material->unitMeasure->name,
+                'unit' => ($material->unitMeasure == null) ? "":$material->unitMeasure->name,
                 'code' => $material->code,
                 'price'=>$material->price_final,
                 'typescrap'=>$material->typescrap_id,

@@ -1058,14 +1058,14 @@
                                         </a>
                                     </li>
                                 @endcan
-                                {{--@can('list_quote')
+                                @can('list_quote')
                                     <li class="nav-item">
-                                        <a href="{{route('quoteSale.indexV2')}}" class="nav-link @yield('activeListQuote')">
+                                        <a href="{{route('quoteSale.index.facturadas')}}" class="nav-link @yield('activeListFacturadasQuote')">
                                             <i class="far fa-circle nav-icon"></i>
-                                            <p>Listar cotizaciones</p>
+                                            <p>Listar facturadas</p>
                                         </a>
                                     </li>
-                                @endcan--}}
+                                @endcan
                                 @can('create_quote')
                                     <li class="nav-item">
                                         <a href="{{ route('quoteSale.create') }}" class="nav-link @yield('activeCreateQuote')">
