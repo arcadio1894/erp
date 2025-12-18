@@ -7,7 +7,10 @@ use App\CashMovement;
 use App\CashRegister;
 use App\Category;
 use App\DataGeneral;
+use App\Item;
 use App\Mail\StockLowNotificationMail;
+use App\Output;
+use App\OutputDetail;
 use App\PorcentageQuote;
 use Illuminate\Support\Facades\Mail;
 use App\Material;
@@ -283,7 +286,17 @@ class PuntoVentaController extends Controller
 
             //$items = json_decode($request->get('items'));
 
-            for ( $i=0; $i<sizeof($items); $i++ )
+            // ✅ Crear UNA sola salida (Output) para toda la venta
+            $output = Output::create([
+                'execution_order'  => "VENTA DE POS",
+                'request_date'     => $sale->date_sale ?? Carbon::now(),
+                'requesting_user'  => Auth::id(),
+                'responsible_user' => Auth::id(),
+                'state'            => 'confirmed',
+                'indicator'        => 'or',
+            ]);
+
+            /*for ( $i=0; $i<sizeof($items); $i++ )
             {
                 $saleDetail = SaleDetail::create([
                     'sale_id' => $sale->id,
@@ -298,8 +311,8 @@ class PuntoVentaController extends Controller
                 // TODO: Actualizar stock
                 // TODO: Actualizar el stock del storeMaterial con la ubicacion que se este enviando
                 $material = Material::find($items[$i]->productId);
-                $material->stock_current = $material->stock_current - $items[$i]->productQuantity;
-                $material->save();
+                //$material->stock_current = $material->stock_current - $items[$i]->productQuantity;
+                //$material->save();
 
                 $cantidadVendida = $items[$i]->productQuantity;
                 $storeMaterials = StoreMaterial::where('material_id', $material->id)
@@ -334,13 +347,144 @@ class PuntoVentaController extends Controller
 
                 //$storeMaterialMin = $storeMaterialMinData->valueNumber;
 
-                /*if ($storeMaterialFinal <= $storeMaterialMin)
-                {
+                //if ($storeMaterialFinal <= $storeMaterialMin)
+                //{
                     // TODO: Crear notificaciones
-                    $this->manageNotifications($material);
-                }*/
+                    //$this->manageNotifications($material);
+                //}
 
-                $this->manageNotifications($material);
+                //$this->manageNotifications($material);
+            }*/
+            for ($i = 0; $i < sizeof($items); $i++) {
+
+                // ==========================================
+                // 1. Crear SaleDetail (NO CAMBIA)
+                // ==========================================
+                $saleDetail = SaleDetail::create([
+                    'sale_id'        => $sale->id,
+                    'material_id'    => $items[$i]->productId,
+                    'price'          => $items[$i]->productPrice,
+                    'quantity'       => $items[$i]->productQuantity,
+                    'percentage_tax' => $items[$i]->productTax,
+                    'total'          => $items[$i]->productTotal,
+                    'discount'       => $items[$i]->productDiscount,
+                ]);
+
+                $material = Material::findOrFail($items[$i]->productId);
+                $cantidadVendida = (float) $items[$i]->productQuantity;
+
+                // ==========================================
+                // 2. CASO ITEMEABLE (tipo_venta_id == 3)
+                // ==========================================
+                if ((int) $material->tipo_venta_id === 3) {
+
+                    if (floor($cantidadVendida) != $cantidadVendida) {
+                        throw new \Exception(
+                            "Cantidad decimal no soportada para material itemeable: {$material->full_name}"
+                        );
+                    }
+
+                    $cantidadVendidaInt = (int) $cantidadVendida;
+
+                    // Traer items disponibles
+                    $itemsDisponibles = Item::where('material_id', $material->id)
+                        ->whereIn('state_item', ['entered', 'scrapped'])
+                        ->orderBy('id')
+                        ->lockForUpdate()
+                        ->take($cantidadVendidaInt)
+                        ->get();
+
+                    if ($itemsDisponibles->count() < $cantidadVendidaInt) {
+                        throw new \Exception(
+                            "Stock insuficiente del material {$material->full_name}. " .
+                            "Requiere {$cantidadVendidaInt} y hay {$itemsDisponibles->count()}."
+                        );
+                    }
+
+                    // Crear OutputDetail por cada item
+                    foreach ($itemsDisponibles as $item) {
+
+                        OutputDetail::create([
+                            'output_id'   => $output->id,
+                            'item_id'     => $item->id,
+                            'material_id' => $material->id,
+                            'quote_id'    => $sale->quote_id ?? null,
+                            'custom'      => 0,
+                            'percentage'  => 1, // 1 item = 1 unidad
+                            'price'       => (float) $items[$i]->productPrice,
+                            'length'      => $item->length,
+                            'width'       => $item->width,
+                        ]);
+
+                        // Marcar item como salido
+                        $item->state_item = 'exited';
+                        $item->save();
+                    }
+
+                    $cantidadParaStore = $cantidadVendidaInt;
+
+                }
+                // ==========================================
+                // 3. CASO NO ITEMEABLE
+                // ==========================================
+                else {
+
+                    // Creamos UN SOLO OutputDetail con la cantidad en percentage
+                    OutputDetail::create([
+                        'output_id'   => $output->id,
+                        'item_id'     => null,
+                        'material_id' => $material->id,
+                        'quote_id'    => $sale->quote_id ?? null,
+                        'custom'      => 0,
+                        'percentage'  => $cantidadVendida, // 👈 AQUÍ VA LA CANTIDAD
+                        'price'       => (float) $items[$i]->productPrice,
+                        'length'      => null,
+                        'width'       => null,
+                    ]);
+
+                    // Descontar stock directo del material
+                    $material->stock_current = max(
+                        0,
+                        (float) $material->stock_current - $cantidadVendida
+                    );
+                    $material->save();
+
+                    $cantidadParaStore = $cantidadVendida;
+                }
+
+                // ==========================================
+                // 4. DESCONTAR StoreMaterial (AMBOS CASOS)
+                // ==========================================
+                if ($cantidadParaStore > 0) {
+
+                    $restante = $cantidadParaStore;
+
+                    $storeMaterials = StoreMaterial::where('material_id', $material->id)
+                        ->orderBy('id')
+                        ->lockForUpdate()
+                        ->get();
+
+                    foreach ($storeMaterials as $storeMaterial) {
+                        if ($restante <= 0) {
+                            break;
+                        }
+
+                        $stockDisponible = (float) $storeMaterial->stock_current;
+
+                        if ($stockDisponible >= $restante) {
+                            $storeMaterial->stock_current = $stockDisponible - $restante;
+                            $storeMaterial->save();
+                            $restante = 0;
+                        } else {
+                            $storeMaterial->stock_current = 0;
+                            $storeMaterial->save();
+                            $restante -= $stockDisponible;
+                        }
+                    }
+
+                    // Notificación de stock bajo
+                    $this->manageNotifications($material);
+                }
             }
 
             // Agregar movimientos a la caja

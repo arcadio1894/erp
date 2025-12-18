@@ -17,10 +17,12 @@ use App\EquipmentWorkforce;
 use App\Http\Requests\StoreQuoteRequest;
 use App\Http\Requests\UpdateQuoteRequest;
 use App\ImagesQuote;
+use App\Item;
 use App\Mail\StockLowNotificationMail;
 use App\Material;
 use App\Notification;
 use App\NotificationUser;
+use App\Output;
 use App\OutputDetail;
 use App\PaymentDeadline;
 use App\PorcentageQuote;
@@ -2527,6 +2529,16 @@ class QuoteSaleController extends Controller
                 'fecha_emision' => null,
             ]);
 
+            // ✅ 1) Crear Output (salida) asociada a la ejecución/orden de la cotización
+            $output = Output::create([
+                'execution_order'   => ($quote->order_execution == "") ? 'VENTA POR COTIZACION':$quote->order_execution, // o $quote->execution_order si tu campo fuera otro
+                'request_date'      => $sale->date_sale,        // o Carbon::now()
+                'requesting_user'   => Auth::id(),
+                'responsible_user'  => Auth::id(),              // si luego lo asignas a almacenero, lo puedes cambiar
+                'state'             => 'confirmed',
+                'indicator'         => 'or',
+            ]);
+
             // Ahora los detalles
             foreach ($quote->equipments as $equipment) {
                 foreach ($equipment->consumables as $consumable) {
@@ -2549,6 +2561,52 @@ class QuoteSaleController extends Controller
                     }
 
                     /*$this->manageNotifications($material);*/
+
+                    $materialId = $consumable->material_id;
+                    $qtyNeeded  = (float) $consumable->quantity;
+
+                    // ⚠️ por ahora solo soportamos cantidades enteras (material normal sin retazos)
+                    if (floor($qtyNeeded) != $qtyNeeded) {
+                        throw new \Exception("La cotización requiere cantidad decimal para el material {$materialId}. Aún no está implementado para retazos.");
+                    }
+                    $qtyNeeded = (int) $qtyNeeded;
+
+                    // ✅ 2.1) Obtener items disponibles con lock (evita carreras)
+                    $items = Item::where('material_id', $materialId)
+                        ->whereIn('state_item', ['entered', 'scrapped'])
+                        // si usas usage para filtrar disponibles:
+                        // ->where('usage', '<>', 'finished')
+                        ->orderBy('id', 'asc') // FIFO simple
+                        ->lockForUpdate()
+                        ->take($qtyNeeded)
+                        ->get();
+
+                    // ✅ 2.2) Validar stock suficiente
+                    if ($items->count() < $qtyNeeded) {
+                        throw new \Exception("Stock insuficiente del material ID {$materialId}. Se requieren {$qtyNeeded} y solo hay {$items->count()} disponibles.");
+                    }
+
+                    // ✅ 2.3) Crear OutputDetails + marcar items como exited
+                    foreach ($items as $item) {
+                        OutputDetail::create([
+                            'output_id'    => $output->id,
+                            'item_id'      => $item->id,
+                            'material_id'  => $materialId,
+                            'quote_id'     => $quote->id,
+                            'custom'       => 0,
+                            'percentage'   => 1,           // material normal => 1
+                            'price'        => $item->price,        // opcional: puedes guardar el costo o precio de salida si quieres
+                            'length'       => $item->length,
+                            'width'        => $item->width,
+                            'equipment_id' => $equipment->id ?? null,
+                            'activo'       => null,        // no usar para lógica de salida (según me dijiste)
+                        ]);
+
+                        $item->state_item = 'exited';
+                        // opcional si manejas usage:
+                        // $item->usage = 'finished';
+                        $item->save();
+                    }
                 }
             }
             $paymentType = $request->tipoPago ?? 4;

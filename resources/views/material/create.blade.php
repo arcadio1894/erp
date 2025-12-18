@@ -76,6 +76,7 @@
                         </div>
 
                         <div class="form-group row">
+                            @if(in_array('unit_measure', $enabled, true))
                             <div class="col-md-4">
                                 <label for="unit_measure">Unidad de medida </label>
                                 <div class="input-group">
@@ -92,6 +93,8 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
+                            @if(in_array('brand', $enabled, true))
                             <div class="col-md-4">
                                 <label for="brand">Marca </label>
                                 <div class="input-group">
@@ -108,6 +111,8 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
+                            @if(in_array('exampler', $enabled, true))
                             <div class="col-md-4">
                                 <label for="exampler">Modelo </label>
                                 <div class="input-group">
@@ -121,9 +126,11 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
                         </div>
 
                         <div class="form-group row">
+                            @if(in_array('genero', $enabled, true))
                             <div class="col-md-4">
                                 <label for="genero">Genero </label>
                                 <div class="input-group">
@@ -140,6 +147,8 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
+                            @if(in_array('talla', $enabled, true))
                             <div class="col-md-4">
                                 <label for="talla">Talla </label>
                                 <div class="input-group">
@@ -156,6 +165,8 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
+                            @if(in_array('perecible', $enabled, true))
                             <div class="col-md-4">
                                 <label for="perecible">Perecible </label>
                                 <select id="perecible" name="perecible" class="form-control select2" style="width: 100%;">
@@ -164,9 +175,11 @@
                                     <option value="n">NO</option>
                                 </select>
                             </div>
+                            @endif
                         </div>
 
                         <div class="form-group row">
+                            @if(in_array('category', $enabled, true))
                             <div class="col-md-4">
                                 <label for="category">Categorías </label>
                                 <div class="input-group">
@@ -184,6 +197,8 @@
                                 </div>
 
                             </div>
+                            @endif
+                            @if(in_array('subcategory', $enabled, true))
                             <div class="col-md-4">
                                 <label for="subcategory">Subcategorías </label>
                                 <div class="input-group">
@@ -198,6 +213,7 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
                             <div class="col-md-4">
                                 <label for="subcategory">Cantidad por paquete </label>
                                 <div class="form-group clearfix">
@@ -210,45 +226,6 @@
 
                             </div>
                         </div>
-
-                        {{--<div class="form-group row" id="feature-body" style="display: none">
-                            <div class="col-md-3">
-                                <label for="type">Tipo </label>
-                                <select id="type" name="type" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                </select>
-
-                            </div>
-                            <div class="col-md-3">
-                                <label for="subtype">Subtipo </label>
-                                <select id="subtype" name="subtype" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                </select>
-
-                            </div>
-                            <div class="col-md-3">
-                                <label for="warrant">Cédula </label>
-                                <select id="warrant" name="warrant" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                    <option value="" selected>Ninguno</option>
-                                    @foreach( $warrants as $warrant )
-                                        <option value="{{$warrant->id}}">{{ $warrant->name }}</option>
-                                    @endforeach
-                                </select>
-
-                            </div>
-                            <div class="col-md-3">
-                                <label for="quality">Calidad </label>
-                                <select id="quality" name="quality" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                    <option value="" selected>Ninguno</option>
-                                    @foreach( $qualities as $quality )
-                                        <option value="{{$quality->id}}">{{ $quality->name }}</option>
-                                    @endforeach
-                                </select>
-
-                            </div>
-                        </div>--}}
 
                         <div class="form-group">
                             <label for="name">Nombre completo</label>
@@ -294,10 +271,7 @@
                             <label for="image">Imagen del material</label>
                             <div class="dropzone" id="image-dropzone"></div>
                         </div>
-                        <!--<div class="form-group">
-                            <label for="serie">N° de serie </label>
-                            <input type="text" id="serie" name="serie" class="form-control">
-                        </div>-->
+
                     </div>
                     <!-- /.card-body -->
                 </div>
@@ -327,43 +301,6 @@
                                     ">
                         </div>
 
-                        {{--<div class="form-group row">
-                            <div class="col-md-12">
-                                <label for="btn-grouped"> Retacería </label> <br>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="icheck-primary d-inline">
-                                    <input type="radio" id="typescrap0" name="typescrap" value="" checked>
-                                    <label for="typescrap0">Ninguno
-                                    </label>
-                                </div>
-                            </div>
-                            @foreach( $typescraps as $typescrap )
-                            <div class="col-md-4">
-                                <div class="icheck-primary d-inline">
-                                    <input type="radio" id="typescrap{{$typescrap->id}}" name="typescrap" value="{{$typescrap->id}}">
-                                    <label for="typescrap{{$typescrap->id}}">{{$typescrap->name}}
-                                    </label>
-                                </div>
-                            </div>
-                            @endforeach
-                        </div>
-
-                        <div class="form-group">
-                            <label for="brand">Marca </label>
-                            <select id="brand" name="brand" class="form-control select2" style="width: 100%;">
-                                <option></option>
-                                @foreach( $brands as $brand )
-                                    <option value="{{ $brand->id }}">{{ $brand->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="exampler">Modelo </label>
-                            <select id="exampler" name="exampler" class="form-control select2" style="width: 100%;">
-
-                            </select>
-                        </div>--}}
 
                     </div>
                     <!-- /.card-body -->

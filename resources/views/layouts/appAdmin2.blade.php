@@ -964,6 +964,29 @@
                                     </ul>
                                 </li>
                             @endcan
+
+                            {{--@can('list_exampler')--}}
+                                <li class="nav-item has-treeview @yield('openSettingsMaterialDetail')">
+                                    <a href="#" class="nav-link">
+                                        <i class="far fa-circle nav-icon text-success"></i>
+                                        <p>
+                                            Parámetros
+                                            <i class="right fas fa-angle-left"></i>
+                                        </p>
+                                    </a>
+                                    <ul class="nav nav-treeview">
+                                        {{--@can('list_exampler')--}}
+                                            <li class="nav-item">
+                                                <a href="{{ route('settings.material-details.index') }}" class="nav-link @yield('activeSettingsMaterialDetails')">
+                                                    <i class="far fa-dot-circle nav-icon text-warning"></i>
+                                                    <p>Configurar Detalles</p>
+                                                </a>
+                                            </li>
+                                        {{--@endcan--}}
+
+                                    </ul>
+                                </li>
+                            {{--@endcan--}}
                         </ul>
                     </li>
                     @endcanany
@@ -1158,6 +1181,12 @@
                                         <a href="{{ route('inventory.index') }}" class="nav-link @yield('activeListInventory')">
                                             <i class="far fa-circle nav-icon"></i>
                                             <p>Listado</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a href="{{ route('kardex.index') }}" class="nav-link @yield('activeListInventoryKardex')">
+                                            <i class="far fa-circle nav-icon"></i>
+                                            <p>Kardex</p>
                                         </a>
                                     </li>
                                 @endcan

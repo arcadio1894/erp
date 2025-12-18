@@ -56,12 +56,21 @@
         @csrf
         <input type="hidden" name="material_id" value="{{ $material->id }}">
 
-        <input type="hidden" id="category_id" value="{{$material->category_id}}">
-        <input type="hidden" id="subcategory_id" value="{{$material->subcategory_id}}">
+        @if(in_array('category', $enabled, true))
+            <input type="hidden" id="category_id" value="{{ $material->category_id }}">
+        @endif
+
+        @if(in_array('subcategory', $enabled, true))
+            <input type="hidden" id="subcategory_id" value="{{ $material->subcategory_id }}">
+        @endif
+
+        @if(in_array('exampler', $enabled, true))
+            <input type="hidden" id="exampler_id" value="{{ $material->exampler_id }}">
+        @endif
+
         <input type="hidden" id="type_id" value="{{$material->material_type_id}}">
         <input type="hidden" id="subtype_id" value="{{$material->subtype_id}}">
 
-        <input type="hidden" id="exampler_id" value="{{$material->exampler_id}}">
         <div class="row">
             <div class="col-md-8">
                 <div class="card card-success">
@@ -86,6 +95,8 @@
                                 <label for="measure">Medida </label>
                                 <input type="text" id="measure" --}}{{--onkeyup="mayus(this);"--}}{{-- name="measure" class="form-control" value="{{ $material->measure }}">
                             </div>--}}
+
+                            @if(in_array('unit_measure', $enabled, true))
                             <div class="col-md-4">
                                 <label for="unit_measure">Unidad de medida <span class="right badge badge-danger">(*)</span></label>
 
@@ -104,7 +115,8 @@
                                 </div>
 
                             </div>
-
+                            @endif
+                            @if(in_array('brand', $enabled, true))
                             <div class="col-md-4">
                                 <label for="brand">Marca </label>
                                 <div class="input-group">
@@ -121,7 +133,8 @@
                                     </div>
                                 </div>
                             </div>
-
+                            @endif
+                            @if(in_array('exampler', $enabled, true))
                             <div class="col-md-4">
                                 <label for="exampler">Modelo </label>
                                 <div class="input-group">
@@ -135,9 +148,11 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
                         </div>
 
                         <div class="form-group row">
+                            @if(in_array('genero', $enabled, true))
                             <div class="col-md-4">
                                 <label for="genero">Genero </label>
                                 <div class="input-group">
@@ -154,6 +169,8 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
+                            @if(in_array('talla', $enabled, true))
                             <div class="col-md-4">
                                 <label for="talla">Talla </label>
                                 <div class="input-group">
@@ -170,6 +187,8 @@
                                     </div>
                                 </div>
                             </div>
+                            @endif
+                            @if(in_array('perecible', $enabled, true))
                             <div class="col-md-4">
                                 <label for="perecible">Perecible </label>
                                 <select id="perecible" name="perecible" class="form-control select2" style="width: 100%;">
@@ -178,9 +197,11 @@
                                     <option value="n" {{ ($material->perecible == "n") ? 'selected':'' }}>NO</option>
                                 </select>
                             </div>
+                            @endif
                         </div>
 
                         <div class="form-group row">
+                            @if(in_array('category', $enabled, true))
                             <div class="col-md-4">
                                 <label for="category">Categorías <span class="right badge badge-danger">(*)</span></label>
                                 <div class="input-group">
@@ -198,6 +219,8 @@
                                 </div>
 
                             </div>
+                            @endif
+                            @if(in_array('subcategory', $enabled, true))
                             <div class="col-md-4">
                                 <label for="subcategory">Subcategorías <span class="right badge badge-danger">(*)</span></label>
                                 <div class="input-group">
@@ -213,6 +236,7 @@
                                 </div>
 
                             </div>
+                            @endif
                             <div class="col-md-4">
                                 <label for="subcategory">Cantidad por paquete </label>
                                 <div class="form-group clearfix">
@@ -225,44 +249,6 @@
 
                             </div>
                         </div>
-                        {{--<div class="form-group row" id="feature-body" style="display: none">
-                            <div class="col-md-3">
-                                <label for="type">Tipo </label>
-                                <select id="type" name="type" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                </select>
-
-                            </div>
-                            <div class="col-md-3">
-                                <label for="subtype">Subtipo </label>
-                                <select id="subtype" name="subtype" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                </select>
-
-                            </div>
-                            <div class="col-md-3">
-                                <label for="warrant">Cédula </label>
-                                <select id="warrant" name="warrant" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                    <option value="" selected>Ninguno</option>
-                                    @foreach( $warrants as $warrant )
-                                        <option value="{{$warrant->id}}" {{ ($warrant->id === $material->warrant_id) ? 'selected': ''}}>{{ $warrant->name }}</option>
-                                    @endforeach
-                                </select>
-
-                            </div>
-                            <div class="col-md-3">
-                                <label for="quality">Calidad </label>
-                                <select id="quality" name="quality" class="form-control select2" style="width: 100%;">
-                                    <option></option>
-                                    <option value="" selected>Ninguno</option>
-                                    @foreach( $qualities as $quality )
-                                        <option value="{{$quality->id}}" {{ ($quality->id === $material->quality_id) ? 'selected' : '' }}>{{ $quality->name }}</option>
-                                    @endforeach
-                                </select>
-
-                            </div>
-                        </div>--}}
 
                         <div class="form-group">
                             <label for="name">Nombre completo</label>

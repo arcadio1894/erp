@@ -14,6 +14,7 @@ use App\Http\Requests\StoreMaterialRequest;
 use App\Http\Requests\UpdateMaterialRequest;
 use App\Location;
 use App\Material;
+use App\MaterialDetailSetting;
 use App\MaterialDiscountQuantity;
 use App\MaterialType;
 use App\MaterialUnpack;
@@ -59,7 +60,7 @@ class MaterialController extends Controller
 
     public function create()
     {
-        $categories = Category::orderBy('name', 'asc')->get();
+        /*$categories = Category::orderBy('name', 'asc')->get();
         $brands = Brand::orderBy('name', 'asc')->get();
         $warrants = Warrant::orderBy('name', 'asc')->get();
         $qualities = Quality::orderBy('name', 'asc')->get();
@@ -69,7 +70,59 @@ class MaterialController extends Controller
         $tallas = Talla::orderBy('name', 'asc')->get();
         $tipoVentas = TipoVenta::orderBy('description', 'asc')->get();
         $discountQuantities = DiscountQuantity::all();
-        return view('material.create', compact('discountQuantities', 'tipoVentas','tallas','generos', 'categories', 'warrants', 'brands', 'qualities', 'typescraps', 'unitMeasures'));
+        return view('material.create', compact('discountQuantities', 'tipoVentas','tallas','generos', 'categories', 'warrants', 'brands', 'qualities', 'typescraps', 'unitMeasures'));*/
+        // 1) Leer configuración global
+        $setting = MaterialDetailSetting::first();
+        $enabled = [];
+        if ($setting && is_array($setting->enabled_sections)) {
+            $enabled = $setting->enabled_sections;
+        }
+
+        // 2) Siempre (porque ya los usas sí o sí hoy)
+        $warrants = Warrant::orderBy('name', 'asc')->get();
+        $qualities = Quality::orderBy('name', 'asc')->get();
+        $typescraps = Typescrap::orderBy('name', 'asc')->get();
+        $tipoVentas = TipoVenta::orderBy('description', 'asc')->get();
+        $discountQuantities = DiscountQuantity::all();
+
+        // 3) Condicionales según configuración
+        $categories = in_array('category', $enabled, true)
+            ? Category::orderBy('name', 'asc')->get()
+            : collect();
+
+        $brands = in_array('brand', $enabled, true)
+            ? Brand::orderBy('name', 'asc')->get()
+            : collect();
+
+        $unitMeasures = in_array('unit_measure', $enabled, true)
+            ? UnitMeasure::orderBy('name', 'asc')->get()
+            : collect();
+
+        $generos = in_array('genero', $enabled, true)
+            ? Genero::orderBy('name', 'asc')->get()
+            : collect();
+
+        $tallas = in_array('talla', $enabled, true)
+            ? Talla::orderBy('name', 'asc')->get()
+            : collect();
+
+        // Si luego agregas modelo/subcategoría, haces lo mismo:
+        // $examplers = in_array('exampler', $enabled, true) ? Exampler::orderBy(...) : collect();
+        // $subcategories = in_array('subcategory', $enabled, true) ? Subcategory::orderBy(...) : collect();
+
+        return view('material.create', compact(
+            'enabled',
+            'discountQuantities',
+            'tipoVentas',
+            'tallas',
+            'generos',
+            'categories',
+            'warrants',
+            'brands',
+            'qualities',
+            'typescraps',
+            'unitMeasures'
+        ));
     }
 
     public function store(StoreMaterialRequest $request)
@@ -168,7 +221,7 @@ class MaterialController extends Controller
 
     public function edit($id)
     {
-        $specifications = Specification::where('material_id', $id)->get();
+        /*$specifications = Specification::where('material_id', $id)->get();
         $brands = Brand::all();
         $categories = Category::all();
         $materialTypes = MaterialType::all();
@@ -190,8 +243,93 @@ class MaterialController extends Controller
             })
             ->toArray();
 
-        return view('material.edit', compact('materialsDiscounts', 'discountQuantities', 'generos','tallas','tipoVentas','unitMeasures','typescraps','qualities','warrants','specifications', 'brands', 'categories', 'materialTypes', 'material'));
+        return view('material.edit', compact('materialsDiscounts', 'discountQuantities', 'generos','tallas','tipoVentas','unitMeasures','typescraps','qualities','warrants','specifications', 'brands', 'categories', 'materialTypes', 'material'));*/
+// 1) Configuración global
+        $setting = MaterialDetailSetting::first();
+        $enabled = [];
+        if ($setting && is_array($setting->enabled_sections)) {
+            $enabled = $setting->enabled_sections;
+        }
 
+        // 2) Datos del material
+        $material = Material::with(['category', 'materialType'])->find($id);
+
+        $specifications = Specification::where('material_id', $id)->get();
+
+        $materialTypes = MaterialType::all();
+
+        // 3) Listas condicionales (igual que create)
+        $brands = in_array('brand', $enabled, true) ? Brand::orderBy('name', 'asc')->get() : collect();
+        $categories = in_array('category', $enabled, true) ? Category::orderBy('name', 'asc')->get() : collect();
+        $unitMeasures = in_array('unit_measure', $enabled, true) ? UnitMeasure::orderBy('name', 'asc')->get() : collect();
+        $generos = in_array('genero', $enabled, true) ? Genero::orderBy('description', 'asc')->get() : collect();
+        $tallas = in_array('talla', $enabled, true) ? Talla::orderBy('name', 'asc')->get() : collect();
+
+        // 4) Dependientes para EDIT (para que venga preseleccionado)
+        $examplers = collect();
+        if (in_array('exampler', $enabled, true)) {
+            // si no está habilitado brand, igual puede pasar por config; pero store settings ya debe forzarlo
+            $brandId = null;
+
+            // Ajusta el nombre del campo según tu DB
+            if ($material) {
+                if (isset($material->brand_id)) $brandId = $material->brand_id;
+                elseif (isset($material->brand)) $brandId = $material->brand;
+            }
+
+            if (!empty($brandId)) {
+                $examplers = Exampler::where('brand_id', $brandId)->orderBy('name','asc')->get();
+            }
+        }
+
+        $subcategories = collect();
+        if (in_array('subcategory', $enabled, true)) {
+            $categoryId = null;
+
+            if ($material) {
+                if (isset($material->category_id)) $categoryId = $material->category_id;
+                elseif (isset($material->category)) $categoryId = $material->category;
+            }
+
+            if (!empty($categoryId)) {
+                $subcategories = Subcategory::where('category_id', $categoryId)->orderBy('name','asc')->get();
+            }
+        }
+
+        // 5) Lo demás que ya tenías (no parametrizable por ahora)
+        $typescraps = Typescrap::all();
+        $warrants = Warrant::all();
+        $qualities = Quality::all();
+        $tipoVentas = TipoVenta::all();
+        $discountQuantities = DiscountQuantity::all();
+
+        $materialsDiscounts = MaterialDiscountQuantity::where('material_id', $id)
+            ->get()
+            ->keyBy('discount_quantity_id')
+            ->map(function ($item) {
+                return $item->percentage;
+            })
+            ->toArray();
+
+        return view('material.edit', compact(
+            'enabled',
+            'materialsDiscounts',
+            'discountQuantities',
+            'generos',
+            'tallas',
+            'tipoVentas',
+            'unitMeasures',
+            'typescraps',
+            'qualities',
+            'warrants',
+            'specifications',
+            'brands',
+            'categories',
+            'materialTypes',
+            'material',
+            'examplers',
+            'subcategories'
+        ));
     }
 
     public function update(UpdateMaterialRequest $request)
@@ -740,7 +878,7 @@ class MaterialController extends Controller
         $array = [];
         foreach ( $materials as $material )
         {
-            array_push($array, ['id'=> $material->id, 'material' => $material->full_description, 'unit' => $material->unitMeasure->name, 'code' => $material->code, 'price'=>$material->price_final, 'typescrap'=>$material->typescrap_id, 'full_typescrap'=>$material->typeScrap, 'stock_current'=>$material->stock_current]);
+            array_push($array, ['id'=> $material->id, 'material' => $material->full_description, 'unit' => ($material->unitMeasure == null) ? '':$material->unitMeasure->name, 'code' => $material->code, 'price'=>$material->price_final, 'typescrap'=>$material->typescrap_id, 'full_typescrap'=>$material->typeScrap, 'stock_current'=>$material->stock_current]);
         }
 
         //dd($materials);
@@ -1164,6 +1302,7 @@ class MaterialController extends Controller
 
             if ( isset($material) )
             {
+                // TODO: VERIFICAR EL TEMA DE LOS ITEMS
                 $materialToUnpack = Material::find($materialUnpack);
                 //$materialToUnpack->stock_unPack = $material->stock_unPack + ($quantityUnpack*$material->quantityPack);
                 $materialToUnpack->stock_current = $materialToUnpack->stock_current + ($quantityUnpack*$material->quantityPack);
@@ -1732,5 +1871,37 @@ class MaterialController extends Controller
         $storeMaterial->delete();
 
         return response()->json(['success' => true]);
+    }
+
+    public function selectAjax(Request $request)
+    {
+        $term = $request->get('q');
+
+        $query = Material::query()
+            ->select('id', 'code', 'full_name');
+            /*->where('inventory', 1); */// solo los que manejan stock (ajusta si quieres)
+
+        if ($term) {
+            $term = trim($term);
+            $query->where(function ($q) use ($term) {
+                $q->where('code', 'like', "%{$term}%")
+                    ->orWhere('full_name', 'like', "%{$term}%");
+            });
+        }
+
+        $materials = $query
+            ->orderBy('full_name')
+            ->limit(20) // importante para no matar la BD
+            ->get();
+
+        // Formato compatible con select2
+        $results = $materials->map(function ($m) {
+            return [
+                'id'   => $m->id,
+                'text' => "{$m->code} - {$m->full_description}",
+            ];
+        });
+
+        return response()->json($results);
     }
 }

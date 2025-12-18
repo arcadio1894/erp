@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use \App\Http\Controllers\MetaController;
+use \App\Http\Controllers\MaterialDetailSettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -2961,6 +2962,28 @@ Route::middleware('auth')->group(function (){
         Route::get('/get/data/promotion/orders/{numberPage}', 'PromotionOrderController@getDataPromotions');
 
         Route::post('/check-promotions', 'PromotionOrderController@checkPromotions');
+
+        // TODO: KARDEX
+        Route::get('/kardex/{materialId}', 'InventoryMovementController@kardex')
+            ->name('kardex.material');
+        Route::get('/kardex', 'InventoryMovementController@index')
+            ->name('kardex.index');
+        Route::get('/materials/select', 'MaterialController@selectAjax')->name('materials.selectAjax');
+
+        // TODO: PARAMTRIZACION DE MATERIAL DETAILS
+        Route::prefix('settings')
+            ->group(function () {
+                Route::get(
+                    'material-details',
+                    [MaterialDetailSettingController::class, 'index']
+                )->name('settings.material-details.index');
+
+                Route::post(
+                    'material-details',
+                    [MaterialDetailSettingController::class, 'store']
+                )->name('settings.material-details.store');
+
+            });
     });
 });
 
@@ -3068,3 +3091,5 @@ Route::get('/api/sunat/v1', function () {
     return $response;
 
 });
+
+Route::get('/test/view/inventory', 'InventoryMovementController@test');
