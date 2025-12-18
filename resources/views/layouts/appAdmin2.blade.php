@@ -965,7 +965,7 @@
                                 </li>
                             @endcan
 
-                            {{--@can('list_exampler')--}}
+                            @can('enable_materialSetting')
                                 <li class="nav-item has-treeview @yield('openSettingsMaterialDetail')">
                                     <a href="#" class="nav-link">
                                         <i class="far fa-circle nav-icon text-success"></i>
@@ -975,18 +975,18 @@
                                         </p>
                                     </a>
                                     <ul class="nav nav-treeview">
-                                        {{--@can('list_exampler')--}}
+                                        @can('list_exampler')
                                             <li class="nav-item">
                                                 <a href="{{ route('settings.material-details.index') }}" class="nav-link @yield('activeSettingsMaterialDetails')">
                                                     <i class="far fa-dot-circle nav-icon text-warning"></i>
                                                     <p>Configurar Detalles</p>
                                                 </a>
                                             </li>
-                                        {{--@endcan--}}
+                                        @endcan
 
                                     </ul>
                                 </li>
-                            {{--@endcan--}}
+                            @endcan
                         </ul>
                     </li>
                     @endcanany

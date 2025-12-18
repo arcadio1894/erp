@@ -98,7 +98,8 @@ class RoleController extends Controller
         'expenseSupplier' => 'EGRESOS PROVEEDORES',
         'inventory' => 'INVENTARIO FISICO',
         'files' => 'IMPORTAR ARCHIVOS',
-        'referralGuide' => 'GUIA DE REMISION'
+        'referralGuide' => 'GUIA DE REMISION',
+        'materialSetting' => 'CONFIGURACION DE MATERIALES'
     ];
 
     public function index()
