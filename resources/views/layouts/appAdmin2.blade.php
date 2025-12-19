@@ -230,7 +230,7 @@
             <!-- Sidebar Menu -->
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-
+                    @can('enable_puntoVenta')
                     <li class="nav-header">PUNTO DE VENTA</li>
                     <li class="nav-item has-treeview @yield('openPuntoVenta')">
                         <a href="#" class="nav-link @yield('activePuntoVenta')">
@@ -241,23 +241,27 @@
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-
+                            @can('create_puntoVenta')
                             <li class="nav-item">
                                 <a href="{{ route('puntoVenta.index') }}" class="nav-link @yield('activeCreatePuntoVenta')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Crear venta</p>
                                 </a>
                             </li>
-
+                            @endcan
+                            @can('list_puntoVenta')
                             <li class="nav-item">
                                 <a href="{{ route('puntoVenta.list') }}" class="nav-link @yield('activeListPuntoVenta')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Listar ventas</p>
                                 </a>
                             </li>
+                            @endcan
                         </ul>
                     </li>
+                    @endcan
 
+                    @can('enable_caja')
                     <li class="nav-header">CAJA</li>
                     <li class="nav-item has-treeview @yield('openCashRegister')">
                         <a href="#" class="nav-link @yield('activeCashRegister')">
@@ -268,33 +272,43 @@
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-
+                            @can('showEfectivo_caja')
                             <li class="nav-item">
                                 <a href="{{ route('index.cashRegister', 'efectivo') }}" class="nav-link @yield('activeCashRegisterEfectivo')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Caja Efectivo</p>
                                 </a>
                             </li>
+                            @endcan
+                            @can('showYape_caja')
                             <li class="nav-item">
                                 <a href="{{ route('index.cashRegister', 'yape') }}" class="nav-link @yield('activeCashRegisterYape')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Caja Yape</p>
                                 </a>
                             </li>
+                            @endcan
+                            @can('showPlin_caja')
                             <li class="nav-item">
                                 <a href="{{ route('index.cashRegister', 'plin') }}" class="nav-link @yield('activeCashRegisterPlin')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Caja Plin</p>
                                 </a>
                             </li>
+                            @endcan
+                            @can('showBancario_caja')
                             <li class="nav-item">
                                 <a href="{{ route('index.cashRegister', 'bancario') }}" class="nav-link @yield('activeCashRegisterBancario')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Caja Bancario</p>
                                 </a>
                             </li>
+                            @endcan
                         </ul>
                     </li>
+                    @endcan
+
+                    @can('enable_gananciaDiaria')
                     <li class="nav-item has-treeview @yield('openGanancias')">
                         <a href="#" class="nav-link @yield('activeGanancias')">
                             <i class="nav-icon fas fa-truck-loading"></i>
@@ -304,23 +318,27 @@
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-
+                            @can('show_gananciaDiaria')
                             <li class="nav-item">
                                 <a href="{{ route('ganancia.index') }}" class="nav-link @yield('activeGananciaDiaria')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Ganancia Diaria</p>
                                 </a>
                             </li>
-
+                            @endcan
+                            @can('showGananciaWorker_gananciaDiaria')
                             <li class="nav-item">
                                 <a href="{{ route('ganancia.index.trabajador') }}" class="nav-link @yield('activeGananciaDiariaTrabajador')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Ganancia x Trabajador</p>
                                 </a>
                             </li>
+                            @endcan
                         </ul>
                     </li>
+                    @endcan
 
+                    @can('enable_metas')
                     <li class="nav-header">METAS</li>
                     <li class="nav-item has-treeview @yield('openMetas')">
                         <a href="#" class="nav-link @yield('activeMetas')">
@@ -331,30 +349,34 @@
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-
+                            @can('list_metas')
                             <li class="nav-item">
                                 <a href="{{ route('metas.index') }}" class="nav-link @yield('activeMetasListado')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Listado de Metas</p>
                                 </a>
                             </li>
-
+                            @endcan
+                            @can('create_metas')
                             <li class="nav-item">
                                 <a href="{{ route('metas.create') }}" class="nav-link @yield('activeMetasCreate')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Crear Metas</p>
                                 </a>
                             </li>
-
+                            @endcan
+                            @can('progress_metas')
                             <li class="nav-item">
                                 <a href="{{ route('metas.ranking') }}" class="nav-link @yield('activeMetasProgreso')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Progreso de Metas</p>
                                 </a>
                             </li>
+                            @endcan
                         </ul>
                     </li>
-
+                    @endcan
+                    @can('enable_promotions')
                     <li class="nav-header">PROMOCIONES</li>
                     <li class="nav-item has-treeview @yield('openPromotions')">
 
@@ -366,23 +388,23 @@
                             </p>
                         </a>
                         <ul class="nav nav-treeview">
-                            {{--@can('list_permission')--}}
+                            @can('showSeasonal_promotions')
                                 <li class="nav-item">
                                     <a href="{{ route('promotion.seasonal.index') }}" class="nav-link @yield('activePromotionsSeasonal')">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Por Temporada</p>
                                     </a>
                                 </li>
-                            {{--@endcan
-                            @can('list_role')--}}
+                            @endcan
+                            @can('showCombo_promotions')
                                 <li class="nav-item">
                                     <a href="{{ route('index.combos') }}" class="nav-link @yield('activePromotionsCombo')">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Por combos</p>
                                     </a>
                                 </li>
-                            {{--@endcan
-                            @can('list_user')--}}
+                            @endcan
+
                                 {{--<li class="nav-item">
                                     <a href="#" class="nav-link @yield('activePromotionsDiscount')">
                                         <i class="far fa-circle nav-icon"></i>
@@ -390,23 +412,25 @@
                                     </a>
                                 </li>--}}
 
-                            {{--@endcan--}}
+                            @can('showLimite_promotions')
                             <li class="nav-item">
                                 <a href="{{ route('promotionLimit.index') }}" class="nav-link @yield('activePromotionLimit')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Por limites</p>
                                 </a>
                             </li>
-
+                            @endcan
+                            @can('order_promotions')
                             <li class="nav-item">
                                 <a href="{{ route('promotionOrder.index') }}" class="nav-link @yield('activePromotionOrder')">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Orden de Promociones</p>
                                 </a>
                             </li>
+                            @endcan
                         </ul>
                     </li>
-
+                    @endcan
                     @can('access_permission')
                     <li class="nav-header">ADMINISTRADOR</li>
                     <li class="nav-item has-treeview @yield('openAccess')">
@@ -1225,7 +1249,6 @@
                         @endcan
                     @endcan
 
-
                     @can('enable_referralGuide')
                         <li class="nav-header">GUIAS DE REMISIÓN</li>
                         <li class="nav-item has-treeview @yield('openReferralGuide')">
@@ -1264,8 +1287,6 @@
                             </ul>
                         </li>
                     @endcan
-
-
 
                     @canany('list_entryPurchase', 'list_entryScrap')
                     <li class="nav-header">ENTRADAS A ALMACEN</li>
@@ -2312,6 +2333,7 @@
                             </li>
                             @endcan
                         </ul>
+                    </li>
                     @can('enable_hourSpecial')
                     <li class="nav-item has-treeview @yield('openHourSpecial')">
                         <a href="#" class="nav-link @yield('activeHourSpecial')">
