@@ -12,7 +12,7 @@ class DataGeneralRotationSeeder extends Seeder
      */
     public function run()
     {
-        DataGeneral::create([
+        /*DataGeneral::create([
             'name' => 'start_rotation_baja',
             'valueText' => 's_r_b',
             'valueNumber' => 0,
@@ -46,6 +46,6 @@ class DataGeneralRotationSeeder extends Seeder
             'valueNumber' => 70,
             'module' => 'material',
             'description' => 'Inicio porcentage rotacion alta'
-        ]);
+        ]);*/
     }
 }
